@@ -18,3 +18,13 @@ Here is an example of how to run the code on the test set of the definitional da
 
 `python test_def_nonces.py models/wiki_all.sent.split.model data/definitions/nonce.definitions.300.test 1 10000 3 15 1 70 1.9 5`
 
+# The data
+
+In the data/ folder, you will find two datasets, split into training and test sets:
+
+* The Wikipedia 'definitional dataset', produced specifically for this paper.
+* A pre-processed version of the 'Chimera dataset' (Lazaridou et al, 2017). More details on this data are to be found in the README of the data/chimeras/ directory.
+
+We thank the authors of the Chimera dataset for letting us use their data. We direct users to the original paper:
+
+A. Lazaridou, M. Marelli and M. Baroni. 2017. Multimodal word meaning induction from minimal exposure to natural text. *Cognitive Science*. 41(S4): 677-705. 

@@ -1,4 +1,5 @@
-#This test the chimeras with a one-off learning procedure. Crazy learning rate.
+#This test the chimeras with a one-off learning procedure.
+#python test_chimeras.py models/wiki_all.sent.split.model data/chimeras/dataset.l4.tokenised.test.txt 1 10000 3 15 1 70 1.9 5
 
 import gensim, logging
 from scipy import stats
@@ -87,14 +88,9 @@ for l in f:
       print "RHO:",sp
       if not math.isnan(sp):
         spearmans.append(sp)
-      if c == 50 and float(sum(spearmans))/float(len(spearmans)) < 0.2:
-        print "ABORTING: NOT GOOD ENOUGH..."
-        aborted = True
-        break
     c+=1
 
 
 f.close()
 
-if not aborted:
-  print "AVERAGE RHO:",float(sum(spearmans))/float(len(spearmans))
+print "AVERAGE RHO:",float(sum(spearmans))/float(len(spearmans))
