@@ -40,10 +40,6 @@ aborted = False
 c = 0
 f=open(dataset)
 for l in f:
-  if c < 1:
-    c+=1
-    continue
-  else:
     fields=l.rstrip('\n').split('\t')
     sentences = []
     for s in fields[1].split("@@"):
@@ -82,19 +78,19 @@ for l in f:
         print "ERROR processing",p
       p_count+=1
 
-  if len(system_responses) > 1:
-    print system_responses
-    print human_responses
-    print model.most_similar(nonce,topn=10)
+    if len(system_responses) > 1:
+      print system_responses
+      print human_responses
+      print model.most_similar(nonce,topn=10)
 		
-    sp = spearman(human_responses,system_responses)	
-    print "RHO:",sp
-    if not math.isnan(sp):
-      spearmans.append(sp)
-    if c == 50 and float(sum(spearmans))/float(len(spearmans)) < 0.2:
-      print "ABORTING: NOT GOOD ENOUGH..."
-      aborted = True
-      break
+      sp = spearman(human_responses,system_responses)	
+      print "RHO:",sp
+      if not math.isnan(sp):
+        spearmans.append(sp)
+      if c == 50 and float(sum(spearmans))/float(len(spearmans)) < 0.2:
+        print "ABORTING: NOT GOOD ENOUGH..."
+        aborted = True
+        break
     c+=1
 
 

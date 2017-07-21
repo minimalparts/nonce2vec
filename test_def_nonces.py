@@ -29,10 +29,6 @@ c = 0
 ranks = []
 f=open(dataset)
 for l in f:
-  if c < 1:
-    c+=1
-    continue
-  else:
     fields=l.rstrip('\n').split('\t')
     nonce = fields[0]
     sentence = [fields[1].replace("___",nonce).split()]
