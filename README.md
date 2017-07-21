@@ -1,5 +1,8 @@
 # nonce2vec
-This is the repo accompanying the paper "High-risk learning: acquiring new word vectors from tiny data" (Herbelot &amp; Baroni, 2017). 
+This is the repo accompanying the paper "High-risk learning: acquiring new word vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code, please cite the following:
+
+A. Herbelot and M. Baroni. 2017. High-risk learning: Acquiring new word vectors from tiny data. *Proceedings of EMNLP 2017 (Conference on Empirical Methods in Natural Language Processing)*.
+
 
 **Abstract**
 
