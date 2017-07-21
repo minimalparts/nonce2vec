@@ -96,7 +96,7 @@ from scipy.special import expit
 from scipy.special import expit
 
 from gensim import utils, matutils  # utility fnc for pickling, common scipy operations etc
-from gensim.corpora.dictionary import Dictionary
+#from gensim.corpora.dictionary import Dictionary
 from six import iteritems, itervalues, string_types
 from six.moves import xrange
 from types import GeneratorType
@@ -132,7 +132,6 @@ except ImportError:
         result = 0
         window = model.window
         for sentence in sentences:
-            print "WINDOW",window
             word_vocabs = [model.wv.vocab[w] for w in sentence if w in model.wv.vocab and
                            model.wv.vocab[w].sample_int > model.random.rand() * 2**32 or w == "___"]
             #Record the subsampled line 

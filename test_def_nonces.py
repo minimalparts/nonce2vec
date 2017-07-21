@@ -1,12 +1,13 @@
 #This test the definitional nonces with a one-off learning procedure. Crazy learning rate.
-#python test_def_nonces.py saved_models/wiki.sent.split.model data/definitions/nonce.definitions.700.train 20 10000 5 15 1
+#python test_def_nonces.py models/wiki_all.sent.split.model data/definitions/nonce.definitions.300.test 1 10000 3 15 1 70 1.9 5
 
 from scipy.stats import binned_statistic
 import numpy as np
 import collections
 import sys
 import re
-import gensim, logging
+from gensim.models import Word2Vec
+import logging
 
 background = sys.argv[1]
 dataset = sys.argv[2]
@@ -39,7 +40,7 @@ for l in f:
     print "--"
     print nonce
     print sentence
-    model = gensim.models.Word2Vec.load(background)
+    model = Word2Vec.load(background)
     vocab_size = len(model.wv.vocab)
     if nonce in model.wv.vocab:
       model.alpha=float(alpha)
