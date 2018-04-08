@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/96074751.svg)](https://zenodo.org/badge/latestdoi/96074751)
+
 # nonce2vec
 This is the repo accompanying the paper "High-risk learning: acquiring new word vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code, please cite the following:
 
