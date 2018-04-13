@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Original Word2Vec implementation:
 # Copyright (C) 2013 Radim Rehurek <me@radimrehurek.com>
 # Licensed under the GNU LGPL v2.1 - http://www.gnu.org/licenses/lgpl.html
-
+#
+# This modification (referred to as 'Nonce2Vec'):
+# Aurelie Herbelot and Marco Baroni
 
 """
 Deep learning via word2vec's "skip-gram and CBOW models", using either
