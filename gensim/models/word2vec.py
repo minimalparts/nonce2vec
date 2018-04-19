@@ -82,7 +82,6 @@ import threading
 import itertools
 
 from gensim.utils import keep_vocab_item, call_on_class_only
-from gensim.utils import keep_vocab_item
 from gensim.models.keyedvectors import KeyedVectors
 
 try:
@@ -96,10 +95,7 @@ from numpy import exp, log, dot, zeros, outer, random, dtype, float32 as REAL,\
 
 from scipy.special import expit
 
-from scipy.special import expit
-
 from gensim import utils, matutils  # utility fnc for pickling, common scipy operations etc
-#from gensim.corpora.dictionary import Dictionary
 from six import iteritems, itervalues, string_types
 from six.moves import xrange
 from types import GeneratorType
@@ -113,65 +109,61 @@ Nonce2Vec does not have a C implementation, so python is used.
 """
 
 try:
-    from gensim.models.word2vec_inner import inexistent_dud_module
+    #from gensim.models.word2vec_inner import inexistent_dud_module
+    from gensim.models.word2vec_inner import train_batch_sg
+    from gensim.models.word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH
 except ImportError:
     # failed... fall back to plain numpy (20-80x slower training than the above)
     FAST_VERSION = -1
     MAX_WORDS_IN_BATCH = 10000
 
-
-
     def train_batch_sg(model, sentences, alpha, work=None):
-        """
-        Update skip-gram model by training on a sequence of sentences.
+        """Update skip-gram model by training on a sequence of sentences.
 
-        Each sentence is a list of string tokens, which are looked up in the model's
+        Each sentence is a list of string tokens, which are looked up in the
+        model's
         vocab dictionary. Called internally from `Word2Vec.train()`.
 
-        This is the non-optimized, Python version. If you have cython installed, gensim
+        This is the non-optimized, Python version. If you have cython
+        installed, gensim
         will use the optimized version from word2vec_inner instead.
-
         """
         result = 0
         window = model.window
         for sentence in sentences:
-            word_vocabs = [model.wv.vocab[w] for w in sentence if w in model.wv.vocab and
-                           model.wv.vocab[w].sample_int > model.random.rand() * 2**32 or w == "___"]
-            #Record the subsampled line 
-            subsampled = ""
+            word_vocabs = [model.wv.vocab[w] for w in sentence if w in
+                           model.wv.vocab and model.wv.vocab[w].sample_int >
+                           model.random.rand() * 2**32 or w == '___']
+            # Count the number of times that we see the nonce
+            nonce_count = 0
             for pos, word in enumerate(word_vocabs):
-                subsampled+=model.wv.index2word[word.index]+" "
-            print "SUBSAMPLED LINE:",subsampled
-
-            #Count the number of times that we see the nonce
-            c = 0
-            for pos, word in enumerate(word_vocabs):
-                #Note: we have got rid of the random window size
+                # Note: we have got rid of the random window size
                 start = max(0, pos - window)
                 for pos2, word2 in enumerate(word_vocabs[start:(pos + window + 1)], start):
                     # don't train on the `word` itself
                     if pos2 != pos:
-                        #If training context nonce, increment its count
+                        # If training context nonce, increment its count
                         if model.wv.index2word[word2.index] == model.nonce:
-                            c+=1
-                            train_sg_pair(model, model.wv.index2word[word.index], word2.index, alpha, c)
-                            #print model.wv.index2word[word.index]
+                            nonce_count += 1
+                            train_sg_pair(model,
+                                          model.wv.index2word[word.index],
+                                          word2.index, alpha, nonce_count)
             result += len(word_vocabs)
             if window - 1 >= 3:
-              window=window - model.window_decay
+                window = window - model.window_decay
             model.recompute_sample_ints()
         return result
 
     def train_batch_cbow(model, sentences, alpha, work=None, neu1=None):
-        """
-        Update CBOW model by training on a sequence of sentences.
+        """Update CBOW model by training on a sequence of sentences.
 
-        Each sentence is a list of string tokens, which are looked up in the model's
+        Each sentence is a list of string tokens, which are looked up in
+        the model's
         vocab dictionary. Called internally from `Word2Vec.train()`.
 
-        This is the non-optimized, Python version. If you have cython installed, gensim
+        This is the non-optimized, Python version. If you have cython
+        installed, gensim
         will use the optimized version from word2vec_inner instead.
-
         """
         result = 0
         for sentence in sentences:
@@ -263,21 +255,16 @@ def train_sg_pair(model, word, context_index, alpha, nonce_count, learn_vectors=
 
     l1 = context_vectors[context_index]  # input word (NN input/projection layer)
     neu1e = zeros(l1.shape)
-    
+
     # Only train the nonce
     if model.nonce != None and model.wv.index2word[context_index] == model.nonce and word != model.nonce:
-        #print "Now training word",word,"context",model.wv.index2word[context_index]
         lock_factor = context_locks[context_index]
-        count = model.wv.vocab[word].count
-        #if alpha - 0.008*nonce_count > model.min_alpha:
-        #    alpha = alpha - 0.008*nonce_count
         lambda_den = model.lambda_den
         exp_decay = -(nonce_count-1)/lambda_den
         if alpha * exp(exp_decay)  > model.min_alpha:# and count < 100000:
-            alpha = alpha * exp(exp_decay) 
+            alpha = alpha * exp(exp_decay)
         else:
             alpha = model.min_alpha
-        #print word,count,alpha,nonce_count
         if model.hs:
             # work on the entire tree at once, to push as much work into numpy's C routines as possible (performance)
             l2a = deepcopy(model.syn1[predict_word.point])  # 2d matrix, codelen x layer1_size
@@ -462,7 +449,7 @@ class Word2Vec(utils.SaveLoad):
         """
 
         self.load = call_on_class_only
-        self.load_word2vec_format = call_on_class_only        
+        self.load_word2vec_format = call_on_class_only
 
         if FAST_VERSION == -1:
             logger.warning('Slow version of {0} is being used'.format(__name__))
@@ -498,7 +485,7 @@ class Word2Vec(utils.SaveLoad):
         self.batch_words = batch_words
         self.model_trimmed_post_training = False
         self.nonce = None
-	self.lambda_den = 0.0
+        self.lambda_den = 0.0
         self.sample_decay = float(sample_decay)
         self.window_decay = int(window_decay)
         if sentences is not None:
@@ -656,13 +643,13 @@ class Word2Vec(utils.SaveLoad):
             #New words and pre-existing words are two separate lists
             new_words = []
             pre_exist_words = []
-            # If nonce is already in previous vocab, replace its label (copy the original to a new slot, and delete original)
-	    if self.nonce != None and self.nonce in self.wv.vocab:
-                gold_nonce = self.nonce+"_true"
-                nonce_index = self.wv.vocab[self.nonce].index
-                self.wv.vocab[gold_nonce] = self.wv.vocab[self.nonce]
-                self.wv.index2word[nonce_index] = gold_nonce
-                del self.wv.vocab[self.nonce]
+        # If nonce is already in previous vocab, replace its label (copy the original to a new slot, and delete original)
+        if self.nonce is not None and self.nonce in self.wv.vocab:
+            gold_nonce = self.nonce+"_true"
+            nonce_index = self.wv.vocab[self.nonce].index
+            self.wv.vocab[gold_nonce] = self.wv.vocab[self.nonce]
+            self.wv.index2word[nonce_index] = gold_nonce
+            del self.wv.vocab[self.nonce]
             for word, v in iteritems(self.raw_vocab):
 		#Update count of all words already in vocab
                 if word in self.wv.vocab:
@@ -729,7 +716,7 @@ class Word2Vec(utils.SaveLoad):
         report_values['memory'] = self.estimate_memory(vocab_size=len(retain_words))
 
         return report_values, pre_exist_words
-    
+
     def recompute_sample_ints(self):
       for w,o in self.wv.vocab.items():
         o.sample_int = int(round(float(o.sample_int) / float(self.sample_decay)))

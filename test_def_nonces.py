@@ -1,13 +1,16 @@
-#This test the definitional nonces with a one-off learning procedure. Crazy learning rate.
-#python test_def_nonces.py models/wiki_all.sent.split.model data/definitions/nonce.definitions.300.test 1 10000 3 15 1 70 1.9 5
+"""This test the definitional nonces with a one-off learning procedure.
 
-from scipy.stats import binned_statistic
+Crazy learning rate.
+
+python test_def_nonces.py models/wiki_all.sent.split.model
+                          data/definitions/nonce.definitions.300.test
+                          1 10000 3 15 1 70 1.9 5
+"""
+
 import numpy as np
 import collections
 import sys
-import re
 from gensim.models import Word2Vec
-import logging
 
 background = sys.argv[1]
 dataset = sys.argv[2]
@@ -39,37 +42,36 @@ for l in f:
     model = Word2Vec.load(background)
     vocab_size = len(model.wv.vocab)
     if nonce in model.wv.vocab:
-      model.alpha=float(alpha)
-      model.sample=float(sample)
-      model.sample_decay=float(sample_decay)
-      model.iter=int(iter)
-      model.negative=int(neg)
-      model.nonce=nonce
-      model.window=int(window)
-      model.window_decay=int(window_decay)
-      model.lambda_den=float(lambda_den)
-      model.build_vocab(sentence, update=True)
-      model.min_count=1
-      model.train(sentence)
-      nns = model.most_similar(nonce,topn=vocab_size)
+        model.alpha=float(alpha)
+        model.sample=float(sample)
+        model.sample_decay=float(sample_decay)
+        model.iter=int(iter)
+        model.negative=int(neg)
+        model.nonce=nonce
+        model.window=int(window)
+        model.window_decay=int(window_decay)
+        model.lambda_den=float(lambda_den)
+        model.build_vocab(sentence, update=True)
+        model.min_count=1
+        model.train(sentence)
+        nns = model.most_similar(nonce,topn=vocab_size)
 
-      print nns[:10]
+        print nns[:10]
+        rr = 0
+        n = 1
+        for nn in nns:
+            w = nn[0]
+            if w == probe:
+                print w
+                rr = n
+                ranks.append(rr)
+            else:
+              n+=1
 
-      rr = 0
-      n = 1
-      for nn in nns:
-        w = nn[0]
-        if w == probe:
-          print w
-          rr = n
-          ranks.append(rr)
-        else:
-          n+=1
-
-      if rr != 0:
-        mrr+=float(1)/float(rr)	
-      print rr,mrr
-      c+=1
+        if rr != 0:
+            mrr+=float(1)/float(rr)
+        print rr,mrr
+        c+=1
     else:
       print "nonce not known..."
 
@@ -81,4 +83,3 @@ bins = np.linspace(0,vocab_size,40)
 print bins
 binned = np.digitize(ranks, bins)
 print collections.Counter(binned)
-
