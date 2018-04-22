@@ -1,9 +1,7 @@
 *.egg
 .idea
 .eggs
-gensim/models/__pycache__
-nonce2vec.egg-info
-nonce2vec/__pycache__
-nonce2vec/models/__pycache__
+*.egg-info
 models
-gensim/__pycache__
+__pycache__
+.pyc

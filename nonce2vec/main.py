@@ -3,9 +3,24 @@
 This is the entry point of the application.
 """
 
-import argparse
+import os
 
+import argparse
+import logging
+import logging.config
+
+import gensim
 from gensim.models import Word2Vec
+
+import nonce2vec.utils.config as cutils
+from nonce2vec.utils.files import Sentences
+
+
+logging.config.dictConfig(
+    cutils.load(
+        os.path.join(os.path.dirname(__file__), 'logging', 'logging.yml')))
+
+logger = logging.getLogger(__name__)
 
 
 def _update_mrr_and_count(mrr, count, nns, probe):
@@ -48,75 +63,76 @@ def _test_chimeras():
 
 
 def _test_def_nonces(dataset, model):
-    """This test the definitional nonces with a one-off learning procedure."""
-    # mrr = 0.0
-    # count = 0
-    # vocab_size = len(model.wv.vocab)
-    # with open(dataset, 'r') as datastream:
-    #     total_num_sent = sum(1 for line in datastream)
-    #     print('Testing Nonce2Vec on the definitional dataset containing {} '
-    #           'sentences'.format(total_num_sent))
-    #     num_sent = 1
-    #     datastream.seek(0)
-    #     for line in datastream:
-    #         print('-' * 80)
-    #         print('Processing sentence {}/{}'.format(num_sent, total_num_sent))
-    #         fields = line.rstrip('\n').split('\t')
-    #         nonce = fields[0]
-    #         sentence = fields[1].replace('___', nonce).split()
-    #         probe = '{}_true'.format(nonce)
-    #         print('nonce: {}'.format(nonce))
-    #         print('sentence: {}'.format(sentence))
-    #         if nonce not in model.wv.vocab:
-    #             print('Nonce \'{}\' not in gensim.word2vec.model vocabulary'
-    #                   .format(nonce))
-    #             continue
-    #         model.nonce = nonce
-    #         model.build_vocab([sentence], update=True)
-    #         model.train(sentence)
-    #         nns = model.most_similar(nonce, topn=vocab_size)
-    #         print('10 most similar words: {}'.format(nns[:10]))
-    #         mrr, count = _update_mrr_and_count(mrr, count, nns, probe)
-    #         num_sent += 1
-    #     print('Final MRR =  {}'.format(mrr/count))
+    """Test the definitional nonces with a one-off learning procedure."""
     mrr = 0.0
-
-    human_responses = []
-    system_responses = []
-
-    c = 0
-    ranks = []
-    f=open(dataset)
-    for l in f:
-        fields=l.rstrip('\n').split('\t')
-        nonce = fields[0]
-        sentence = [fields[1].replace("___",nonce).split()]
-        probe = nonce+"_true"
-        #model = Word2Vec.load(background)
-        vocab_size = len(model.wv.vocab)
-        if nonce in model.wv.vocab:
+    count = 0
+    vocab_size = len(model.wv.vocab)
+    with open(dataset, 'r') as datastream:
+        total_num_sent = sum(1 for line in datastream)
+        print('Testing Nonce2Vec on the definitional dataset containing {} '
+              'sentences'.format(total_num_sent))
+        num_sent = 1
+        datastream.seek(0)
+        for line in datastream:
+            print('-' * 80)
+            print('Processing sentence {}/{}'.format(num_sent, total_num_sent))
+            fields = line.rstrip('\n').split('\t')
+            nonce = fields[0]
+            sentence = fields[1].replace('___', nonce).split()
+            probe = '{}_true'.format(nonce)
+            print('nonce: {}'.format(nonce))
+            print('sentence: {}'.format(sentence))
+            if nonce not in model.wv.vocab:
+                print('Nonce \'{}\' not in gensim.word2vec.model vocabulary'
+                      .format(nonce))
+                continue
             model.nonce = nonce
-            model.build_vocab(sentence, update=True)
-            model.min_count=1
+            model.build_vocab([sentence], update=True)
             model.train(sentence)
-            nns = model.most_similar(nonce,topn=vocab_size)
+            nns = model.most_similar(nonce, topn=vocab_size)
+            print('10 most similar words: {}'.format(nns[:10]))
+            mrr, count = _update_mrr_and_count(mrr, count, nns, probe)
+            num_sent += 1
+        print('Final MRR =  {}'.format(mrr/count))
 
-            rr = 0
-            n = 1
-            for nn in nns:
-                w = nn[0]
-                if w == probe:
-                    rr = n
-                    ranks.append(rr)
-                else:
-                  n+=1
-
-            if rr != 0:
-                mrr+=float(1)/float(rr)
-            print(rr,mrr)
-            c+=1
-        else:
-          print("nonce not known...")
+    # mrr = 0.0
+    #
+    # human_responses = []
+    # system_responses = []
+    #
+    # c = 0
+    # ranks = []
+    # f=open(dataset)
+    # for l in f:
+    #     fields=l.rstrip('\n').split('\t')
+    #     nonce = fields[0]
+    #     sentence = [fields[1].replace("___",nonce).split()]
+    #     probe = nonce+"_true"
+    #     #model = Word2Vec.load(background)
+    #     vocab_size = len(model.wv.vocab)
+    #     if nonce in model.wv.vocab:
+    #         model.nonce = nonce
+    #         model.build_vocab(sentence, update=True)
+    #         model.min_count=1
+    #         model.train(sentence)
+    #         nns = model.most_similar(nonce,topn=vocab_size)
+    #
+    #         rr = 0
+    #         n = 1
+    #         for nn in nns:
+    #             w = nn[0]
+    #             if w == probe:
+    #                 rr = n
+    #                 ranks.append(rr)
+    #             else:
+    #               n+=1
+    #
+    #         if rr != 0:
+    #             mrr+=float(1)/float(rr)
+    #         print(rr,mrr)
+    #         c+=1
+    #     else:
+    #       print("nonce not known...")
 
 
 def _test(args):
@@ -130,10 +146,53 @@ def _test(args):
         _test_chimeras()
 
 
+def _train(args):
+    sentences = Sentences(args.datadir)
+    model = gensim.models.Word2Vec(
+        min_count=args.min_count, alpha=args.alpha, negative=args.negative,
+        window=args.window, sample=args.sample, iter=args.epochs,
+        size=args.size, workers=args.num_threads)
+    model.build_vocab(sentences)
+    model.train(sentences, total_examples=model.corpus_count,
+                epochs=model.epochs)
+
+
 def main():
     """Launch Nonce2Vec."""
     parser = argparse.ArgumentParser(prog='nonce2vec')
     subparsers = parser.add_subparsers()
+    parser_train = subparsers.add_parser(
+        'train', formatter_class=argparse.RawTextHelpFormatter,
+        help='generate pre-trained embeddings from wikipedia dump via '
+             'gensim.word2vec')
+    parser_train.set_defaults(func=_train)
+    parser_train.add_argument('--data', required=True,
+                              dest='datadir',
+                              help='absolute path to training data directory')
+    parser_train.add_argument('--num_threads',
+                              type=int, default=1,
+                              help='number of threads to be used by gensim')
+    parser_train.add_argument('--alpha',
+                              type=float, default=0.025,
+                              help='initial learning rate')
+    parser_train.add_argument('--negative',
+                              type=int, default=5,
+                              help='number of negative samples')
+    parser_train.add_argument('--window',
+                              type=int, default=5,
+                              help='window size')
+    parser_train.add_argument('--sample',
+                              type=float, default=1e-3,
+                              help='subsampling')
+    parser_train.add_argument('--epochs',
+                              type=int, default=5,
+                              help='number of epochs')
+    parser_train.add_argument('--min_count',
+                              type=int, default=50,
+                              help='min frequency count')
+    parser_train.add_argument('--size',
+                              type=int, default=400,
+                              help='vector dimensionality')
     parser_test = subparsers.add_parser(
         'test', formatter_class=argparse.RawTextHelpFormatter,
         help='test nonce2vec')
