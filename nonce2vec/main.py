@@ -13,6 +13,7 @@ import gensim
 from gensim.models import Word2Vec
 
 import nonce2vec.utils.config as cutils
+import nonce2vec.utils.files as futils
 from nonce2vec.utils.files import Sentences
 
 
@@ -155,6 +156,7 @@ def _train(args):
     model.build_vocab(sentences)
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
+    model.save(futils.get_model_path(args.datadir, args.outputdir))
 
 
 def main():
@@ -193,6 +195,9 @@ def main():
     parser_train.add_argument('--size',
                               type=int, default=400,
                               help='vector dimensionality')
+    parser_train.add_argument('--outputdir',
+                              required=True,
+                              help='Absolute path to outputdir to save model')
     parser_test = subparsers.add_parser(
         'test', formatter_class=argparse.RawTextHelpFormatter,
         help='test nonce2vec')

@@ -3,7 +3,18 @@
 import os
 import smart_open
 
-__all__ = ('Sentences', 'get_zipped_sentences', 'get_sentences')
+__all__ = ('Sentences', 'get_zipped_sentences', 'get_sentences',
+           'get_model_path')
+
+
+def get_model_path(datadir, outputdir):
+    """Return absolute path to w2v model file.
+
+    Model absolute path is computer from the outputdir and the
+    datadir name.
+    """
+    os.makedirs(outputdir, exist_ok=True)
+    return os.path.join(outputdir, '{}.w2v'.format(os.path.basename(datadir)))
 
 
 def get_zipped_sentences(datazip):
