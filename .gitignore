@@ -2,7 +2,7 @@
 .idea
 .eggs
 *.egg-info
-models
+/models
 __pycache__
 .pyc
 data
