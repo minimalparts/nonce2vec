@@ -11,7 +11,7 @@ handlers:
     formatter: simple
 loggers:
   gensim:
-    level: INFO
+    level: WARNING
     handlers: [console]
   nonce2vec:
     level: INFO
