@@ -149,6 +149,7 @@ def _test(args):
 
 def _train(args):
     sentences = Sentences(args.datadir)
+    output_model_filepath = futils.get_model_path(args.datadir, args.outputdir)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.negative,
         window=args.window, sample=args.sample, iter=args.epochs,
@@ -156,7 +157,7 @@ def _train(args):
     model.build_vocab(sentences)
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
-    model.save(futils.get_model_path(args.datadir, args.outputdir))
+    model.save(output_model_filepath)
 
 
 def main():
