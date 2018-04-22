@@ -40,5 +40,5 @@ setup(
                  'Topic :: Scientific/Engineering :: Artificial Intelligence',
                  'Topic :: Software Development :: Libraries :: Python Modules',
                  'Topic :: Text Processing :: Linguistic'],
-    zip_safe=True,
+    zip_safe=False,
 )
