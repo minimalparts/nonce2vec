@@ -18,7 +18,7 @@ setup(
     keywords=['word2vec', 'embeddings', 'nonce', 'once-shot'],
     platforms=['any'],
     packages=['nonce2vec', 'nonce2vec.utils', 'nonce2vec.models',
-              'nonce2vec.exceptions'],
+              'nonce2vec.exceptions', 'nonce2vec.logging'],
     entry_points={
         'console_scripts': [
             'n2v = nonce2vec.main:main'
