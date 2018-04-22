@@ -6,9 +6,9 @@ Methods used to manipulate YAML-based configuration files.
 import logging
 import yaml
 
-from pyfn.exceptions.method import InvalidMethodError
-from pyfn.exceptions.parameter import InvalidParameterError
-from pyfn.utils.immutables import ImmutableConfig
+from nonce2vec.exceptions.method import InvalidMethodError
+from nonce2vec.exceptions.parameter import InvalidParameterError
+from nonce2vec.utils.immutables import ImmutableConfig
 
 __all__ = ('load')
 
