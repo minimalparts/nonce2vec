@@ -14,7 +14,7 @@ loggers:
     level: ERROR
     handlers: [console]
   nonce2vec:
-    level: WARNING
+    level: INFO
     handlers: [console]
   nonce2vec.models:
     level: WARNING
