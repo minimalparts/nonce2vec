@@ -9,8 +9,12 @@ import argparse
 import logging
 import logging.config
 
+import numpy
+
 import gensim
 from gensim.models import Word2Vec
+
+from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
@@ -30,22 +34,28 @@ def _update_mrr_and_count(mrr, count, nns, probe):
     for nn in nns:
         word = nn[0]
         if word == probe:
-            print('probe: {}'.format(word))
+            logger.info('probe: {}'.format(word))
             rr = n
         else:
             n += 1.0
     if rr != 0.0:
         mrr += 1.0 / rr
     count += 1.0
-    print('RR, MRR = {} {}'.format(rr, mrr))
-    print('MRR = {}'.format(mrr/count))
+    logger.info('RR, MRR = {} {}'.format(rr, mrr))
+    logger.info('MRR = {}'.format(mrr/count))
     return mrr, count
 
 
 def _load_nonce2vec_model(background, alpha, sample, neg, window, iteration,
-                          lambda_den, sample_decay, window_decay):
-    print('Loading Word2Vec model...')
-    model = Word2Vec.load(background)
+                          lambda_den, sample_decay, window_decay, num_threads):
+    logger.info('Loading Nonce2Vec model...')
+    model = Nonce2Vec.load(background)
+    w2vec_vocab = model.vocabulary
+    n2vec_vocab = Nonce2VecVocab()
+    for key, value in w2vec_vocab.__dict__.items():
+        setattr(n2vec_vocab, key, value)
+    model.vocabulary = n2vec_vocab
+    model.sg = 1
     model.alpha = alpha
     model.sample = sample
     model.sample_decay = sample_decay
@@ -55,7 +65,13 @@ def _load_nonce2vec_model(background, alpha, sample, neg, window, iteration,
     model.window_decay = window_decay
     model.lambda_den = lambda_den
     model.min_count = 1
-    print('Model loaded')
+    model.workers = num_threads
+    model.neg_labels = []
+    if model.negative > 0:
+        # precompute negative labels optimization for pure-python training
+        model.neg_labels = numpy.zeros(model.negative + 1)
+        model.neg_labels[0] = 1.
+    logger.info('Model loaded')
     return model
 
 
@@ -68,79 +84,44 @@ def _test_def_nonces(dataset, model):
     mrr = 0.0
     count = 0
     vocab_size = len(model.wv.vocab)
+    logger.error('vocab size = {}'.format(vocab_size))
     with open(dataset, 'r') as datastream:
         total_num_sent = sum(1 for line in datastream)
-        print('Testing Nonce2Vec on the definitional dataset containing {} '
-              'sentences'.format(total_num_sent))
+        logger.info('Testing Nonce2Vec on the definitional dataset containing '
+                    '{} sentences'.format(total_num_sent))
         num_sent = 1
         datastream.seek(0)
         for line in datastream:
-            print('-' * 80)
-            print('Processing sentence {}/{}'.format(num_sent, total_num_sent))
+            logger.info('-' * 80)
+            logger.info('Processing sentence {}/{}'.format(num_sent,
+                                                           total_num_sent))
             fields = line.rstrip('\n').split('\t')
             nonce = fields[0]
             sentence = fields[1].replace('___', nonce).split()
             probe = '{}_true'.format(nonce)
-            print('nonce: {}'.format(nonce))
-            print('sentence: {}'.format(sentence))
+            logger.info('nonce: {}'.format(nonce))
+            logger.info('sentence: {}'.format(sentence))
             if nonce not in model.wv.vocab:
-                print('Nonce \'{}\' not in gensim.word2vec.model vocabulary'
-                      .format(nonce))
+                logger.error('Nonce \'{}\' not in gensim.word2vec.model '
+                             'vocabulary'.format(nonce))
                 continue
-            model.nonce = nonce
+            model.vocabulary.nonce = nonce
             model.build_vocab([sentence], update=True)
-            model.train(sentence)
+            model.train([sentence], total_examples=model.corpus_count,
+                        epochs=model.epochs)
             nns = model.most_similar(nonce, topn=vocab_size)
-            print('10 most similar words: {}'.format(nns[:10]))
+            logger.info('10 most similar words: {}'.format(nns[:10]))
             mrr, count = _update_mrr_and_count(mrr, count, nns, probe)
             num_sent += 1
-        print('Final MRR =  {}'.format(mrr/count))
-
-    # mrr = 0.0
-    #
-    # human_responses = []
-    # system_responses = []
-    #
-    # c = 0
-    # ranks = []
-    # f=open(dataset)
-    # for l in f:
-    #     fields=l.rstrip('\n').split('\t')
-    #     nonce = fields[0]
-    #     sentence = [fields[1].replace("___",nonce).split()]
-    #     probe = nonce+"_true"
-    #     #model = Word2Vec.load(background)
-    #     vocab_size = len(model.wv.vocab)
-    #     if nonce in model.wv.vocab:
-    #         model.nonce = nonce
-    #         model.build_vocab(sentence, update=True)
-    #         model.min_count=1
-    #         model.train(sentence)
-    #         nns = model.most_similar(nonce,topn=vocab_size)
-    #
-    #         rr = 0
-    #         n = 1
-    #         for nn in nns:
-    #             w = nn[0]
-    #             if w == probe:
-    #                 rr = n
-    #                 ranks.append(rr)
-    #             else:
-    #               n+=1
-    #
-    #         if rr != 0:
-    #             mrr+=float(1)/float(rr)
-    #         print(rr,mrr)
-    #         c+=1
-    #     else:
-    #       print("nonce not known...")
+        logger.info('Final MRR =  {}'.format(mrr/count))
 
 
 def _test(args):
     model = _load_nonce2vec_model(args.background, args.alpha,
                                   args.sample, args.neg, args.window,
                                   args.iteration, args.lambda_den,
-                                  args.sample_decay, args.window_decay)
+                                  args.sample_decay, args.window_decay,
+                                  args.num_threads)
     if args.mode == 'def_nonces':
         _test_def_nonces(args.dataset, model)
     if args.mode == 'chimeras':
@@ -229,5 +210,8 @@ def main():
                              help='')
     parser_test.add_argument('--window_decay', required=True, type=int,
                              help='')
+    parser_test.add_argument('--num_threads',
+                             type=int, default=1,
+                             help='number of threads to be used by gensim')
     args = parser.parse_args()
     args.func(args)

@@ -14,7 +14,8 @@ def get_model_path(datadir, outputdir):
     datadir name.
     """
     os.makedirs(outputdir, exist_ok=True)
-    return os.path.join(outputdir, '{}.w2v'.format(os.path.basename(datadir)))
+    return os.path.join(outputdir, '{}.w2v.model'.format(
+        os.path.basename(datadir)))
 
 
 def get_zipped_sentences(datazip):

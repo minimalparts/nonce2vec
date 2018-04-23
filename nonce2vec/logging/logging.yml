@@ -11,13 +11,13 @@ handlers:
     formatter: simple
 loggers:
   gensim:
-    level: WARNING
+    level: ERROR
     handlers: [console]
   nonce2vec:
-    level: INFO
+    level: WARNING
     handlers: [console]
   nonce2vec.models:
-    level: INFO
+    level: WARNING
     handlers: [console]
 root:
   level: INFO
