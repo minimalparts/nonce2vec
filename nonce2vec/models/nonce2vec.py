@@ -233,40 +233,39 @@ class Nonce2VecVocab(Word2VecVocab):
                 wv.vocab[gold_nonce] = wv.vocab[self.nonce]
                 wv.index2word[nonce_index] = gold_nonce
                 del wv.vocab[self.nonce]
-            for word, v in iteritems(self.raw_vocab):
-                # For new words, keep the ones above the min count
-                # AND the nonce (regardless of count)
-                if keep_vocab_item(word, v, min_count, trim_rule=trim_rule) \
-                 or word == self.nonce:
-                    if word in wv.vocab:
-                        pre_exist_words.append(word)
-                        pre_exist_total += v
-                        if not dry_run:
-                            wv.vocab[word].count += v
+                for word, v in iteritems(self.raw_vocab):
+                    # For new words, keep the ones above the min count
+                    # AND the nonce (regardless of count)
+                    if keep_vocab_item(word, v, min_count,
+                                       trim_rule=trim_rule) or word == self.nonce:
+                        if word in wv.vocab:
+                            pre_exist_words.append(word)
+                            pre_exist_total += v
+                            if not dry_run:
+                                wv.vocab[word].count += v
+                        else:
+                            new_words.append(word)
+                            new_total += v
+                            if not dry_run:
+                                wv.vocab[word] = Vocab(count=v,
+                                                       index=len(wv.index2word))
+                                wv.index2word.append(word)
                     else:
-                        new_words.append(word)
-                        new_total += v
-                        if not dry_run:
-                            wv.vocab[word] = Vocab(count=v,
-                                                   index=len(wv.index2word))
-                            wv.index2word.append(word)
-                else:
-                    drop_unique += 1
-                    drop_total += v
-            original_unique_total = len(pre_exist_words) \
-                + len(new_words) + drop_unique
-            pre_exist_unique_pct = len(pre_exist_words) \
-                * 100 / max(original_unique_total, 1)
-            new_unique_pct = len(new_words) * 100 / max(original_unique_total,
-                                                        1)
-            logger.info('New added %i unique words (%i%% of original %i) '
-                        'and increased the count of %i pre-existing words '
-                        '(%i%% of original %i)', len(new_words),
-                        new_unique_pct, original_unique_total,
-                        len(pre_exist_words), pre_exist_unique_pct,
-                        original_unique_total)
-            retain_words = new_words + pre_exist_words
-            retain_total = new_total + pre_exist_total
+                        drop_unique += 1
+                        drop_total += v
+                original_unique_total = len(pre_exist_words) \
+                    + len(new_words) + drop_unique
+                pre_exist_unique_pct = len(pre_exist_words) \
+                    * 100 / max(original_unique_total, 1)
+                new_unique_pct = len(new_words) * 100 / max(original_unique_total, 1)
+                logger.info('New added %i unique words (%i%% of original %i) '
+                            'and increased the count of %i pre-existing words '
+                            '(%i%% of original %i)', len(new_words),
+                            new_unique_pct, original_unique_total,
+                            len(pre_exist_words), pre_exist_unique_pct,
+                            original_unique_total)
+                retain_words = new_words + pre_exist_words
+                retain_total = new_total + pre_exist_total
 
         # Precalculate each vocabulary item's threshold for sampling
         if not sample:
