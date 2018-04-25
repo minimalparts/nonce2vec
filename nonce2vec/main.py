@@ -85,6 +85,8 @@ def _test_def_nonces(dataset, model):
     count = 0
     vocab_size = len(model.wv.vocab)
     logger.error('vocab size = {}'.format(vocab_size))
+    # for item in model.wv.vocab:
+    #     print(item)
     with open(dataset, 'r') as datastream:
         total_num_sent = sum(1 for line in datastream)
         logger.info('Testing Nonce2Vec on the definitional dataset containing '
@@ -92,7 +94,7 @@ def _test_def_nonces(dataset, model):
         num_sent = 1
         datastream.seek(0)
         for line in datastream:
-            logger.info('-' * 80)
+            logger.info('-' * 30)
             logger.info('Processing sentence {}/{}'.format(num_sent,
                                                            total_num_sent))
             fields = line.rstrip('\n').split('\t')
