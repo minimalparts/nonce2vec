@@ -330,7 +330,7 @@ class Nonce2VecVocab(Word2VecVocab):
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table(wv)
 
-        return report_values
+        return report_values, wv
 
 
 class Nonce2Vec(Word2Vec):
@@ -376,6 +376,44 @@ class Nonce2Vec(Word2Vec):
         else:
             raise Exception('Nonce2Vec does not support cbow mode')
         return tally, self._raw_word_count(sentences)
+
+
+    def build_vocab(self, sentences, update=False, progress_per=10000,
+                    keep_raw_vocab=False, trim_rule=None, **kwargs):
+        """Build vocabulary from a sequence of sentences.
+
+        (can be a once-only generator stream).
+        Each sentence is a iterable of iterables (can simply be a list of
+        unicode strings too).
+        Parameters
+        ----------
+        sentences : iterable of iterables
+            The `sentences` iterable can be simply a list of lists of tokens,
+                but for larger corpora,
+            consider an iterable that streams the sentences directly from
+                disk/network.
+            See :class:`~gensim.models.word2vec.BrownCorpus`,
+                :class:`~gensim.models.word2vec.Text8Corpus`
+            or :class:`~gensim.models.word2vec.LineSentence`
+                in :mod:`~gensim.models.word2vec` module for such examples.
+        update : bool
+            If true, the new words in `sentences` will be added to model's
+                vocab.
+        progress_per : int
+            Indicates how many words to process before showing/updating the
+                progress.
+        """
+        total_words, corpus_count = self.vocabulary.scan_vocab(
+            sentences, progress_per=progress_per, trim_rule=trim_rule)
+        self.corpus_count = corpus_count
+        report_values, self.wv = self.vocabulary.prepare_vocab(
+            self.hs, self.negative, self.wv, update=update,
+            keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule, **kwargs)
+        report_values['memory'] = self.estimate_memory(
+            vocab_size=report_values['num_retained_words'])
+        self.trainables.prepare_weights(self.hs, self.negative, self.wv,
+                                        update=update,
+                                        vocabulary=self.vocabulary)
 
     def recompute_sample_ints(self):
         for w, o in self.wv.vocab.items():
