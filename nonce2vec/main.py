@@ -14,7 +14,7 @@ import numpy
 import gensim
 from gensim.models import Word2Vec
 
-from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab
+from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, Nonce2VecTrainables
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
@@ -29,18 +29,18 @@ logger = logging.getLogger(__name__)
 
 
 def _update_mrr_and_count(mrr, count, nns, probe):
-    rr = 0.0
-    n = 1.0
+    rr = 0
+    n = 1
     for nn in nns:
         word = nn[0]
         if word == probe:
             logger.info('probe: {}'.format(word))
             rr = n
         else:
-            n += 1.0
-    if rr != 0.0:
-        mrr += 1.0 / rr
-    count += 1.0
+            n += 1
+    if rr != 0:
+        mrr += 1.0 / float(rr)
+    count += 1
     logger.info('RR, MRR = {} {}'.format(rr, mrr))
     logger.info('MRR = {}'.format(mrr/count))
     return mrr, count
@@ -52,9 +52,14 @@ def _load_nonce2vec_model(background, alpha, sample, neg, window, iteration,
     model = Nonce2Vec.load(background)
     w2vec_vocab = model.vocabulary
     n2vec_vocab = Nonce2VecVocab()
+    w2vec_trainables = model.trainables
+    n2vec_trainables = Nonce2VecTrainables()
     for key, value in w2vec_vocab.__dict__.items():
         setattr(n2vec_vocab, key, value)
+    for key, value in w2vec_trainables.__dict__.items():
+        setattr(n2vec_trainables, key, value)
     model.vocabulary = n2vec_vocab
+    model.trainables = n2vec_trainables
     model.sg = 1
     model.alpha = alpha
     model.sample = sample
@@ -85,6 +90,7 @@ def _test_def_nonces(dataset, model):
     count = 0
     vocab_size = len(model.wv.vocab)
     logger.error('vocab size = {}'.format(vocab_size))
+    print(model.random.rand())
     # for item in model.wv.vocab:
     #     print(item)
     with open(dataset, 'r') as datastream:
@@ -110,7 +116,8 @@ def _test_def_nonces(dataset, model):
             model.vocabulary.nonce = nonce
             model.build_vocab([sentence], update=True)
             model.train([sentence], total_examples=model.corpus_count,
-                        epochs=model.epochs)
+                        epochs=model.iter)
+
             nns = model.most_similar(nonce, topn=vocab_size)
             logger.info('10 most similar words: {}'.format(nns[:10]))
             mrr, count = _update_mrr_and_count(mrr, count, nns, probe)
