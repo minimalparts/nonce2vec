@@ -42,8 +42,8 @@ for l in f:
     model = Word2Vec.load(background)
     vocab_size = len(model.wv.vocab)
     print('vocab_size = ', vocab_size)
-    model.random = np.random.RandomState(seed=1) # FIXME: hack
-    print(model.random.rand())
+    #model.random = np.random.RandomState(seed=1) # FIXME: hack
+    #print(model.random.rand())
     if nonce in model.wv.vocab:
         model.alpha=float(alpha)
         model.sample=float(sample)

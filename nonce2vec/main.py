@@ -84,16 +84,11 @@ def _test_chimeras():
     pass
 
 
-def _test_def_nonces(dataset, model):
+def _test_def_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
     mrr = 0.0
     count = 0
-    vocab_size = len(model.wv.vocab)
-    logger.error('vocab size = {}'.format(vocab_size))
-    print(model.random.rand())
-    # for item in model.wv.vocab:
-    #     print(item)
-    with open(dataset, 'r') as datastream:
+    with open(args.dataset, 'r') as datastream:
         total_num_sent = sum(1 for line in datastream)
         logger.info('Testing Nonce2Vec on the definitional dataset containing '
                     '{} sentences'.format(total_num_sent))
@@ -103,6 +98,13 @@ def _test_def_nonces(dataset, model):
             logger.info('-' * 30)
             logger.info('Processing sentence {}/{}'.format(num_sent,
                                                            total_num_sent))
+            model = _load_nonce2vec_model(args.background, args.alpha,
+                                          args.sample, args.neg, args.window,
+                                          args.iteration, args.lambda_den,
+                                          args.sample_decay, args.window_decay,
+                                          args.num_threads)
+            vocab_size = len(model.wv.vocab)
+            logger.error('vocab size = {}'.format(vocab_size))
             fields = line.rstrip('\n').split('\t')
             nonce = fields[0]
             sentence = fields[1].replace('___', nonce).split()
@@ -126,13 +128,9 @@ def _test_def_nonces(dataset, model):
 
 
 def _test(args):
-    model = _load_nonce2vec_model(args.background, args.alpha,
-                                  args.sample, args.neg, args.window,
-                                  args.iteration, args.lambda_den,
-                                  args.sample_decay, args.window_decay,
-                                  args.num_threads)
+
     if args.mode == 'def_nonces':
-        _test_def_nonces(args.dataset, model)
+        _test_def_nonces(args)
     if args.mode == 'chimeras':
         _test_chimeras()
 

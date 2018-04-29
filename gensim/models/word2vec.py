@@ -101,6 +101,8 @@ from six.moves import xrange
 from types import GeneratorType
 from scipy import stats
 
+# from pdb import break_on_setattr
+
 logger = logging.getLogger(__name__)
 
 """
@@ -131,7 +133,7 @@ except ImportError:
         result = 0
         window = model.window
         for sentence in sentences:
-            print(model.random.rand())
+            #print(model.random.rand())
             word_vocabs = [model.wv.vocab[w] for w in sentence if w in
                            model.wv.vocab and model.wv.vocab[w].sample_int >
                            model.random.rand() * 2**32 or w == '___']
@@ -382,6 +384,7 @@ class Vocab(object):
         return "%s(%s)" % (self.__class__.__name__, ', '.join(vals))
 
 
+#@break_on_setattr('wv.index2word')
 class Word2Vec(utils.SaveLoad):
     """
     Class for training, using and evaluating neural networks described in https://code.google.com/p/word2vec/
@@ -577,6 +580,7 @@ class Word2Vec(utils.SaveLoad):
 
         """
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)  # initial survey
+        print('krv (build_vocab)', keep_raw_vocab, trim_rule, update)
         report_values, pre_exist_words = self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule, update=update)  # trim by min_count & precalculate downsampling
         self.finalize_vocab(pre_exist_words, update=update)  # build tables & arrays
 
@@ -626,7 +630,11 @@ class Word2Vec(utils.SaveLoad):
 
         """
         min_count = min_count or self.min_count
-	#Sampling must be set by the user
+        print('trim_rule', trim_rule)
+        print('dry_run', dry_run)
+        print('min_count', min_count)
+        print(id(self.wv.index2word))
+	    #Sampling must be set by the user
         sample = self.sample
         drop_total = drop_unique = 0
 
@@ -756,6 +764,7 @@ class Word2Vec(utils.SaveLoad):
     def finalize_vocab(self, pre_exist_words, update=False):
         """Build tables and model weights based on final vocabulary settings."""
         if not self.wv.index2word:
+            print('fv (finalize_vocab)')
             self.scale_vocab()
         if self.sorted_vocab and not update:
             self.sort_vocab()
@@ -1147,7 +1156,7 @@ class Word2Vec(utils.SaveLoad):
             # construct deterministic seed from word AND seed argument
             #newsyn0[i-len(self.wv.syn0)] = self.seeded_vector(self.wv.index2word[i] + str(self.seed))
             # Initialise to sum (NOTE: subsample to try and get rid of function words)
-            for w in sorted(pre_exist_words):
+            for w in pre_exist_words:
                 if self.wv.vocab[w].sample_int > self.random.rand() * 2**32 or w == "___":
                    #print "Adding",w,"to initialisation..."
                    #print(w)

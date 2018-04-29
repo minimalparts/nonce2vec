@@ -104,8 +104,8 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
     window = model.window
     for sentence in sentences:
-        print(model.random)
-        print(model.random.rand())
+        #print(model.random)
+        #print(model.random.rand())
         word_vocabs = [model.wv.vocab[w] for w in sentence if w in
                        model.wv.vocab and model.wv.vocab[w].sample_int
                        > model.random.rand() * 2 ** 32 or w == '___']
@@ -157,6 +157,8 @@ class Nonce2VecVocab(Word2VecVocab):
         Delete the raw vocabulary after the scaling is done to free up RAM,
         unless `keep_raw_vocab` is set.
         """
+        print('trim_rule', trim_rule)
+        print('id index2word', id(wv.index2word))
         min_count = min_count or self.min_count
         sample = sample or self.sample
         drop_total = drop_unique = 0
@@ -316,7 +318,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #     wv.index2word[i] + str(self.seed), wv.vector_size)
             # Initialise to sum (NOTE: subsample to try and get rid of
             # function words)
-            for w in sorted(pre_exist_words):
+            for w in pre_exist_words:
                 if wv.vocab[w].sample_int > model_random.rand() * 2 ** 32 \
                  or w == '___':
                     # Adding w to initialisation
