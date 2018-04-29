@@ -10,6 +10,7 @@ import logging
 import logging.config
 
 import numpy
+import scipy
 
 import gensim
 from gensim.models import Word2Vec
@@ -26,6 +27,10 @@ logging.config.dictConfig(
         os.path.join(os.path.dirname(__file__), 'logging', 'logging.yml')))
 
 logger = logging.getLogger(__name__)
+
+# Note: this is scipy's spearman, without tie adjustment
+def spearman(x, y):
+	return scipy.stats.spearmanr(x, y)[0]
 
 
 def _update_mrr_and_count(mrr, count, nns, probe):
@@ -80,8 +85,49 @@ def _load_nonce2vec_model(background, alpha, sample, neg, window, iteration,
     return model
 
 
-def _test_chimeras():
-    pass
+def _test_chimeras(args):
+    with open(args.dataset, 'r') as datastream:
+        nonce = '___'
+        rhos = []
+        count = 0
+        for line in datastream:
+            fields = line.rstrip('\n').split('\t')
+            sentences = []
+            for sent in fields[1].split('@@'):
+                sentences.append(sent.split(' '))
+            probes = fields[2].split(',')
+            responses = fields[3].split(',')
+            logger.info('-' * 30)
+            logger.info('sentences = {}'.format(sentences))
+            logger.info('probes = {}'.format(probes))
+            logger.info('responses = {}'.format(responses))
+            model = _load_nonce2vec_model(args.background, args.alpha,
+                                          args.sample, args.neg, args.window,
+                                          args.iteration, args.lambda_den,
+                                          args.sample_decay, args.window_decay,
+                                          args.num_threads)
+            system_responses = []
+            human_responses = []
+            probe_count = 0
+            for probe in probes:
+                try:
+                    cos = model.similarity('___', probe)
+                    system_responses.append(cos)
+                    human_responses.append(responses[probe_count])
+                except:
+                    logger.error('ERROR processing probe {}'.format(probe))
+                probe_count += 1
+            if len(system_responses) > 1:
+                logger.info('system_responses = {}'.format(system_responses))
+                logger.info('human_responses = {}'.format(human_responses))
+                logger.info('10 most similar words = {}'.format(
+                    model.most_similar(nonce, topn=10)))
+                rho = spearman(human_responses, system_responses)
+                logger.info('RHO = {}'.format(rho))
+                if not math.isnan(rho):
+                    rhos.append(rho)
+            count += 1
+        logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
 
 
 def _test_def_nonces(args):
@@ -104,7 +150,7 @@ def _test_def_nonces(args):
                                           args.sample_decay, args.window_decay,
                                           args.num_threads)
             vocab_size = len(model.wv.vocab)
-            logger.error('vocab size = {}'.format(vocab_size))
+            logger.info('vocab size = {}'.format(vocab_size))
             fields = line.rstrip('\n').split('\t')
             nonce = fields[0]
             sentence = fields[1].replace('___', nonce).split()
@@ -132,7 +178,7 @@ def _test(args):
     if args.mode == 'def_nonces':
         _test_def_nonces(args)
     if args.mode == 'chimeras':
-        _test_chimeras()
+        _test_chimeras(args)
 
 
 def _train(args):
