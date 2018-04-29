@@ -27,7 +27,6 @@ def train_sg_pair(model, word, context_index, alpha,
     if context_vectors is None:
         #context_vectors = model.wv.syn0
         context_vectors = model.wv.vectors
-        print('cxt_vectors1 = {}'.format(len(model.wv.vectors)))
 
     if context_locks is None:
         #context_locks = model.syn0_lockf
@@ -51,26 +50,13 @@ def train_sg_pair(model, word, context_index, alpha,
             alpha = alpha * numpy.exp(exp_decay)
         else:
             alpha = model.min_alpha
-        print('context_index = {}'.format(context_index))
-        #print('l1 = {}'.format(l1))
-        print('lock_factor = {}'.format(lock_factor))
-        print('lambda_den = {}'.format(lambda_den))
-        print('exp_decay = {}'.format(exp_decay))
-        print('alpha = {}'.format(alpha))
-        print('model.hs = {}'.format(model.hs))
-        print('model.negative = {}'.format(model.negative))
-        print('learn_hidden = {}'.format(learn_hidden))
-        print('compute_loss = {}'.format(compute_loss))
-        print('learn_vectors = {}'.format(learn_vectors))
         if model.negative:
-            print('neg_labels = {}'.format(model.neg_labels))
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
             word_indices = [predict_word.index]
             while len(word_indices) < model.negative + 1:
                 w = model.cum_table.searchsorted(
                     model.random.randint(model.cum_table[-1]))
-                print('w = {}'.format(w))
                 if w != predict_word.index:
                     word_indices.append(w)
             l2b = model.syn1neg[word_indices]  # 2d matrix, k+1 x layer1_size
@@ -78,8 +64,6 @@ def train_sg_pair(model, word, context_index, alpha,
             fb = expit(prod_term)  # propagate hidden -> output
             gb = (model.neg_labels - fb) * alpha  # vector of error gradients
             # multiplied by the learning rate
-            print('prod_term = {}'.format(prod_term))
-            print('gb = {}'.format(gb))
             if learn_hidden:
                 model.syn1neg[word_indices] += numpy.outer(gb, l1)
                 # learn hidden -> output
@@ -88,7 +72,6 @@ def train_sg_pair(model, word, context_index, alpha,
         if learn_vectors:
             l1 += neu1e * lock_factor  # learn input -> hidden
                 # (mutates model.wv.syn0[word2.index], if that is l1)
-    #print('neu1e = {}'.format(neu1e))
     return neu1e
 
 
@@ -104,8 +87,6 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
     window = model.window
     for sentence in sentences:
-        #print(model.random)
-        #print(model.random.rand())
         word_vocabs = [model.wv.vocab[w] for w in sentence if w in
                        model.wv.vocab and model.wv.vocab[w].sample_int
                        > model.random.rand() * 2 ** 32 or w == '___']
@@ -122,8 +103,6 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                     if model.wv.index2word[word2.index] == \
                      model.vocabulary.nonce:
                         nonce_count += 1
-                        print('word2.index = {}'.format(word2.index))
-                        print('word = {}'.format(model.wv.index2word[word2.index]))
                         train_sg_pair(model,
                                       model.wv.index2word[word.index],
                                       word2.index, alpha, nonce_count,
@@ -133,7 +112,6 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         if window - 1 >= 3:
             window = window - model.window_decay
         model.recompute_sample_ints()
-        print('result = {}'.format(result))
     return result
 
 
@@ -157,8 +135,6 @@ class Nonce2VecVocab(Word2VecVocab):
         Delete the raw vocabulary after the scaling is done to free up RAM,
         unless `keep_raw_vocab` is set.
         """
-        print('trim_rule', trim_rule)
-        print('id index2word', id(wv.index2word))
         min_count = min_count or self.min_count
         sample = sample or self.sample
         drop_total = drop_unique = 0
@@ -175,15 +151,10 @@ class Nonce2VecVocab(Word2VecVocab):
         if self.nonce is not None and self.nonce in wv.vocab:
             gold_nonce = '{}_true'.format(self.nonce)
             nonce_index = wv.vocab[self.nonce].index
-            print('nonce_index = {}'.format(nonce_index))
             wv.vocab[gold_nonce] = wv.vocab[self.nonce]
-            print('len index2word before = {}'.format(len(wv.index2word)))
             wv.index2word[nonce_index] = gold_nonce
             #del wv.index2word[wv.vocab[self.nonce].index]
             del wv.vocab[self.nonce]
-            print('wv.index2word[nonce_index] = {}'.format(wv.index2word[nonce_index]))
-            print('before wv.index2word = {}'.format(wv.index2word[len(wv.index2word) - 1]))
-            print('raw_vocab = {}'.format(len(self.raw_vocab)))
             for word, v in iteritems(self.raw_vocab):
                 # Update count of all words already in vocab
                 if word in wv.vocab:
@@ -199,12 +170,9 @@ class Nonce2VecVocab(Word2VecVocab):
                         new_words.append(word)
                         new_total += v
                         if not dry_run:
-                            print('len index2word after = {}'.format(len(wv.index2word)))
                             wv.vocab[word] = Vocab(count=v,
                                                    index=len(wv.index2word))
                             wv.index2word.append(word)
-                            print('after wv.index2word = {}'.format(wv.index2word[len(wv.index2word) - 1]))
-                            print('len index2word last = {}'.format(len(wv.index2word)))
                     else:
                         drop_unique += 1
                         drop_total += v
@@ -266,7 +234,6 @@ class Nonce2VecVocab(Word2VecVocab):
         }
 
         if self.null_word:
-            print('NULL WORD')
             # create null pseudo-word for padding when using concatenative
             # L1 (run-of-words)
             # this word is only ever input – never predicted – so count,
@@ -322,14 +289,8 @@ class Nonce2VecTrainables(Word2VecTrainables):
                 if wv.vocab[w].sample_int > model_random.rand() * 2 ** 32 \
                  or w == '___':
                     # Adding w to initialisation
-                    #print(w)
-                    #print(newvectors[i-len(wv.vectors)])
-                    #print(wv.vocab[w].index)
-                    #print(wv.vectors[wv.vocab[w].index])
                     newvectors[i-len(wv.vectors)] += wv.vectors[
                         wv.vocab[w].index]
-                    #print('newvectors[]')
-                    #print(newvectors[i-len(wv.vectors)])
 
         # Raise an error if an online update is run before initial training on
         # a corpus
