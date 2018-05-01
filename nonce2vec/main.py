@@ -34,20 +34,20 @@ def spearman(x, y):
 
 
 def _update_mrr_and_count(mrr, count, nns, probe):
-    rr = 0
+    rank = 0
     n = 1
     for nn in nns:
         word = nn[0]
         if word == probe:
             logger.info('probe: {}'.format(word))
-            rr = n
+            rank = n
         else:
             n += 1
-    if rr != 0:
-        mrr += 1.0 / float(rr)
+    if rank != 0:
+        relative_rank += 1.0 / float(rr)
     count += 1
-    logger.info('RR, MRR = {} {}'.format(rr, mrr))
-    logger.info('MRR = {}'.format(mrr/count))
+    logger.info('Rank, Relative Rank = {} {}'.format(rank, relative_rank))
+    logger.info('MRR = {}'.format(relative_rank/count))
     return mrr, count
 
 
