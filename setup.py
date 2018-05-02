@@ -26,7 +26,8 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['PyYAML==3.12'],
+    install_requires=['PyYAML==3.12', 'bdlm==0.1.0', 'torch==0.3.0.post4',
+                      'torchvision==0.1.6'],
     setup_requires=['pytest-runner==4.0', 'pytest-pylint==0.8.0'],
     tests_require=['pytest==3.4.1', 'pylint==1.8.2', 'pytest-cov==2.5.1'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
