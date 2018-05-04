@@ -7,13 +7,31 @@ entropy-based informativeness measures.
 import numpy
 import spacy
 import torch
+import torch.nn.functional as F
 
 import bdlm.utils as bdlm_utils
 
-from bdlm.models.language import BDLM
+from bdlm.language_model import BDLM  # TODO change to language ultimately
+import bdlm.bilstm2
 from bdlm.models.corpus import Dictionary
 
 __all__ = ('Informativeness')
+
+
+def entropy(x):
+    """Compute the Shannon entropy of a tensor x along its lines.
+
+    Args:
+        x (torch.autograd.Variable): A pyTorch Variable: wrapper around a
+                                     torch.Tensor of size n x m.
+
+    Returns:
+        a torch.Tensor of size n x 1
+
+    """
+    plogp = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
+    shannon_entropy = -1.0 * plogp.sum(dim=1)
+    return shannon_entropy
 
 
 class Informativeness():
@@ -36,7 +54,7 @@ class Informativeness():
         """
         self.model = BDLM.load(torch_model_path)
         self.vocab = Dictionary.load(vocab_path)
-        self.nlp = spacy.load('en_core_web_sm')
+        #self.nlp = spacy.load('en_core_web_sm')
         self.cuda = cuda
 
     def _tokenize(self, sentence):
@@ -50,11 +68,13 @@ class Informativeness():
 
     def _map_to_idx(self, tokens_with_eos):
         ids = torch.LongTensor(len(tokens_with_eos))
+        idx = 0
         for token in tokens_with_eos:
             if token not in self.vocab.word2idx:
-                ids[token] = self.vocab.word2idx['<unk>']
+                ids[idx] = self.vocab.word2idx['<unk>']
             else:
-                ids[token] = self.vocab.word2idx[token]
+                ids[idx] = self.vocab.word2idx[token]
+            idx += 1
         return ids
 
     def _preprocess(self, sentence):
@@ -85,22 +105,28 @@ class Informativeness():
         """Get sentence-to-sentence informativeness."""
         pass
 
-    def sentence2word(self, sentence, word_index):
+    def sentence2word(self, tokens, word_index):
         """Get sentence-to-word informativeness."""
         if not isinstance(word_index, int) or word_index < 0 \
-         or word_index >= len(sentence):
+         or word_index >= len(tokens):
             raise Exception('Invalid input word_index = {}. Should be a '
-                            'positive integer within input sentence length '
-                            '= {}'.format(word_index, len(sentence)))
-        batches, tokens = self._preprocess(sentence)
-        word_index = self._update_word_index(tokens, sentence, word_index)
-        seq_len = len(batches) - 2
+                            'positive integer within input tokens length '
+                            '= {}'.format(word_index, len(tokens)))
+        #batches, tokens = self._preprocess(sentence)
+        #word_index = self._update_word_index(tokens, sentence, word_index)
+        tokens.insert(0, '<eos>')
+        tokens.append('<eos>')
+        word_index += 1
+        print('informativeness for word {}'.format(tokens[word_index]))
+        tokens_as_ints = self._map_to_idx(tokens)
+        batches = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self.cuda)
         # TODO: maybe change this to a max seq_length ultimately?
-        hidden = self.model.init_hidden(eval_batch_size=1)
+        seq_len = len(batches) - 2
+        hidden = self.model.init_hidden(bsz=1)
         for i in range(0, batches.size(0) - seq_len, seq_len):
             hidden = bdlm_utils.update_hidden(self.model, mode='bidir',
                                               hidden=hidden,
-                                              eval_batch_size=1)
+                                              batch_size=1)
             if word_index > i and word_index <= i + seq_len:
                 data, _ = bdlm_utils.get_batch(batches, i, seq_len,
                                                mode='bidir', evaluation=True)
@@ -108,13 +134,11 @@ class Informativeness():
                 break
             else:
                 continue
-        pred_tens_variable = torch.autograd.Variable(predictions[word_index],
-                                                     requires_grad=True)
-        target_tens_variable = torch.autograd.Variable(torch.LongTensor(1))
+        pred_tens_variable = predictions[word_index]
         # Ultimately 1 should be replaced by the number of batches for w2wi
-        entropy = torch.nn.functional.cross_entropy(pred_tens_variable,
-                                                    target_tens_variable)
-        return 1 + (entropy / len(self.vocab))
+        shannon_entropy = float(entropy(pred_tens_variable))
+        # as-is the code supposes that entropy returns a float and not a tensor
+        return 1 - (shannon_entropy / numpy.log(len(self.vocab)))
 
     def word2word(self):
         """Get word-to-word informativeness."""
