@@ -200,6 +200,7 @@ def _test_men(args):
     logger.info('Loading word2vec model...')
     model = Word2Vec.load(args.w2v_model)
     logger.info('Model loaded')
+    logger.info('Vocabulary size = {}'.format(len(model.wv.vocab)))
     system_actual = []
     human_actual = []  # This is needed because we may not be able to
                        # calculate cosine for all pairs

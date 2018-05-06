@@ -117,7 +117,7 @@ Details regarding the pre-pretrained w2v models:
 | pre-trained model | vocab size | MEN | Details |
 | --- | --- | --- | --- |
 | `wiki_all.sent.split.model` | 259376 | 0.7496 | Aurélie's wikidump |
-| `wikidump.w2v.model` | 308334 | 0.7085 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
+| `wikidump.w2v.model` | 308334 | 0.7032 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
 
 On the nonce dataset:
 
@@ -130,7 +130,7 @@ in *sum_only* mode:
 
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split.model` |  |
+| `wiki_all.sent.split.model` | 0.03207267593437761 |
 | `wikidump.w2v.model` |  |
 
 MRR reported in the paper is: **0.04907**
@@ -139,11 +139,11 @@ On the chimera dataset:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split.model` | L2 |  |
+| `wiki_all.sent.split.model` | L2 | 0.02878451891486321 |
 | `wikidump.w2v.model` | L2 |  |
-| `wiki_all.sent.split.model` | L4 |  |
+| `wiki_all.sent.split.model` | L4 | 0.06529154086149094 |
 | `wikidump.w2v.model` | L4 |  |
-| `wiki_all.sent.split.model` | L6 |  |
+| `wiki_all.sent.split.model` | L6 | -0.009389131446087906 |
 | `wikidump.w2v.model` | L6 |  |
 
 Average RHO values reported in the paper are:
