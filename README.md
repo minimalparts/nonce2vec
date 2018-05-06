@@ -129,8 +129,8 @@ On the nonce dataset:
 in *sum_only* mode:
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split` | 0.04879828330072024 |
-| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
+| `wiki_all.sent.split` |  |
+| `wiki.all.utf8.sent.split.lower` |  |
 
 MRR reported in the paper is: **0.04907**
 

@@ -26,7 +26,7 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['PyYAML==3.12'],
+    install_requires=['PyYAML==3.12', 'gensim==3.4.0'],
     setup_requires=['pytest-runner==4.0', 'pytest-pylint==0.8.0'],
     tests_require=['pytest==3.4.1', 'pylint==1.8.2', 'pytest-cov==2.5.1'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
