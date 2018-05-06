@@ -40,16 +40,34 @@ def get_sentences(data):
 
 
 class Sentences(object):
-    """An iterable class (with generators) for gensim."""
+    """An iterable class (with generators) for gensim and n2v."""
 
-    def __init__(self, datadir):
-        self.datadir = datadir
+    def __init__(self, input_data, target):
+        if target != 'gensim' and target != 'n2v':
+            raise Exception('Invalid target parameter \'{}\''.format(target))
+        self._target = target
+        if target == 'gensim':
+            self._datadir = input_data
+        if target == 'n2v':
+            self._datafile = input_data
 
-    def __iter__(self):
-        for filename in os.listdir(self.datadir):
+    def _iterate_for_gensim(self):
+        for filename in os.listdir(self._datadir):
             if filename.startswith('.'):
                 continue
-            with open(os.path.join(self.datadir, filename), 'r') \
+            with open(os.path.join(self._datadir, filename), 'rt') \
              as input_stream:
                 for line in input_stream:
                     yield line.strip().split()
+
+    def _iterate_for_n2v(self):
+        with open(self._datafile, 'rt') as input_stream:
+            for line in input_stream:
+                yield line.rstrip('\n').split('\t')
+
+    def __iter__(self):
+        if self._target == 'gensim':
+            return self._iterate_for_gensim()
+        if self._target == 'n2v':
+            return self._iterate_for_n2v()
+        raise Exception('Invalid target parameter \'{}\''.format(self._target))
