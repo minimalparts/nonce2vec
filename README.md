@@ -58,7 +58,7 @@ n2v men \
 ### Test nonce2vec on the nonce definitional dataset
 ```bash
 n2v test \
-  --mode def_nonces \
+  --mode nonces \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/nonce.definitions.300.test \
   --alpha 1 \
@@ -76,7 +76,7 @@ To test in *sum_only* mode which just sums overs pre-existing vectors, just add
 the `sum_only` flag
 ```bash
 n2v test \
-  --mode def_nonces \
+  --mode nonces \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/nonce.definitions.300.test \
   --alpha 1 \
@@ -96,7 +96,7 @@ n2v test \
 ### Test nonce2vec on the chimera dataset
 ```bash
 n2v test \
-  --mode chimera \
+  --mode chimeras \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/chimeras.dataset.lx.tokenised.test.txt \
   --alpha 1 \
@@ -116,21 +116,21 @@ Details regarding the pre-pretrained w2v models:
 
 | pre-trained model | vocab size | MEN | Details |
 | --- | --- | --- | --- |
-| `wiki_all.sent.split` | 259376 | 0.7496 | Aurélie's wikidump |
-| `wiki.all.utf8.sent.split.lower` | 308334 | 0.7085 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
+| `wiki_all.sent.split.model` | 259376 | 0.7496 | Aurélie's wikidump |
+| `wikidump.w2v.model` | 308334 | 0.7085 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
 
 On the nonce dataset:
 
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split` | 0.04879828330072024 |
-| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
+| `wiki_all.sent.split.model` | 0.04879828330072024 |
+| `wikidump.w2v.model` | 0.030977350626280563 |
 
 in *sum_only* mode:
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split` |  |
-| `wiki.all.utf8.sent.split.lower` |  |
+| `wiki_all.sent.split.model` |  |
+| `wikidump.w2v.model` |  |
 
 MRR reported in the paper is: **0.04907**
 
@@ -138,12 +138,12 @@ On the chimera dataset:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split` | L2 |  |
-| `wiki.all.utf8.sent.split.lower` | L2 |  |
-| `wiki_all.sent.split` | L4 |  |
-| `wiki.all.utf8.sent.split.lower` | L4 |  |
-| `wiki_all.sent.split` | L6 |  |
-| `wiki.all.utf8.sent.split.lower` | L6 |  |
+| `wiki_all.sent.split.model` | L2 |  |
+| `wikidump.w2v.model` | L2 |  |
+| `wiki_all.sent.split.model` | L4 |  |
+| `wikidump.w2v.model` | L4 |  |
+| `wiki_all.sent.split.model` | L6 |  |
+| `wikidump.w2v.model` | L6 |  |
 
 Average RHO values reported in the paper are:
 - L2: 0.3320
