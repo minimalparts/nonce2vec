@@ -260,8 +260,6 @@ def main():
                                  help='subsampling')
     parser_template.add_argument('--epochs', type=int, default=5,
                                  help='number of epochs')
-
-
     parser_train = subparsers.add_parser(
         'train', formatter_class=argparse.RawTextHelpFormatter,
         help='generate pre-trained embeddings from wikipedia dump via '

@@ -1,21 +1,76 @@
 [![DOI](https://zenodo.org/badge/96074751.svg)](https://zenodo.org/badge/latestdoi/96074751)
 
 # nonce2vec
-This is the repo accompanying the paper "High-risk learning: acquiring new word vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code, please cite the following:
+This is the repo accompanying the paper "High-risk learning: acquiring new word
+vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code,
+please cite the following:
+```tex
+@InProceedings{herbelot-baroni:2017:EMNLP2017,
+  author    = {Herbelot, Aur\'{e}lie  and  Baroni, Marco},
+  title     = {High-risk learning: acquiring new word vectors from tiny data},
+  booktitle = {Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing},
+  month     = {September},
+  year      = {2017},
+  address   = {Copenhagen, Denmark},
+  publisher = {Association for Computational Linguistics},
+  pages     = {304--309},
+  url       = {https://www.aclweb.org/anthology/D17-1030}
+}
+```
 
-A. Herbelot and M. Baroni. 2017. High-risk learning: Acquiring new word vectors from tiny data. *Proceedings of EMNLP 2017 (Conference on Empirical Methods in Natural Language Processing)*.
+## Replication HowTo
+The following sections detail the steps required to replicate results from scratch.
 
+### Install nonce2vec
+Under the nonce2vec directory, run:
+```bash
+sudo -H python3 setup.py develop
+```
 
-**Abstract**
+### Generate a pre-trained word2vec model
+To generate a gensim.word2vec model, run:
+```bash
+n2v train \
+  --data /absolute/path/to/wikipedia/dump \
+  --outputdir /absolute/path/to/dir/where/to/store/w2v/model \
+  --alpha 0.025 \
+  --neg 5 \
+  --window 5 \
+  --sample 1e-3 \
+  --epochs 5 \
+  --min_count 50 \
+  --size 400 \
+  --num_threads number_of_threads_available_in_your_env
+```
 
-Distributional semantics models are known to struggle with small data. It is generally accepted that in order to learn 'a good vector' for a word, a model must have sufficient examples of its usage. This contradicts the fact that humans can guess the meaning of a word from a few occurrences only. In this paper, we show that a neural language model such as Word2Vec only necessitates minor modifications to its standard architecture to learn new terms from tiny data, using background knowledge from a previously learnt semantic space. We test our model on word definitions and on a nonce task involving 2-6 sentences' worth of context, showing a large increase in performance over state-of-the-art models on the definitional task. 
+### Check the correlation with the MEN dataset
+To check the quality of your pre-trained gensim.word2vec model
+against the MEN dataset, run:
+```bash
+n2v men \
+  --data /absolute/path/to/MEN/MEN_dataset_natural_form_full
+  --model /absolute/path/to/gensim/word2vec/model
+```
+
+### Test nonce2vec on the nonce definitional dataset
+```bash
+n2v test \
+  --mode def_nonces \
+
+```
+
+### Test nonce2vec on the chimera dataset
+```bash
+
+```
+
 
 ## A note on the code
 We have had queries about *where* exactly the Nonce2Vec code resides. Since it is a modification of the original gensim Word2Vec model, it is located in the gensim/models directory, confusingly still under the name *word2vec.py*. All modifications described in the paper are implemented in that file. Note that there is no C implementation of Nonce2Vec, so the program runs on standard numpy. Also, only skipgram is implemented -- the cbow functions in the code are original Word2Vec.
 
 
 ## Pre-requisites
-You will need a pre-trained gensim model. You can go and train one yourself, using the gensim repo at [https://github.com/rare-technologies/gensim](https://github.com/rare-technologies/gensim), or simply download ours, pre-trained on Wikipedia: 
+You will need a pre-trained gensim model. You can go and train one yourself, using the gensim repo at [https://github.com/rare-technologies/gensim](https://github.com/rare-technologies/gensim), or simply download ours, pre-trained on Wikipedia:
 
 `wget http://clic.cimec.unitn.it/~aurelie.herbelot/wiki_all.model.tar.gz`
 
@@ -43,4 +98,4 @@ In the data/ folder, you will find two datasets, split into training and test se
 
 We thank the authors of the Chimera dataset for letting us use their data. We direct users to the original paper:
 
-A. Lazaridou, M. Marelli and M. Baroni. 2017. Multimodal word meaning induction from minimal exposure to natural text. *Cognitive Science*. 41(S4): 677-705. 
+A. Lazaridou, M. Marelli and M. Baroni. 2017. Multimodal word meaning induction from minimal exposure to natural text. *Cognitive Science*. 41(S4): 677-705.

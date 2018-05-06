@@ -9,9 +9,9 @@ from setuptools import setup
 setup(
     name='nonce2vec',
     description='A python module to generate word embeddings from tiny data',
-    author='Alexandre Kabbach',
+    author='Aurélie Herbelot and Alexandre Kabbach',
     author_email='akb@3azouz.net',
-    version='2.0.0',
+    version='1.0.0',
     url='https://github.com/akb89/nonce2vec',
     download_url='https://github.com/akb89/nonce2vec/archive/2.0.0.tar.gz',
     license='MIT',
