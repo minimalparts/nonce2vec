@@ -27,6 +27,9 @@ Under the nonce2vec directory, run:
 sudo -H python3 setup.py develop
 ```
 
+### Download and extract required resources
+
+
 ### Generate a pre-trained word2vec model
 To generate a gensim.word2vec model, run:
 ```bash
@@ -56,46 +59,93 @@ n2v men \
 ```bash
 n2v test \
   --mode def_nonces \
-
+  --model /absolute/path/to/pretrained/w2v/model \
+  --data /absolute/path/to/nonce.definitions.300.test \
+  --alpha 1 \
+  --neg 3 \
+  --window 15 \
+  --sample 10000 \
+  --epochs 1 \
+  --min_count 1 \
+  --lambda 70 \
+  --sample_decay 1.9 \
+  --window_decay 5 \
+  --num_threads number_of_threads_available_in_your_env
 ```
+To test in *sum_only* mode which just sums overs pre-existing vectors, just add
+the `sum_only` flag
+```bash
+n2v test \
+  --mode def_nonces \
+  --model /absolute/path/to/pretrained/w2v/model \
+  --data /absolute/path/to/nonce.definitions.300.test \
+  --alpha 1 \
+  --neg 3 \
+  --window 15 \
+  --sample 10000 \
+  --epochs 1 \
+  --min_count 1 \
+  --lambda 70 \
+  --sample_decay 1.9 \
+  --window_decay 5 \
+  --num_threads number_of_threads_available_in_your_env \
+  --sum_only
+```
+
 
 ### Test nonce2vec on the chimera dataset
 ```bash
-
+n2v test \
+  --mode chimera \
+  --model /absolute/path/to/pretrained/w2v/model \
+  --data /absolute/path/to/chimeras.dataset.lx.tokenised.test.txt \
+  --alpha 1 \
+  --neg 3 \
+  --window 15 \
+  --sample 10000 \
+  --epochs 1 \
+  --min_count 1 \
+  --lambda 70 \
+  --sample_decay 1.9 \
+  --window_decay 5 \
+  --num_threads number_of_threads_available_in_your_env
 ```
 
+## Replication results
+Details regarding the pre-pretrained w2v models:
 
-## A note on the code
-We have had queries about *where* exactly the Nonce2Vec code resides. Since it is a modification of the original gensim Word2Vec model, it is located in the gensim/models directory, confusingly still under the name *word2vec.py*. All modifications described in the paper are implemented in that file. Note that there is no C implementation of Nonce2Vec, so the program runs on standard numpy. Also, only skipgram is implemented -- the cbow functions in the code are original Word2Vec.
+| pre-trained model | vocab size | MEN | Details |
+| --- | --- | --- | --- |
+| `wiki_all.sent.split` | 259376 | 0.7496 | Aurélie's wikidump |
+| `wiki.all.utf8.sent.split.lower` | 308334 | 0.7085 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
 
+On the nonce dataset:
 
-## Pre-requisites
-You will need a pre-trained gensim model. You can go and train one yourself, using the gensim repo at [https://github.com/rare-technologies/gensim](https://github.com/rare-technologies/gensim), or simply download ours, pre-trained on Wikipedia:
+| pre-trained model | MRR |
+| --- | --- |
+| `wiki_all.sent.split` | 0.04879828330072024 |
+| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
 
-`wget http://clic.cimec.unitn.it/~aurelie.herbelot/wiki_all.model.tar.gz`
+in *sum_only* mode:
+| pre-trained model | MRR |
+| --- | --- |
+| `wiki_all.sent.split` | 0.04879828330072024 |
+| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
 
-If you use our tar file, the content should be unpacked into the models/ directory of the repo.
+MRR reported in the paper is: **0.04907**
 
-## Running the code
+On the chimera dataset:
 
-Here is an example of how to run the code on the test set of the definitional dataset, with the best identified parameters from the paper:
+| pre-trained model | L | Average RHO |
+| --- | --- | --- |
+| `wiki_all.sent.split` | L2 |  |
+| `wiki.all.utf8.sent.split.lower` | L2 |  |
+| `wiki_all.sent.split` | L4 |  |
+| `wiki.all.utf8.sent.split.lower` | L4 |  |
+| `wiki_all.sent.split` | L6 |  |
+| `wiki.all.utf8.sent.split.lower` | L6 |  |
 
-`python test_def_nonces.py models/wiki_all.sent.split.model data/definitions/nonce.definitions.300.test 1 10000 3 15 1 70 1.9 5`
-
-For the chimeras dataset, you can run with:
-
-`python test_chimeras.py models/wiki_all.sent.split.model data/chimeras/chimeras.dataset.l4.tokenised.test.txt 1 10000 3 15 1 70 1.9 5`
-
-(changing the chimeras test set for testing on 2, 4 or 6 sentences).
-
-
-## The data
-
-In the data/ folder, you will find two datasets, split into training and test sets:
-
-* The Wikipedia 'definitional dataset', produced specifically for this paper.
-* A pre-processed version of the 'Chimera dataset' (Lazaridou et al, 2017). More details on this data are to be found in the README of the data/chimeras/ directory.
-
-We thank the authors of the Chimera dataset for letting us use their data. We direct users to the original paper:
-
-A. Lazaridou, M. Marelli and M. Baroni. 2017. Multimodal word meaning induction from minimal exposure to natural text. *Cognitive Science*. 41(S4): 677-705.
+Average RHO values reported in the paper are:
+- L2: 0.3320
+- L4: 0.3668
+- L6: 0.3890

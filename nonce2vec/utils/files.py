@@ -42,16 +42,16 @@ def get_sentences(data):
 class Sentences(object):
     """An iterable class (with generators) for gensim and n2v."""
 
-    def __init__(self, input_data, target):
-        if target != 'gensim' and target != 'n2v':
-            raise Exception('Invalid target parameter \'{}\''.format(target))
-        self._target = target
-        if target == 'gensim':
+    def __init__(self, input_data, source):
+        if source != 'wiki' and source != 'nonce_or_chimera':
+            raise Exception('Invalid source parameter \'{}\''.format(source))
+        self._source = source
+        if source == 'wiki':
             self._datadir = input_data
-        if target == 'n2v':
+        if source == 'nonce_or_chimera':
             self._datafile = input_data
 
-    def _iterate_for_gensim(self):
+    def _iterate_over_wiki(self):
         for filename in os.listdir(self._datadir):
             if filename.startswith('.'):
                 continue
@@ -60,14 +60,14 @@ class Sentences(object):
                 for line in input_stream:
                     yield line.strip().split()
 
-    def _iterate_for_n2v(self):
+    def _iterate_over_nonce_or_chimera(self):
         with open(self._datafile, 'rt') as input_stream:
             for line in input_stream:
                 yield line.rstrip('\n').split('\t')
 
     def __iter__(self):
-        if self._target == 'gensim':
-            return self._iterate_for_gensim()
-        if self._target == 'n2v':
-            return self._iterate_for_n2v()
-        raise Exception('Invalid target parameter \'{}\''.format(self._target))
+        if self._source == 'wiki':
+            return self._iterate_over_wiki()
+        if self._source == 'nonce_or_chimera':
+            return self._iterate_over_nonce_or_chimera()
+        raise Exception('Invalid source parameter \'{}\''.format(self._source))
