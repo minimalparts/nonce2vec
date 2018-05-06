@@ -117,14 +117,14 @@ Details regarding the pre-pretrained w2v models:
 | pre-trained model | vocab size | MEN | Details |
 | --- | --- | --- | --- |
 | `wiki_all.sent.split.model` | 259376 | 0.7496 | Aurélie's wikidump |
-| `wikidump.w2v.model` | 308334 | 0.7032 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
+| `wikidump.w2v.model` | 274449 | 0.7032 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
 
 On the nonce dataset:
 
 | pre-trained model | MRR |
 | --- | --- |
 | `wiki_all.sent.split.model` | 0.04879828330072024 |
-| `wikidump.w2v.model` | 0.030977350626280563 |
+| `wikidump.w2v.model` |  |
 
 in *sum_only* mode:
 
