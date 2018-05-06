@@ -3,7 +3,6 @@
 A modified version of gensim.Word2Vec.
 """
 
-import copy
 import logging
 from collections import defaultdict
 
@@ -140,7 +139,8 @@ class Nonce2VecVocab(Word2VecVocab):
         drop_total = drop_unique = 0
 
         if not update:
-            raise Exception('Nonce2Vec can only update a pre-existing vocabulary')
+            raise Exception('Nonce2Vec can only update a pre-existing '
+                            'vocabulary')
         logger.info('Updating model with new vocabulary')
         new_total = pre_exist_total = 0
         # New words and pre-existing words are two separate lists

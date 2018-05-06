@@ -6,6 +6,7 @@ entropy-based informativeness measures.
 
 import numpy
 import spacy
+import copy
 import torch
 import torch.nn.functional as F
 
@@ -105,40 +106,53 @@ class Informativeness():
         """Get sentence-to-sentence informativeness."""
         pass
 
-    def sentence2word(self, tokens, word_index):
+    def sentence2word(self, tokens, word_index, seq_len=0):
         """Get sentence-to-word informativeness."""
         if not isinstance(word_index, int) or word_index < 0 \
          or word_index >= len(tokens):
             raise Exception('Invalid input word_index = {}. Should be a '
                             'positive integer within input tokens length '
                             '= {}'.format(word_index, len(tokens)))
-        #batches, tokens = self._preprocess(sentence)
-        #word_index = self._update_word_index(tokens, sentence, word_index)
-        tokens.insert(0, '<eos>')
-        tokens.append('<eos>')
+        _tokens = copy.deepcopy(tokens)
+        _tokens.insert(0, '<eos>')
+        _tokens.append('<eos>')
         word_index += 1
-        print('informativeness for word {}'.format(tokens[word_index]))
-        tokens_as_ints = self._map_to_idx(tokens)
+        tokens_as_ints = self._map_to_idx(_tokens)
+        assert len(_tokens) == len(tokens) + 2
+        assert _tokens[word_index] == tokens[word_index - 1]
         batches = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self.cuda)
+        assert batches.size(0) == len(_tokens)
+        assert batches[0][0] == batches[0][-1]  # start/end with <eos>
         # TODO: maybe change this to a max seq_length ultimately?
-        seq_len = len(batches) - 2
+        #seq_len = len(batches) - 2
+        #assert seq_len <= len(batches) - 2
         hidden = self.model.init_hidden(bsz=1)
-        for i in range(0, batches.size(0) - seq_len, seq_len):
+        for i in range(0, batches.size(0), seq_len):
             hidden = bdlm_utils.update_hidden(self.model, mode='bidir',
                                               hidden=hidden,
                                               batch_size=1)
-            if word_index > i and word_index <= i + seq_len:
-                data, _ = bdlm_utils.get_batch(batches, i, seq_len,
-                                               mode='bidir', evaluation=True)
+            if batches.size(0) - i < seq_len + 2:
+                seq_len = batches.size(0) - i - 2
+            if seq_len < 3:
+                continue  # TODO: raise exception
+            if word_index > i and word_index < i + seq_len + 1:
+                data, targets = bdlm_utils.get_batch(batches, i, seq_len,
+                                                     mode='bidir',
+                                                     evaluation=True)
+                print(data)
+                assert data[0].size(0) == seq_len
+                assert data[1].size(0) == seq_len
+                assert targets.size(0) == seq_len
                 predictions, hidden = self.model(data, hidden)
-                break
+                assert 0 <= word_index-i-1 <= seq_len - 1
+                pred_tens_variable = predictions[word_index-i-1]
+                # Ultimately 1 should be replaced by the number of batches for w2wi
+                shannon_entropy = float(entropy(pred_tens_variable))
+                # as-is the code supposes that entropy returns a float and not a tensor
+                return 1 - (shannon_entropy / numpy.log(len(self.vocab)))
             else:
                 continue
-        pred_tens_variable = predictions[word_index]
-        # Ultimately 1 should be replaced by the number of batches for w2wi
-        shannon_entropy = float(entropy(pred_tens_variable))
-        # as-is the code supposes that entropy returns a float and not a tensor
-        return 1 - (shannon_entropy / numpy.log(len(self.vocab)))
+        return  # TODO: raise Exception
 
     def word2word(self):
         """Get word-to-word informativeness."""
