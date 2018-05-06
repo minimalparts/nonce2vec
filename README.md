@@ -127,6 +127,7 @@ On the nonce dataset:
 | `wikidump.w2v.model` | 0.030977350626280563 |
 
 in *sum_only* mode:
+
 | pre-trained model | MRR |
 | --- | --- |
 | `wiki_all.sent.split.model` |  |
