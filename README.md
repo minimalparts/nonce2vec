@@ -58,7 +58,7 @@ n2v men \
 ### Test nonce2vec on the nonce definitional dataset
 ```bash
 n2v test \
-  --mode def_nonces \
+  --mode nonces \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/nonce.definitions.300.test \
   --alpha 1 \
@@ -76,7 +76,7 @@ To test in *sum_only* mode which just sums overs pre-existing vectors, just add
 the `sum_only` flag
 ```bash
 n2v test \
-  --mode def_nonces \
+  --mode nonces \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/nonce.definitions.300.test \
   --alpha 1 \
@@ -96,7 +96,7 @@ n2v test \
 ### Test nonce2vec on the chimera dataset
 ```bash
 n2v test \
-  --mode chimera \
+  --mode chimeras \
   --model /absolute/path/to/pretrained/w2v/model \
   --data /absolute/path/to/chimeras.dataset.lx.tokenised.test.txt \
   --alpha 1 \
@@ -116,21 +116,23 @@ Details regarding the pre-pretrained w2v models:
 
 | pre-trained model | vocab size | MEN | Details |
 | --- | --- | --- | --- |
-| `wiki_all.sent.split` | 259376 | 0.7496 | Aurélie's wikidump |
-| `wiki.all.utf8.sent.split.lower` | 308334 | 0.7085 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
+| `wiki_all.sent.split.model` | 259376 | 0.7496 | Aurélie's wikidump |
+| `wikidump.w2v.model` | 274449 | 0.7032 | Alex's wikidump (lowercase UTF-8 version of Aurélie's) |
 
 On the nonce dataset:
 
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split` | 0.04879828330072024 |
-| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
+| `wiki_all.sent.split.model` | 0.049172107209112415 |
+| `wikidump.w2v.model` | 0.03244086200454485 |
 
 in *sum_only* mode:
+
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split` | 0.04879828330072024 |
-| `wiki.all.utf8.sent.split.lower` | 0.030977350626280563 |
+| `wiki_all.sent.split.model` | 0.041074614290738116 |
+| `wikidump.w2v.model` | 0.03029920582998488 |
+
 
 MRR reported in the paper is: **0.04907**
 
@@ -138,14 +140,30 @@ On the chimera dataset:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split` | L2 |  |
-| `wiki.all.utf8.sent.split.lower` | L2 |  |
-| `wiki_all.sent.split` | L4 |  |
-| `wiki.all.utf8.sent.split.lower` | L4 |  |
-| `wiki_all.sent.split` | L6 |  |
-| `wiki.all.utf8.sent.split.lower` | L6 |  |
+| `wiki_all.sent.split.model` | L2 | 0.2945885566474934 |
+| `wikidump.w2v.model` | L2 | 0.2417513120432906 |
+| `wiki_all.sent.split.model` | L4 | 0.2934163091681338 |
+| `wikidump.w2v.model` | L4 | 0.1597227113856652 |
+| `wiki_all.sent.split.model` | L6 | 0.3529782502652243 |
+| `wikidump.w2v.model` | L6 | 0.17972625545903392 |
 
-Average RHO values reported in the paper are:
+in *sum_only* mode:
+
+| pre-trained model | L | Average RHO |
+| --- | --- | --- |
+| `wiki_all.sent.split.model` | L2 | 0.33666460433580814 |
+| `wikidump.w2v.model` | L2 | 0.2519347998127817 |
+| `wiki_all.sent.split.model` | L4 | 0.36519180870706414 |
+| `wikidump.w2v.model` | L4 | 0.1852681912170354 |
+| `wiki_all.sent.split.model` | L6 | 0.40022239961777484 |
+| `wikidump.w2v.model` | L6 | 0.2073600944244708 |
+
+
+Average RHO values reported in the paper are (for n2v):
 - L2: 0.3320
 - L4: 0.3668
 - L6: 0.3890
+
+Details:
+- Results on the definitional dataset are robust across n2v versions and pre-trained w2v models
+- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v. 
