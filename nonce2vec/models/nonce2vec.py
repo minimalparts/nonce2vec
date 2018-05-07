@@ -121,6 +121,14 @@ class Nonce2VecVocab(Word2VecVocab):
                                              sorted_vocab, null_word)
         self.nonce = None
 
+    @classmethod
+    def load(cls, w2v_vocab):
+        """Load a Nonce2VecVocab instance from a Word2VecVocab instance."""
+        n2v_vocab = cls()
+        for key, value in w2v_vocab.__dict__.items():
+            setattr(n2v_vocab, key, value)
+        return n2v_vocab
+
     def prepare_vocab(self, hs, negative, wv, update=False,
                       keep_raw_vocab=False, trim_rule=None,
                       min_count=None, sample=None, dry_run=False):
@@ -256,6 +264,13 @@ class Nonce2VecTrainables(Word2VecTrainables):
 
     def __init__(self, vector_size=100, seed=1, hashfxn=hash):
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
+
+    @classmethod
+    def load(cls, w2v_trainables):
+        n2v_trainables = cls()
+        for key, value in w2v_trainables.__dict__.items():
+            setattr(n2v_trainables, key, value)
+        return n2v_trainables
 
     def prepare_weights(self, pre_exist_words, hs, negative, wv, model_random,
                         update=False):
