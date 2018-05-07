@@ -133,7 +133,7 @@ def _test_chimeras(args):
     logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
 
 
-def _test_def_nonces(args):
+def _test_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
     relative_ranks = 0.0
     count = 0
@@ -239,8 +239,8 @@ def _train(args):
 
 
 def _test(args):
-    if args.mode == 'def_nonces':
-        _test_def_nonces(args)
+    if args.mode == 'nonces':
+        _test_nonces(args)
     if args.mode == 'chimeras':
         _test_chimeras(args)
 
@@ -295,7 +295,7 @@ def main():
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
     parser_test.add_argument('--mode', required=True,
-                             choices=['def_nonces', 'chimeras'],
+                             choices=['nonces', 'chimeras'],
                              help='what is to be tested')
     parser_test.add_argument('--model', required=True,
                              dest='background',

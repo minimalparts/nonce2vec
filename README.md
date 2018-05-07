@@ -124,14 +124,15 @@ On the nonce dataset:
 | pre-trained model | MRR |
 | --- | --- |
 | `wiki_all.sent.split.model` | 0.04879828330072024 |
-| `wikidump.w2v.model` |  |
+| `wikidump.w2v.model` | 0.029644000840080106 |
 
 in *sum_only* mode:
 
 | pre-trained model | MRR |
 | --- | --- |
 | `wiki_all.sent.split.model` | 0.03207267593437761 |
-| `wikidump.w2v.model` |  |
+| `wikidump.w2v.model` | 0.026372814683224246 |
+
 
 MRR reported in the paper is: **0.04907**
 
@@ -139,11 +140,11 @@ On the chimera dataset:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split.model` | L2 | 0.02878451891486321 |
+| `wiki_all.sent.split.model` | L2 |  |
 | `wikidump.w2v.model` | L2 |  |
-| `wiki_all.sent.split.model` | L4 | 0.06529154086149094 |
+| `wiki_all.sent.split.model` | L4 |  |
 | `wikidump.w2v.model` | L4 |  |
-| `wiki_all.sent.split.model` | L6 | -0.009389131446087906 |
+| `wiki_all.sent.split.model` | L6 |  |
 | `wikidump.w2v.model` | L6 |  |
 
 Average RHO values reported in the paper are:
