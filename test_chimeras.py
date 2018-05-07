@@ -66,7 +66,7 @@ for l in f:
     model.build_vocab(sentences, update=True)
     model.min_count=1
     model.train(sentences)
-		
+
     system_responses = []
     human_responses = []
     p_count = 0
@@ -83,8 +83,8 @@ for l in f:
       print system_responses
       print human_responses
       print model.most_similar(nonce,topn=10)
-		
-      sp = spearman(human_responses,system_responses)	
+
+      sp = spearman(human_responses,system_responses)
       print "RHO:",sp
       if not math.isnan(sp):
         spearmans.append(sp)

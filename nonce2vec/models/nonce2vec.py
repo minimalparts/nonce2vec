@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 """Nonce2Vec model.
 
 A modified version of gensim.Word2Vec.

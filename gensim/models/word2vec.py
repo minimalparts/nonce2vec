@@ -133,7 +133,6 @@ except ImportError:
         result = 0
         window = model.window
         for sentence in sentences:
-            #print(model.random.rand())
             word_vocabs = [model.wv.vocab[w] for w in sentence if w in
                            model.wv.vocab and model.wv.vocab[w].sample_int >
                            model.random.rand() * 2**32 or w == '___']
@@ -148,8 +147,6 @@ except ImportError:
                         # If training context nonce, increment its count
                         if model.wv.index2word[word2.index] == model.nonce:
                             nonce_count += 1
-                            print('word2.index = {}'.format(word2.index))
-                            print('word = {}'.format(model.wv.index2word[word2.index]))
                             train_sg_pair(model,
                                           model.wv.index2word[word.index],
                                           word2.index, alpha, nonce_count)
@@ -157,7 +154,6 @@ except ImportError:
             if window - 1 >= 3:
                 window = window - model.window_decay
             model.recompute_sample_ints()
-            print('result = {}'.format(result))
         return result
 
     def train_batch_cbow(model, sentences, alpha, work=None, neu1=None):
@@ -253,7 +249,6 @@ def train_sg_pair(model, word, context_index, alpha, nonce_count,
                   context_vectors=None, context_locks=None):
     if context_vectors is None:
         context_vectors = model.wv.syn0
-        print('cxt_vectors = {}'.format(len(model.wv.syn0)))
     if context_locks is None:
         context_locks = model.syn0_lockf
 
@@ -273,16 +268,6 @@ def train_sg_pair(model, word, context_index, alpha, nonce_count,
             alpha = alpha * exp(exp_decay)
         else:
             alpha = model.min_alpha
-        print('context_index = {}'.format(context_index))
-        #print('l1 = {}'.format(l1))
-        print('lock_factor = {}'.format(lock_factor))
-        print('lambda_den = {}'.format(lambda_den))
-        print('exp_decay = {}'.format(exp_decay))
-        print('alpha = {}'.format(alpha))
-        print('model.hs = {}'.format(model.hs))
-        print('model.negative = {}'.format(model.negative))
-        print('learn_hidden = {}'.format(learn_hidden))
-        print('learn_vectors = {}'.format(learn_vectors))
         if model.hs:
             # work on the entire tree at once, to push as much work into numpy's C routines as possible (performance)
             l2a = deepcopy(model.syn1[predict_word.point])  # 2d matrix, codelen x layer1_size
@@ -293,19 +278,15 @@ def train_sg_pair(model, word, context_index, alpha, nonce_count,
             neu1e += dot(ga, l2a)  # save error
 
         if model.negative:
-            print('neg_labels = {}'.format(model.neg_labels))
             # use this word (label = 1) + `negative` other random words not from this sentence (label = 0)
             word_indices = [predict_word.index]
             while len(word_indices) < model.negative + 1:
                 w = model.cum_table.searchsorted(model.random.randint(model.cum_table[-1]))
-                print('w = {}'.format(w))
                 if w != predict_word.index:
                     word_indices.append(w)
             l2b = model.syn1neg[word_indices]  # 2d matrix, k+1 x layer1_size
             fb = expit(dot(l1, l2b.T))  # propagate hidden -> output
             gb = (model.neg_labels - fb) * alpha  # vector of error gradients multiplied by the learning rate
-            print('prod_term = {}'.format(dot(l1, l2b.T)))
-            print('gb = {}'.format(gb))
             if learn_hidden:
                 model.syn1neg[word_indices] += outer(gb, l1)  # learn hidden -> output
             neu1e += dot(gb, l2b)  # save error
@@ -580,7 +561,6 @@ class Word2Vec(utils.SaveLoad):
 
         """
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)  # initial survey
-        print('krv (build_vocab)', keep_raw_vocab, trim_rule, update)
         report_values, pre_exist_words = self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule, update=update)  # trim by min_count & precalculate downsampling
         self.finalize_vocab(pre_exist_words, update=update)  # build tables & arrays
 
@@ -630,10 +610,6 @@ class Word2Vec(utils.SaveLoad):
 
         """
         min_count = min_count or self.min_count
-        print('trim_rule', trim_rule)
-        print('dry_run', dry_run)
-        print('min_count', min_count)
-        print(id(self.wv.index2word))
 	    #Sampling must be set by the user
         sample = self.sample
         drop_total = drop_unique = 0
@@ -678,14 +654,9 @@ class Word2Vec(utils.SaveLoad):
         if self.nonce is not None and self.nonce in self.wv.vocab:
             gold_nonce = self.nonce+"_true"
             nonce_index = self.wv.vocab[self.nonce].index
-            print('nonce_index = {}'.format(nonce_index))
             self.wv.vocab[gold_nonce] = self.wv.vocab[self.nonce]
-            print('len index2word before = {}'.format(len(self.wv.index2word)))
             self.wv.index2word[nonce_index] = gold_nonce
             del self.wv.vocab[self.nonce]
-            print('wv.index2word[nonce_index] = {}'.format(self.wv.index2word[nonce_index]))
-            print('before wv.index2word = {}'.format(self.wv.index2word[len(self.wv.index2word) - 1]))
-            print('raw_vocab = {}'.format(len(self.raw_vocab)))
             for word, v in iteritems(self.raw_vocab):
 		        # Update count of all words already in vocab
                 if word in self.wv.vocab:
@@ -700,11 +671,8 @@ class Word2Vec(utils.SaveLoad):
                         new_words.append(word)
                         new_total += v
                         if not dry_run:
-                            print('len index2word after = {}'.format(len(self.wv.index2word)))
                             self.wv.vocab[word] = Vocab(count=v, index=len(self.wv.index2word))
                             self.wv.index2word.append(word)
-                            print('after wv.index2word = {}'.format(self.wv.index2word[len(self.wv.index2word) - 1]))
-                            print('len index2word last = {}'.format(len(self.wv.index2word)))
                     else:
                         drop_unique += 1
                         drop_total += v
@@ -764,7 +732,6 @@ class Word2Vec(utils.SaveLoad):
     def finalize_vocab(self, pre_exist_words, update=False):
         """Build tables and model weights based on final vocabulary settings."""
         if not self.wv.index2word:
-            print('fv (finalize_vocab)')
             self.scale_vocab()
         if self.sorted_vocab and not update:
             self.sort_vocab()
@@ -775,7 +742,6 @@ class Word2Vec(utils.SaveLoad):
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table()
         if self.null_word:
-            print('NULL WORD')
             # create null pseudo-word for padding when using concatenative L1 (run-of-words)
             # this word is only ever input – never predicted – so count, huffman-point, etc doesn't matter
             word, v = '\0', Vocab(count=1, sample_int=0)
@@ -1158,14 +1124,7 @@ class Word2Vec(utils.SaveLoad):
             # Initialise to sum (NOTE: subsample to try and get rid of function words)
             for w in pre_exist_words:
                 if self.wv.vocab[w].sample_int > self.random.rand() * 2**32 or w == "___":
-                   #print "Adding",w,"to initialisation..."
-                   #print(w)
-                   #print(newsyn0[i-len(self.wv.syn0)])
-                   #print(self.wv.vocab[w].index)
-                   #print(self.wv.syn0[self.wv.vocab[w].index])
                    newsyn0[i-len(self.wv.syn0)]+=self.wv.syn0[self.wv.vocab[w].index]
-                   #print('newvectors[]')
-                   #print(newsyn0[i-len(self.wv.syn0)])
         self.wv.syn0 = vstack([self.wv.syn0, newsyn0])
 
         if self.hs:

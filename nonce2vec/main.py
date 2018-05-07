@@ -55,7 +55,7 @@ def _update_rr_and_count(relative_ranks, count, nns, probe):
 
 
 def _load_nonce2vec_model(background, alpha, sample, neg, window, epochs,
-                          min_count, lambda_den, sample_decay, window_decay,
+                          lambda_den, sample_decay, window_decay,
                           num_threads):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(background)
@@ -70,7 +70,6 @@ def _load_nonce2vec_model(background, alpha, sample, neg, window, epochs,
     model.window = window
     model.window_decay = window_decay
     model.lambda_den = lambda_den
-    model.min_count = min_count
     model.workers = num_threads
     model.neg_labels = []
     if model.negative > 0:
@@ -98,10 +97,18 @@ def _test_chimeras(args):
         logger.info('responses = {}'.format(responses))
         model = _load_nonce2vec_model(args.background, args.alpha,
                                       args.sample, args.neg, args.window,
-                                      args.epochs, args.min_count,
+                                      args.epochs,
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
                                       args.num_threads)
+        vocab_size = len(model.wv.vocab)
+        logger.info('vocab size = {}'.format(vocab_size))
+        model.vocabulary.nonce = nonce
+        model.build_vocab(sentences, update=True)
+        model.min_count = args.min_count
+        if not args.sum_only:
+            model.train(sentences, total_examples=model.corpus_count,
+                        epochs=model.iter)
         system_responses = []
         human_responses = []
         probe_count = 0
