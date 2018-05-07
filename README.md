@@ -124,14 +124,14 @@ On the nonce dataset:
 | pre-trained model | MRR |
 | --- | --- |
 | `wiki_all.sent.split.model` | 0.049172107209112415 |
-| `wikidump.w2v.model` |  |
+| `wikidump.w2v.model` | 0.03244086200454485 |
 
 in *sum_only* mode:
 
 | pre-trained model | MRR |
 | --- | --- |
-| `wiki_all.sent.split.model` |  |
-| `wikidump.w2v.model` |  |
+| `wiki_all.sent.split.model` | 0.041074614290738116 |
+| `wikidump.w2v.model` | 0.03029920582998488 |
 
 
 MRR reported in the paper is: **0.04907**
@@ -140,26 +140,29 @@ On the chimera dataset:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split.model` | L2 | 0.3016929047538029 |
-| `wikidump.w2v.model` | L2 | 0.21332653231708532 |
-| `wiki_all.sent.split.model` | L4 | 0.2969805965716985 |
-| `wikidump.w2v.model` | L4 | 0.1863917111261584 |
-| `wiki_all.sent.split.model` | L6 | 0.35449014204392826 |
-| `wikidump.w2v.model` | L6 | 0.1827810095715356 |
+| `wiki_all.sent.split.model` | L2 | 0.2945885566474934 |
+| `wikidump.w2v.model` | L2 | 0.2417513120432906 |
+| `wiki_all.sent.split.model` | L4 | 0.2934163091681338 |
+| `wikidump.w2v.model` | L4 | 0.1597227113856652 |
+| `wiki_all.sent.split.model` | L6 | 0.3529782502652243 |
+| `wikidump.w2v.model` | L6 | 0.17972625545903392 |
 
 in *sum_only* mode:
 
 | pre-trained model | L | Average RHO |
 | --- | --- | --- |
-| `wiki_all.sent.split.model` | L2 |  |
-| `wikidump.w2v.model` | L2 |  |
-| `wiki_all.sent.split.model` | L4 |  |
-| `wikidump.w2v.model` | L4 |  |
-| `wiki_all.sent.split.model` | L6 |  |
-| `wikidump.w2v.model` | L6 |  |
+| `wiki_all.sent.split.model` | L2 | 0.33666460433580814 |
+| `wikidump.w2v.model` | L2 | 0.2519347998127817 |
+| `wiki_all.sent.split.model` | L4 | 0.36519180870706414 |
+| `wikidump.w2v.model` | L4 | 0.1852681912170354 |
+| `wiki_all.sent.split.model` | L6 | 0.40022239961777484 |
+| `wikidump.w2v.model` | L6 | 0.2073600944244708 |
 
 
-Average RHO values reported in the paper are:
+Average RHO values reported in the paper are (for n2v):
 - L2: 0.3320
 - L4: 0.3668
 - L6: 0.3890
+
+Details:
+-
