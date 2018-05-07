@@ -165,4 +165,5 @@ Average RHO values reported in the paper are (for n2v):
 - L6: 0.3890
 
 Details:
--
+- Results on the definitional dataset are robust across n2v versions and pre-trained w2v models
+- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v. 
