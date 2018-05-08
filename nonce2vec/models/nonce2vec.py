@@ -309,20 +309,21 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            if 'random' in filters:
-                pre_exist_words = [
-                    w for w in pre_exist_words if
-                    wv.vocab[w].sample_int > random_state.rand() * 2 ** 32
-                    or w == '___']
-            if 'self' in filters:
-                if self_info_threshold == 0:
-                    raise Exception('You have selected self information filter '
-                                    'but have not specified a threshold value')
-                for w in pre_exist_words:
+            if filters:
+                if 'random' in filters:
                     pre_exist_words = [
                         w for w in pre_exist_words if
-                        numpy.log(wv.vocab[w].sample_int) > self_info_threshold
+                        wv.vocab[w].sample_int > random_state.rand() * 2 ** 32
                         or w == '___']
+                if 'self' in filters:
+                    if self_info_threshold == 0:
+                        raise Exception('You have selected self information filter '
+                                        'but have not specified a threshold value')
+                    for w in pre_exist_words:
+                        pre_exist_words = [
+                            w for w in pre_exist_words if
+                            numpy.log(wv.vocab[w].sample_int) > self_info_threshold
+                            or w == '___']
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
