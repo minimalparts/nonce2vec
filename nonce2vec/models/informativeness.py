@@ -4,9 +4,9 @@ Loads a bi-directional language model and computes various
 entropy-based informativeness measures.
 """
 
-import numpy
-import spacy
 import copy
+
+import numpy
 import torch
 import torch.nn.functional as F
 
@@ -53,10 +53,10 @@ class Informativeness():
             nlp: a spacy.nlp loaded instance (for English)
             cuda: set to True to use GPUs with pyTorch
         """
-        self.model = BDLM.load(torch_model_path)
-        self.vocab = Dictionary.load(vocab_path)
+        self._model = BDLM.load(torch_model_path)
+        self._vocab = Dictionary.load(vocab_path)
         #self.nlp = spacy.load('en_core_web_sm')
-        self.cuda = cuda
+        self._cuda = cuda
 
     def _tokenize(self, sentence):
         return self.nlp(sentence).to_array()
@@ -71,10 +71,10 @@ class Informativeness():
         ids = torch.LongTensor(len(tokens_with_eos))
         idx = 0
         for token in tokens_with_eos:
-            if token not in self.vocab.word2idx:
-                ids[idx] = self.vocab.word2idx['<unk>']
+            if token not in self._vocab.word2idx:
+                ids[idx] = self._vocab.word2idx['<unk>']
             else:
-                ids[idx] = self.vocab.word2idx[token]
+                ids[idx] = self._vocab.word2idx[token]
             idx += 1
         return ids
 
@@ -95,7 +95,7 @@ class Informativeness():
         tokens_with_eos = Informativeness._add_eos(tokens)
         tokens_as_ints = self._map_to_idx(tokens_with_eos)
         tokens_batch = bdlm_utils.batchify(tokens_as_ints, bsz=1,
-                                           cuda=self.cuda)
+                                           cuda=self._cuda)
         return tokens_batch, tokens
 
     def _update_word_index(self, tokens, sentence, word_index):
@@ -120,15 +120,16 @@ class Informativeness():
         tokens_as_ints = self._map_to_idx(_tokens)
         assert len(_tokens) == len(tokens) + 2
         assert _tokens[word_index] == tokens[word_index - 1]
-        batches = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self.cuda)
+        batches = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self._cuda)
+        print(batches)
         assert batches.size(0) == len(_tokens)
         assert batches[0][0] == batches[0][-1]  # start/end with <eos>
-        # TODO: maybe change this to a max seq_length ultimately?
-        #seq_len = len(batches) - 2
-        #assert seq_len <= len(batches) - 2
-        hidden = self.model.init_hidden(bsz=1)
+        if seq_len == 0 or seq_len > 18:
+            seq_len = 18  # with Kristina's pretrained model its the max we can do
+            # seq_len = len(bathes) - 2  # currently not possible as the limit is 18
+        hidden = self._model.init_hidden(bsz=1)
         for i in range(0, batches.size(0), seq_len):
-            hidden = bdlm_utils.update_hidden(self.model, mode='bidir',
+            hidden = bdlm_utils.update_hidden(self._model, mode='bidir',
                                               hidden=hidden,
                                               batch_size=1)
             if batches.size(0) - i < seq_len + 2:
@@ -139,23 +140,62 @@ class Informativeness():
                 data, targets = bdlm_utils.get_batch(batches, i, seq_len,
                                                      mode='bidir',
                                                      evaluation=True)
-                print(data)
+                print(targets)
                 assert data[0].size(0) == seq_len
                 assert data[1].size(0) == seq_len
                 assert targets.size(0) == seq_len
-                predictions, hidden = self.model(data, hidden)
+                predictions, hidden = self._model(data, hidden)
                 assert 0 <= word_index-i-1 <= seq_len - 1
                 pred_tens_variable = predictions[word_index-i-1]
                 # Ultimately 1 should be replaced by the number of batches for w2wi
                 shannon_entropy = float(entropy(pred_tens_variable))
                 # as-is the code supposes that entropy returns a float and not a tensor
-                return 1 - (shannon_entropy / numpy.log(len(self.vocab)))
+                return 1 - (shannon_entropy / numpy.log(len(self._vocab)))
             else:
                 continue
         return  # TODO: raise Exception
 
-    def word2word(self):
+    def word2word(self, tokens, source_word_index, target_word_index, seq_len=0):
         """Get word-to-word informativeness."""
         # Use torch.where with condition
         # Better: use masked_select with ge(s2w) condition
-        pass
+        _tokens = copy.deepcopy(tokens)
+        _tokens.insert(0, '<eos>')
+        _tokens.append('<eos>')
+        source_word_index += 1
+        target_word_index += 1
+        tokens_as_ints = self._map_to_idx(_tokens)
+        source_word_id = tokens_as_ints[source_word_index]
+        target_word_id = tokens_as_ints[target_word_index]
+        source_tensor = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self._cuda)
+        batches = torch.LongTensor(source_tensor.size(0), len(self._vocab) - 1).zero_()
+        index_tensor = torch.LongTensor([[i for i in range(len(self._vocab) - 1)]])
+        for i in range(source_tensor.size(0)):
+            batches.index_fill_(0, torch.LongTensor([i]), source_tensor[i][0])
+        batches[source_word_index].put_(
+            torch.LongTensor(
+                [j for j in range(len(self._vocab) - 1)]),
+            torch.LongTensor(
+                [k for k in self._vocab.word2idx.values() if k != source_word_id]))
+        print(batches)
+
+        for j in range(batches.size(1)):
+            if seq_len == 0 or seq_len > 18:
+                seq_len = 18  # with Kristina's pretrained model its the max we can do
+                # seq_len = len(bathes) - 2  # currently not possible as the limit is 18
+            batch = batches[:, j:j+1].contiguous()
+            hidden = self._model.init_hidden(bsz=1)
+            for i in range(0, batch.size(0), seq_len):
+                hidden = bdlm_utils.update_hidden(self._model, mode='bidir',
+                                                  hidden=hidden,
+                                                  batch_size=1)
+                if batch.size(0) - i < seq_len + 2:
+                    seq_len = batch.size(0) - i - 2
+                if seq_len < 3:
+                    continue  # TODO: raise exception
+                if target_word_index > i and target_word_index < i + seq_len + 1:
+                    data, targets = bdlm_utils.get_batch(batch, i,
+                                                         bptt=seq_len,
+                                                         mode='bidir',
+                                                         evaluation=True)
+                    predictions, hidden = self._model(data, hidden)

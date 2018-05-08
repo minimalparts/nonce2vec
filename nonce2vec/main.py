@@ -164,7 +164,8 @@ def _test_nonces(args):
                          'vocabulary'.format(nonce))
             continue
         model.vocabulary.nonce = nonce
-        model.build_vocab([sentence], update=True)
+        model.build_vocab([sentence], filters=args.filters,
+                          self_info_threshold=args.self_thresh, update=True)
         model.min_count = args.min_count
         if not args.sum_only:
             model.train([sentence], total_examples=model.corpus_count,
@@ -308,6 +309,12 @@ def main():
     parser_test.add_argument('--sample_decay', required=True, type=float,
                              help='')
     parser_test.add_argument('--window_decay', required=True, type=int,
+                             help='')
+    parser_test.add_argument('--filters',
+                             choices=['random', 'self', 'w2w'],
+                             help='')
+    parser_test.add_argument('--self_info_threshold', type=int,
+                             dest='self_thresh',
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')

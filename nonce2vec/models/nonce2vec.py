@@ -263,7 +263,7 @@ class Nonce2VecVocab(Word2VecVocab):
 
 class Nonce2VecTrainables(Word2VecTrainables):
 
-    def __init__(self, vector_size=100, seed=1, hashfxn=hash):
+    def __init__(self, vector_size=100, seed=1, hashfxn=hash, filters=[]):
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
 
     @classmethod
@@ -273,17 +273,19 @@ class Nonce2VecTrainables(Word2VecTrainables):
             setattr(n2v_trainables, key, value)
         return n2v_trainables
 
-    def prepare_weights(self, pre_exist_words, hs, negative, wv, model_random,
-                        update=False):
+    def prepare_weights(self, pre_exist_words, hs, negative, wv, filters,
+                        random_state, self_info_threshold, update=False):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
             raise Exception('prepare_weight on Nonce2VecTrainables should '
                             'always be used with update=True')
         else:
-            self.update_weights(pre_exist_words, hs, negative, wv, model_random)
+            self.update_weights(pre_exist_words, hs, negative, wv,
+                                filters, random_state, self_info_threshold)
 
-    def update_weights(self, pre_exist_words, hs, negative, wv, model_random):
+    def update_weights(self, pre_exist_words, hs, negative, wv, filters,
+                       random_state=None, self_info_threshold=0):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -301,12 +303,31 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #     wv.index2word[i] + str(self.seed), wv.vector_size)
             # Initialise to sum (NOTE: subsample to try and get rid of
             # function words)
+            # for w in pre_exist_words:
+            #     if wv.vocab[w].sample_int > random_state.rand() * 2 ** 32 \
+            #      or w == '___':
+            #         # Adding w to initialisation
+            #         newvectors[i-len(wv.vectors)] += wv.vectors[
+            #             wv.vocab[w].index]
+            if 'random' in filters:
+                pre_exist_words = [
+                    w for w in pre_exist_words if
+                    wv.vocab[w].sample_int > random_state.rand() * 2 ** 32
+                    or w == '___']
+            if 'self' in filters:
+                if self_info_threshold == 0:
+                    raise Exception('You have selected self information filter '
+                                    'but have not specified a threshold value')
+                for w in pre_exist_words:
+                    pre_exist_words = [
+                        w for w in pre_exist_words if
+                        numpy.log(wv.vocab[w].sample_int) > self_info_threshold
+                        or w == '___']
             for w in pre_exist_words:
-                if wv.vocab[w].sample_int > model_random.rand() * 2 ** 32 \
-                 or w == '___':
-                    # Adding w to initialisation
-                    newvectors[i-len(wv.vectors)] += wv.vectors[
-                        wv.vocab[w].index]
+                # Initialise to sum
+                newvectors[i-len(wv.vectors)] += wv.vectors[
+                    wv.vocab[w].index]
+
 
         # Raise an error if an online update is run before initial training on
         # a corpus
@@ -375,8 +396,10 @@ class Nonce2Vec(Word2Vec):
             raise Exception('Nonce2Vec does not support cbow mode')
         return tally, self._raw_word_count(sentences)
 
-    def build_vocab(self, sentences, update=False, progress_per=10000,
-                    keep_raw_vocab=False, trim_rule=None, **kwargs):
+    def build_vocab(self, sentences, filters=[],
+                    self_info_threshold=0,
+                    update=False, progress_per=10000, keep_raw_vocab=False,
+                    trim_rule=None, **kwargs):
         """Build vocabulary from a sequence of sentences.
 
         (can be a once-only generator stream).
@@ -409,7 +432,9 @@ class Nonce2Vec(Word2Vec):
         report_values['memory'] = self.estimate_memory(
             vocab_size=report_values['num_retained_words'])
         self.trainables.prepare_weights(pre_exist_words, self.hs,
-                                        self.negative, self.wv, self.random,
+                                        self.negative, self.wv, filters,
+                                        random_state=self.random,
+                                        self_info_threshold=self_info_threshold,
                                         update=update)
 
     def recompute_sample_ints(self):
