@@ -166,4 +166,42 @@ Average RHO values reported in the paper are (for n2v):
 
 Details:
 - Results on the definitional dataset are robust across n2v versions and pre-trained w2v models
-- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v. 
+- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v.
+
+## Filtering XP
+
+Testing misc. filters in sum_only mode
+
+| Filters | MRR |
+| --- | --- |
+| NONE | 0.01784929554742602 |
+| random | 0.0336934577224455 |
+| self 20 | 0.02985819235102424 |
+| self 22 | 0.048155663626896696 |
+|  |  |
+
+## Experiments:
+Probabilities:
+1. With CBOW to predict probabilities
+2. With BIDIR LM to predict probabilities
+
+S2W informativeness:
+1. With the standard entropy
+2. With a weighted entropy
+3. With filtered context words
+
+W2W informatieness:
+1. With the 2 forms of S2W informativeness
+2. With CBOW as a deviation with and without source context word
+3. With BIDIR as a deviation on the neighboring words in the distribution
+
+Testing S2W informativeness:
+1. On the nonce dataset test correlation between score and informativeness
+2. On the chimera dataset try sorting sentences by s2w informativeness
+
+Testing W2W informativeness:
+1. Sum on context words with W2W above specified threshold
+2. Train nonce2vec with a dynamic window-size adjusted based on informative context words
+
+Testing S2S informativeness:
+1. On the chimera dataset, train on the most informative sentence only 
