@@ -8,7 +8,10 @@ import copy
 
 import numpy
 import torch
+import scipy
 import torch.nn.functional as F
+
+from gensim.models import Word2Vec
 
 import bdlm.utils as bdlm_utils
 
@@ -38,7 +41,9 @@ def entropy(x):
 class Informativeness():
     """Informativeness class relying on a bi-directional language model."""
 
-    def __init__(self, torch_model_path, vocab_path, cuda=False):
+    def __init__(self, mode, w2v_model_path=None,
+                 torch_model_path=None, vocab_path=None,
+                 cuda=False, entropy=None):
         """Initialize the Informativeness instance.
 
         Args:
@@ -53,10 +58,19 @@ class Informativeness():
             nlp: a spacy.nlp loaded instance (for English)
             cuda: set to True to use GPUs with pyTorch
         """
-        self._model = BDLM.load(torch_model_path)
-        self._vocab = Dictionary.load(vocab_path)
-        #self.nlp = spacy.load('en_core_web_sm')
-        self._cuda = cuda
+        assert mode == 'cbow' or mode == 'bidir'
+        assert entropy == 'shannon' or 'weighted'
+        self._mode = mode
+        if self._mode == 'cbow':
+            if not w2v_model_path:
+                raise Exception('Unspecified w2v model path for informativeness '
+                                'in CBOW mode')
+            self._model = Word2Vec.load(w2v_model_path)
+        self._entropy = entropy
+        # self._model = BDLM.load(torch_model_path)
+        # self._vocab = Dictionary.load(vocab_path)
+        # #self.nlp = spacy.load('en_core_web_sm')
+        # self._cuda = cuda
 
     def _tokenize(self, sentence):
         return self.nlp(sentence).to_array()
@@ -106,8 +120,7 @@ class Informativeness():
         """Get sentence-to-sentence informativeness."""
         pass
 
-    def sentence2word(self, tokens, word_index, seq_len=0):
-        """Get sentence-to-word informativeness."""
+    def _get_bidir_sentence2word(self, tokens, word_index, seq_len=0):
         if not isinstance(word_index, int) or word_index < 0 \
          or word_index >= len(tokens):
             raise Exception('Invalid input word_index = {}. Should be a '
@@ -155,8 +168,54 @@ class Informativeness():
                 continue
         return  # TODO: raise Exception
 
-    def word2word(self, tokens, source_word_index, target_word_index, seq_len=0):
-        """Get word-to-word informativeness."""
+    def _get_cbow_s2w_with_weighted_entropy(self, tokens, word_index):
+        _tokens = copy.deepcopy(tokens)
+        del _tokens[word_index]
+        words_and_probs = self._model.predict_output_word(
+            _tokens, topn=len(self._model.wv.vocab))
+        # shannon_entropy = scipy.stats.entropy(probs)
+        shannon_entropy = 0
+        total_count = sum(self._model.wv.vocab[w].count for w in self._model.wv.vocab)
+        _alpha = 0
+        for w in self._model.wv.vocab:
+            pw = self._model.wv.vocab[w].count / total_count
+            _alpha += (1 / (len(self._model.wv.vocab) * pw)) * numpy.log(1 / len(self._model.wv.vocab))
+        alpha = 1 / _alpha
+        for (w, prob) in words_and_probs:
+            abs_prob = self._model.wv.vocab[w].count / total_count
+            #shannon_entropy -= (prob / abs_prob) * numpy.log((prob / abs_prob))
+            shannon_entropy += (prob / abs_prob) * numpy.log(prob)
+        #s2w = 1 - (shannon_entropy / numpy.log(len(self._model.wv.vocab)))
+        s2w = 1 - (shannon_entropy * alpha)
+        return s2w
+
+    def _get_cbow_s2w_with_shannon_entropy(self, tokens, word_index):
+        _tokens = copy.deepcopy(tokens)
+        del _tokens[word_index]
+        words_and_probs = self._model.predict_output_word(
+            _tokens, topn=len(self._model.wv.vocab))
+        probs = [item[1] for item in words_and_probs]
+        shannon_entropy = scipy.stats.entropy(probs)
+        s2w = 1 - (shannon_entropy / numpy.log(len(self._model.wv.vocab)))
+        return s2w
+
+    def _get_cbow_sentence2word(self, tokens, word_index):
+        if self._entropy == 'shannon':
+            return self._get_cbow_s2w_with_shannon_entropy(tokens, word_index)
+        if self._entropy == 'weighted':
+            return self._get_cbow_s2w_with_weighted_entropy(tokens, word_index)
+
+
+    def sentence2word(self, tokens, word_index, seq_len=0):
+        """Get sentence-to-word informativeness."""
+        if self._mode == 'bidir':
+            return self._get_bidir_sentence2word(tokens, word_index, seq_len)
+        if self._mode == 'cbow':
+            return self._get_cbow_sentence2word(tokens, word_index)
+
+
+    def _get_bidir_word2word(self, tokens, source_word_index,
+                             target_word_index, seq_len=0):
         # Use torch.where with condition
         # Better: use masked_select with ge(s2w) condition
         _tokens = copy.deepcopy(tokens)
@@ -199,3 +258,24 @@ class Informativeness():
                                                          mode='bidir',
                                                          evaluation=True)
                     predictions, hidden = self._model(data, hidden)
+
+    def _get_cbow_word2word(self, tokens, source_word_index, target_word_index):
+        swi_with_source = self._get_cbow_sentence2word(tokens, target_word_index)
+        _tokens = copy.deepcopy(tokens)
+        del _tokens[source_word_index]
+        if target_word_index > source_word_index:
+            target_word_index -= 1
+        swi_without_source = self._get_cbow_sentence2word(_tokens, target_word_index)
+        #return numpy.abs(swi_without_source - swi_with_source) / swi_with_source
+        #return (swi_without_source - swi_with_source) / swi_with_source
+        return swi_with_source - swi_without_source
+
+    def word2word(self, tokens, source_word_index, target_word_index,
+                  seq_len=0):
+        """Get word-to-word informativeness."""
+        if self._mode == 'bidir':
+            return self._get_bidir_word2word(tokens, source_word_index,
+                                             target_word_index, seq_len)
+        if self._mode == 'cbow':
+            return self._get_cbow_word2word(tokens, source_word_index,
+                                            target_word_index)

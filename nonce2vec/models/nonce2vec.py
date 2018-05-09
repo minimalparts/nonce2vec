@@ -15,6 +15,8 @@ from gensim.models.word2vec import Word2Vec, Word2VecVocab, Word2VecTrainables
 from gensim.utils import keep_vocab_item
 from gensim.models.keyedvectors import Vocab
 
+from nonce2vec.models.informativeness import Informativeness
+
 __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
@@ -263,7 +265,7 @@ class Nonce2VecVocab(Word2VecVocab):
 
 class Nonce2VecTrainables(Word2VecTrainables):
 
-    def __init__(self, vector_size=100, seed=1, hashfxn=hash, filters=[]):
+    def __init__(self, vector_size=100, seed=1, hashfxn=hash):
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
 
     @classmethod
@@ -274,7 +276,8 @@ class Nonce2VecTrainables(Word2VecTrainables):
         return n2v_trainables
 
     def prepare_weights(self, pre_exist_words, hs, negative, wv, filters,
-                        random_state, self_info_threshold, update=False):
+                        random_state, self_info_threshold,
+                        informativeness, update=False):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
@@ -282,10 +285,12 @@ class Nonce2VecTrainables(Word2VecTrainables):
                             'always be used with update=True')
         else:
             self.update_weights(pre_exist_words, hs, negative, wv,
-                                filters, random_state, self_info_threshold)
+                                filters, random_state, self_info_threshold,
+                                informativeness)
 
     def update_weights(self, pre_exist_words, hs, negative, wv, filters,
-                       random_state=None, self_info_threshold=0):
+                       random_state=None, self_info_threshold=0,
+                       informativeness=None):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -324,6 +329,17 @@ class Nonce2VecTrainables(Word2VecTrainables):
                             w for w in pre_exist_words if
                             numpy.log(wv.vocab[w].sample_int) > self_info_threshold
                             or w == '___']
+                if 'w2w' in filters:
+                    if not informativeness:
+                        raise Exception('An informativeness instance is '
+                                        'required for the w2w filter')
+                    tokens = ['___']
+                    tokens.extend(pre_exist_words)
+                    print(tokens)
+                    pre_exist_words = [
+                        w for idx, w in enumerate(pre_exist_words)
+                        if informativeness.word2word(tokens, idx+1, 0) > 0]
+                    print(pre_exist_words)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
@@ -399,6 +415,7 @@ class Nonce2Vec(Word2Vec):
 
     def build_vocab(self, sentences, filters=[],
                     self_info_threshold=0,
+                    informativeness=None,
                     update=False, progress_per=10000, keep_raw_vocab=False,
                     trim_rule=None, **kwargs):
         """Build vocabulary from a sequence of sentences.
@@ -436,7 +453,8 @@ class Nonce2Vec(Word2Vec):
                                         self.negative, self.wv, filters,
                                         random_state=self.random,
                                         self_info_threshold=self_info_threshold,
-                                        update=update)
+                                        update=update,
+                                        informativeness=informativeness)
 
     def recompute_sample_ints(self):
         for w, o in self.wv.vocab.items():

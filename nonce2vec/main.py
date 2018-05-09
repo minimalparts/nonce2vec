@@ -22,6 +22,7 @@ from gensim.models import Word2Vec
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
 from nonce2vec.utils.files import Sentences
+from nonce2vec.models.informativeness import Informativeness
 
 
 logging.config.dictConfig(
@@ -142,6 +143,9 @@ def _test_nonces(args):
     logger.info('Testing Nonce2Vec on the definitional dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
+    informativeness = Informativeness(
+        mode=args.info_mode, w2v_model_path=args.info_model_path,
+        entropy=args.entropy)
     for fields in sentences:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
@@ -165,7 +169,8 @@ def _test_nonces(args):
             continue
         model.vocabulary.nonce = nonce
         model.build_vocab([sentence], filters=args.filters,
-                          self_info_threshold=args.self_thresh, update=True)
+                          self_info_threshold=args.self_thresh, update=True,
+                          informativeness=informativeness)
         model.min_count = args.min_count
         if not args.sum_only:
             model.train([sentence], total_examples=model.corpus_count,
@@ -316,6 +321,14 @@ def main():
     parser_test.add_argument('--self_info_threshold', type=int,
                              dest='self_thresh',
                              help='')
+    parser_test.add_argument('--info_mode', choices=['cbow', 'bidir'],
+                             help='Informativeness mode. How probabilities are gathered')
+    parser_test.add_argument('--info_model', type=str,
+                             dest='info_model_path',
+                             help='Informativeness model path')
+    parser_test.add_argument('--info_entropy', choices=['shannon', 'weighted'],
+                             dest='entropy',
+                             help='entropy')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')
     args = parser.parse_args()

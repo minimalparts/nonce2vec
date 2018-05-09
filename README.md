@@ -178,7 +178,7 @@ Testing misc. filters in sum_only mode
 | random | 0.0336934577224455 |
 | self 20 | 0.02985819235102424 |
 | self 22 | 0.048155663626896696 |
-|  |  |
+| w2w |  |
 
 ## Experiments:
 Probabilities:
@@ -204,4 +204,4 @@ Testing W2W informativeness:
 2. Train nonce2vec with a dynamic window-size adjusted based on informative context words
 
 Testing S2S informativeness:
-1. On the chimera dataset, train on the most informative sentence only 
+1. On the chimera dataset, train on the most informative sentence only
