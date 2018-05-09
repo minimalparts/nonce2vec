@@ -7,7 +7,6 @@ entropy-based informativeness measures.
 import copy
 
 import numpy
-import torch
 import scipy
 
 from gensim.models import Word2Vec
