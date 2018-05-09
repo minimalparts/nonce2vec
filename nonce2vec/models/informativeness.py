@@ -9,7 +9,6 @@ import copy
 import numpy
 import torch
 import scipy
-import torch.nn.functional as F
 
 from gensim.models import Word2Vec
 
