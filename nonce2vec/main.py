@@ -143,9 +143,10 @@ def _test_nonces(args):
     logger.info('Testing Nonce2Vec on the definitional dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
-    informativeness = Informativeness(
-        mode=args.info_mode, w2v_model_path=args.info_model_path,
-        entropy=args.entropy)
+    if args.with_info:
+        informativeness = Informativeness(
+            mode=args.info_mode, w2v_model_path=args.info_model_path,
+            entropy=args.entropy)
     for fields in sentences:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
@@ -168,9 +169,13 @@ def _test_nonces(args):
                          'vocabulary'.format(nonce))
             continue
         model.vocabulary.nonce = nonce
-        model.build_vocab([sentence], filters=args.filters,
-                          self_info_threshold=args.self_thresh, update=True,
-                          informativeness=informativeness)
+        if args.with_info:
+            model.build_vocab([sentence], filters=args.filters,
+                              self_info_threshold=args.self_thresh, update=True,
+                              informativeness=informativeness)
+        else:
+            model.build_vocab([sentence], filters=args.filters,
+                              self_info_threshold=args.self_thresh, update=True)
         model.min_count = args.min_count
         if not args.sum_only:
             model.train([sentence], total_examples=model.corpus_count,
@@ -330,6 +335,8 @@ def main():
                              dest='entropy',
                              help='entropy')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
+                             help='')
+    parser_test.add_argument('--with_info', action='store_true', default=False,
                              help='')
     args = parser.parse_args()
     args.func(args)
