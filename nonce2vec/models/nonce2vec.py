@@ -335,11 +335,9 @@ class Nonce2VecTrainables(Word2VecTrainables):
                                         'required for the w2w filter')
                     tokens = ['___']
                     tokens.extend(pre_exist_words)
-                    print(tokens)
                     pre_exist_words = [
                         w for idx, w in enumerate(pre_exist_words)
                         if informativeness.word2word(tokens, idx+1, 0) > 0]
-                    print(pre_exist_words)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
