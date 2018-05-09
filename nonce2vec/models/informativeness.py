@@ -11,11 +11,11 @@ import scipy
 
 from gensim.models import Word2Vec
 
-import bdlm.utils as bdlm_utils
-
-from bdlm.language_model import BDLM  # TODO change to language ultimately
-import bdlm.bilstm2
-from bdlm.models.corpus import Dictionary
+# import bdlm.utils as bdlm_utils
+#
+# from bdlm.language_model import BDLM  # TODO change to language ultimately
+# import bdlm.bilstm2
+# from bdlm.models.corpus import Dictionary
 
 __all__ = ('Informativeness')
 
