@@ -74,7 +74,7 @@ def train_sg_pair(model, word, context_index, alpha,
         if learn_vectors:
             l1 += neu1e * lock_factor  # learn input -> hidden
                 # (mutates model.wv.syn0[word2.index], if that is l1)
-    return neu1e
+    return neu1e, alpha
 
 
 def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
@@ -105,10 +105,10 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                     if model.wv.index2word[word2.index] == \
                      model.vocabulary.nonce:
                         nonce_count += 1
-                        train_sg_pair(model,
-                                      model.wv.index2word[word.index],
-                                      word2.index, alpha, nonce_count,
-                                      compute_loss=compute_loss)
+                        neu1e, alpha = train_sg_pair(
+                            model, model.wv.index2word[word.index],
+                            word2.index, alpha, nonce_count,
+                            compute_loss=compute_loss)
 
         result += len(word_vocabs)
         if window - 1 >= 3:
