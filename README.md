@@ -158,6 +158,28 @@ in *sum_only* mode:
 | `wiki_all.sent.split.model` | L6 | 0.40022239961777484 |
 | `wikidump.w2v.model` | L6 | 0.2073600944244708 |
 
+with the nonce2vec bugfix:
+
+| pre-trained model | L | Average RHO |
+| --- | --- | --- |
+| `wiki_all.sent.split.model` | L2 |  |
+| `wikidump.w2v.model` | L2 |  |
+| `wiki_all.sent.split.model` | L4 |  |
+| `wikidump.w2v.model` | L4 |  |
+| `wiki_all.sent.split.model` | L6 |  |
+| `wikidump.w2v.model` | L6 |  |
+
+in *sum_only* mode:
+
+| pre-trained model | L | Average RHO |
+| --- | --- | --- |
+| `wiki_all.sent.split.model` | L2 |  |
+| `wikidump.w2v.model` | L2 |  |
+| `wiki_all.sent.split.model` | L4 |  |
+| `wikidump.w2v.model` | L4 |  |
+| `wiki_all.sent.split.model` | L6 |  |
+| `wikidump.w2v.model` | L6 |  |
+
 
 Average RHO values reported in the paper are (for n2v):
 - L2: 0.3320
@@ -170,15 +192,31 @@ Details:
 
 ## Filtering XP
 
-Testing misc. filters in sum_only mode
+1. Context entropy (s2w)
+2. Context word entropy (w2w)
+3. Context information overlap (s2s)
 
-| Filters | MRR |
-| --- | --- |
-| NONE | 0.01784929554742602 |
-| random | 0.0336934577224455 |
-| self 20 | 0.02985819235102424 |
-| self 22 | 0.048155663626896696 |
-| w2w |  |
+On the nonce dataset
+
+| model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| sum-only | 0.01785 | 0.03370 | 0.02986 | 0.04816 | 0.04135 | |
+| nonce2vec |  |  | | |  | |
+
+On the chimera dataset:
+
+| dataset | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| L2 | sum-only |  |  |  |  |  | |
+| L2 | nonce2vec |  |  | | |  | |
+| L4 | sum-only |  |  |  |  |  | |
+| L4 | nonce2vec |  |  | | |  | |
+| L6 | sum-only |  |  |  |  |  | |
+| L6 | nonce2vec |  |  | | |  | |
+
+
+Spearman correlation = -0.18694416650898932
+For s2w with rank on nonces
 
 ## Experiments:
 Probabilities:

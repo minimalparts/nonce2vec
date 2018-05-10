@@ -114,10 +114,6 @@ class Informativeness():
         # Don't forget to add 1 for start <eos>
         return
 
-    def sentence2sentence(self):
-        """Get sentence-to-sentence informativeness."""
-        pass
-
     def _get_bidir_sentence2word(self, tokens, word_index, seq_len=0):
         if not isinstance(word_index, int) or word_index < 0 \
          or word_index >= len(tokens):
@@ -187,12 +183,17 @@ class Informativeness():
         s2w = 1 - (shannon_entropy * alpha)
         return s2w
 
-    def _get_cbow_s2w_with_shannon_entropy(self, tokens, word_index):
+    def _get_cbow_probs(self, tokens, word_index):
         _tokens = copy.deepcopy(tokens)
         del _tokens[word_index]
         words_and_probs = self._model.predict_output_word(
             _tokens, topn=len(self._model.wv.vocab))
-        probs = [item[1] for item in words_and_probs]
+        #print(words_and_probs)
+        return [item[1] for item in words_and_probs]
+        #return {word: prob for (word, prob) in words_and_probs}
+
+    def _get_cbow_s2w_with_shannon_entropy(self, tokens, word_index):
+        probs = self._get_cbow_probs(tokens, word_index)
         shannon_entropy = scipy.stats.entropy(probs)
         s2w = 1 - (shannon_entropy / numpy.log(len(self._model.wv.vocab)))
         return s2w
@@ -277,3 +278,38 @@ class Informativeness():
         if self._mode == 'cbow':
             return self._get_cbow_word2word(tokens, source_word_index,
                                             target_word_index)
+
+    def sentence2sentence(self, tokens_1, word_index_1, tokens_2,
+                          word_index_2):
+        """Get sentence-to-sentence informativeness."""
+        probs_1 = self._get_cbow_probs(tokens_1, word_index_1)
+        probs_2 = self._get_cbow_probs(tokens_2, word_index_2)
+        dpm = 0
+        dqm = 0
+        for word, prob in probs_1.items():
+            p = prob
+            q = probs_2[word]
+            m = (p + q) / 2
+            dpm += p * numpy.log(p/m)
+            dqm += q * numpy.log(q/m)
+        jsd = (dpm + dqm) / 2
+        return jsd
+        # manhattan = 0
+        # for word, prob in probs_1.items():
+        #     manhattan += numpy.abs(prob - probs_2[word])
+        # return manhattan
+        # abs_diff = 0
+        # for word, prob in probs_1.items():
+        #     if prob - probs_2[word] > 0:
+        #         abs_diff += 1
+        # return abs_diff / len(probs_1)
+        # chi = 0
+        # for word, prob in probs_1.items():
+        #     #print('word: {} | prob_1 = {} | prob_2 = {}'.format(word, prob, probs_2[word]))
+        #     chi += (prob - probs_2[word])**2 / (prob + probs_2[word])
+        # return chi / 2
+        # p = numpy.asarray(probs_1)
+        # q = numpy.asarray(probs_2)
+        # m = (1./2)*(p+q)
+        # jsd = scipy.stats.entropy(p, m) / 2 + scipy.stats.entropy(q, m) / 2
+        # return 1 - jsd
