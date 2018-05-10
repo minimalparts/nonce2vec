@@ -72,14 +72,13 @@ class Samples(object):
     def _iterate_over_chimeras(self):
         with open(self._datafile, 'rt') as input_stream:
             for line in input_stream:
-                _fields = line.rstrip('\n').split('\t')
-                for fields in _fields:
-                    sentences = []
-                    for sent in fields[1].split('@@'):
-                        sentences.append(sent.strip().split(' '))
-                    probes = fields[2].split(',')
-                    responses = fields[3].split(',')
-                    yield sentences, probes, responses
+                fields = line.rstrip('\n').split('\t')
+                sentences = []
+                for sent in fields[1].split('@@'):
+                    sentences.append(sent.strip().split(' '))
+                probes = fields[2].split(',')
+                responses = fields[3].split(',')
+                yield sentences, probes, responses
 
     def __iter__(self):
         if self._source == 'wiki':
