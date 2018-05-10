@@ -15,8 +15,6 @@ from gensim.models.word2vec import Word2Vec, Word2VecVocab, Word2VecTrainables
 from gensim.utils import keep_vocab_item
 from gensim.models.keyedvectors import Vocab
 
-from nonce2vec.models.informativeness import Informativeness
-
 __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
@@ -89,9 +87,12 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
     window = model.window
     for sentence in sentences:
+        # word_vocabs = [model.wv.vocab[w] for w in sentence if w in
+        #                model.wv.vocab and model.wv.vocab[w].sample_int
+        #                > model.random.rand() * 2 ** 32 or w == '___']
         word_vocabs = [model.wv.vocab[w] for w in sentence if w in
-                       model.wv.vocab and model.wv.vocab[w].sample_int
-                       > model.random.rand() * 2 ** 32 or w == '___']
+                       model.wv.vocab]
+        word_vocabs = model.trainables.filter.filter_tokens(word_vocabs)
         # Count the number of times that we see the nonce
         nonce_count = 0
         for pos, word in enumerate(word_vocabs):
@@ -135,16 +136,6 @@ class Nonce2VecVocab(Word2VecVocab):
     def prepare_vocab(self, hs, negative, wv, update=False,
                       keep_raw_vocab=False, trim_rule=None,
                       min_count=None, sample=None, dry_run=False):
-        """Apply vocabulary settings for `min_count`.
-        (discarding less-frequent words)
-        and `sample` (controlling the downsampling of more-frequent words).
-        Calling with `dry_run=True` will only simulate the provided
-        settings and report the size of the retained vocabulary,
-        effective corpus length, and estimated memory requirements.
-        Results are both printed via logging and returned as a dict.
-        Delete the raw vocabulary after the scaling is done to free up RAM,
-        unless `keep_raw_vocab` is set.
-        """
         min_count = min_count or self.min_count
         sample = sample or self.sample
         drop_total = drop_unique = 0
@@ -267,6 +258,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
 
     def __init__(self, vector_size=100, seed=1, hashfxn=hash):
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
+        self.filter = None
 
     @classmethod
     def load(cls, w2v_trainables):
@@ -275,22 +267,16 @@ class Nonce2VecTrainables(Word2VecTrainables):
             setattr(n2v_trainables, key, value)
         return n2v_trainables
 
-    def prepare_weights(self, pre_exist_words, hs, negative, wv, filters,
-                        random_state, self_info_threshold,
-                        informativeness, update=False):
+    def prepare_weights(self, pre_exist_words, hs, negative, wv, update=False):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
             raise Exception('prepare_weight on Nonce2VecTrainables should '
                             'always be used with update=True')
         else:
-            self.update_weights(pre_exist_words, hs, negative, wv,
-                                filters, random_state, self_info_threshold,
-                                informativeness)
+            self.update_weights(pre_exist_words, hs, negative, wv)
 
-    def update_weights(self, pre_exist_words, hs, negative, wv, filters,
-                       random_state=None, self_info_threshold=0,
-                       informativeness=None):
+    def update_weights(self, pre_exist_words, hs, negative, wv):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -314,30 +300,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            if filters:
-                if 'random' in filters:
-                    pre_exist_words = [
-                        w for w in pre_exist_words if
-                        wv.vocab[w].sample_int > random_state.rand() * 2 ** 32
-                        or w == '___']
-                if 'self' in filters:
-                    if self_info_threshold == 0:
-                        raise Exception('You have selected self information filter '
-                                        'but have not specified a threshold value')
-                    for w in pre_exist_words:
-                        pre_exist_words = [
-                            w for w in pre_exist_words if
-                            numpy.log(wv.vocab[w].sample_int) > self_info_threshold
-                            or w == '___']
-                if 'w2w' in filters:
-                    if not informativeness:
-                        raise Exception('An informativeness instance is '
-                                        'required for the w2w filter')
-                    tokens = ['___']
-                    tokens.extend(pre_exist_words)
-                    pre_exist_words = [
-                        w for idx, w in enumerate(pre_exist_words)
-                        if informativeness.word2word(tokens, idx+1, 0) > 0]
+            pre_exist_words = self.filter.filter_tokens(pre_exist_words)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
@@ -411,34 +374,8 @@ class Nonce2Vec(Word2Vec):
             raise Exception('Nonce2Vec does not support cbow mode')
         return tally, self._raw_word_count(sentences)
 
-    def build_vocab(self, sentences, filters=[],
-                    self_info_threshold=0,
-                    informativeness=None,
-                    update=False, progress_per=10000, keep_raw_vocab=False,
-                    trim_rule=None, **kwargs):
-        """Build vocabulary from a sequence of sentences.
-
-        (can be a once-only generator stream).
-        Each sentence is a iterable of iterables (can simply be a list of
-        unicode strings too).
-        Parameters
-        ----------
-        sentences : iterable of iterables
-            The `sentences` iterable can be simply a list of lists of tokens,
-                but for larger corpora,
-            consider an iterable that streams the sentences directly from
-                disk/network.
-            See :class:`~gensim.models.word2vec.BrownCorpus`,
-                :class:`~gensim.models.word2vec.Text8Corpus`
-            or :class:`~gensim.models.word2vec.LineSentence`
-                in :mod:`~gensim.models.word2vec` module for such examples.
-        update : bool
-            If true, the new words in `sentences` will be added to model's
-                vocab.
-        progress_per : int
-            Indicates how many words to process before showing/updating the
-                progress.
-        """
+    def build_vocab(self, sentences, update=False, progress_per=10000,
+                    keep_raw_vocab=False, trim_rule=None, **kwargs):
         total_words, corpus_count = self.vocabulary.scan_vocab(
             sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.corpus_count = corpus_count
@@ -448,11 +385,8 @@ class Nonce2Vec(Word2Vec):
         report_values['memory'] = self.estimate_memory(
             vocab_size=report_values['num_retained_words'])
         self.trainables.prepare_weights(pre_exist_words, self.hs,
-                                        self.negative, self.wv, filters,
-                                        random_state=self.random,
-                                        self_info_threshold=self_info_threshold,
-                                        update=update,
-                                        informativeness=informativeness)
+                                        self.negative, self.wv,
+                                        update=update)
 
     def recompute_sample_ints(self):
         for w, o in self.wv.vocab.items():

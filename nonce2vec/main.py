@@ -26,6 +26,10 @@ from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
 from nonce2vec.utils.files import Samples
 from nonce2vec.models.informativeness import Informativeness
 
+from nonce2vec.models.context_filters import NoFilter, RandomFilter, \
+                                             SelfInformationFilter, \
+                                             ContextWordEntropyFilter
+
 
 logging.config.dictConfig(
     cutils.load(
@@ -55,10 +59,14 @@ def _update_rr_and_count(relative_ranks, count, nns, probe):
     return relative_ranks, count
 
 
-#@lru_cache(maxsize=1)
+def _load_filter(filter):
+    if not filter:
+        return {}
+
+
 def _load_nonce2vec_model(background, alpha, sample, neg, window, epochs,
-                          lambda_den, sample_decay, window_decay,
-                          num_threads):
+                          lambda_den, sample_decay, window_decay, num_threads,
+                          nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
@@ -78,15 +86,17 @@ def _load_nonce2vec_model(background, alpha, sample, neg, window, epochs,
         # precompute negative labels optimization for pure-python training
         model.neg_labels = np.zeros(model.negative + 1)
         model.neg_labels[0] = 1.
+    model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
 
-def _test_chimeras(args):
+def _test_on_chimeras(args):
     samples = Samples(args.dataset, source='chimeras')
     nonce = '___'
     rhos = []
     count = 0
+    filter = _load_filter(args)
     for sentences, probes, responses in samples:
         logger.info('-' * 30)
         logger.info('sentences = {}'.format(sentences))
@@ -97,10 +107,26 @@ def _test_chimeras(args):
                                       args.epochs,
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
-                                      args.num_threads)
+                                      args.num_threads, nonce)
+        if not args.filter:
+            logger.warning('Applying no filters to context selection: this should '
+                           'negatively, and significantly, impact results')
+            filter = NoFilter()
+        elif args.filter == 'random':
+            filter = RandomFilter(model)
+        elif args.filter == 'self':
+            filter = SelfInformationFilter(model, args.threshold)
+        elif args.filter == 'cwe':
+            info = Informativeness(mode=args.info_mode,
+                                   model_path=args.info_model,
+                                   entropy=args.entropy,
+                                   threshold=args.threshold)
+            filter = ContextWordEntropyFilter(info, threshold)
+        model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        model.vocabulary.nonce = nonce
+        if args.filter == 'cwe':
+            model.trainables.filter.compute_entropy(sentences, nonce)
         model.build_vocab(sentences, update=True)
         model.min_count = args.min_count
         if not args.sum_only:
@@ -111,7 +137,7 @@ def _test_chimeras(args):
         probe_count = 0
         for probe in probes:
             try:
-                cos = model.similarity('___', probe)
+                cos = model.similarity(nonce, probe)
                 system_responses.append(cos)
                 human_responses.append(responses[probe_count])
             except:
@@ -130,7 +156,7 @@ def _test_chimeras(args):
     logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
 
 
-def _test_nonces(args):
+def _test_on_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
     relative_ranks = 0.0
     count = 0
@@ -139,10 +165,6 @@ def _test_nonces(args):
     logger.info('Testing Nonce2Vec on the definitional dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
-    if args.with_info:
-        informativeness = Informativeness(
-            mode=args.info_mode, w2v_model_path=args.info_model_path,
-            entropy=args.entropy)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
@@ -152,23 +174,33 @@ def _test_nonces(args):
                                       args.epochs,
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
-                                      args.num_threads)
+                                      args.num_threads, nonce)
+        if not args.filter:
+            logger.warning('Applying no filters to context selection: this should '
+                           'negatively, and significantly, impact results')
+            filter = NoFilter()
+        elif args.filter == 'random':
+            filter = RandomFilter(model)
+        elif args.filter == 'self':
+            filter = SelfInformationFilter(model, args.threshold)
+        elif args.filter == 'cwe':
+            info = Informativeness(mode=args.info_mode,
+                                   model_path=args.info_model,
+                                   entropy=args.entropy,
+                                   threshold=args.threshold)
+            filter = ContextWordEntropyFilter(info, threshold)
+        model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
+        if args.filter == 'cwe':
+            model.trainables.filter.compute_entropy(sentences, nonce)
         logger.info('nonce: {}'.format(nonce))
         logger.info('sentences: {}'.format(sentences))
         if nonce not in model.wv.vocab:
             logger.error('Nonce \'{}\' not in gensim.word2vec.model '
                          'vocabulary'.format(nonce))
             continue
-        model.vocabulary.nonce = nonce
-        if args.with_info:
-            model.build_vocab(sentences, filters=args.filters,
-                              self_info_threshold=args.self_thresh, update=True,
-                              informativeness=informativeness)
-        else:
-            model.build_vocab(sentences, filters=args.filters,
-                              self_info_threshold=args.self_thresh, update=True)
+        model.build_vocab(sentences, update=True)
         model.min_count = args.min_count
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
@@ -279,9 +311,7 @@ def _get_nonces_s2w_rank_distrib(samples, args):
                          'vocabulary'.format(nonce))
             continue
         model.vocabulary.nonce = nonce
-        model.build_vocab(sentences, filters=args.filters,
-                          self_info_threshold=args.self_thresh, update=True,
-                          informativeness=informativeness)
+        model.build_vocab(sentences, update=True)
         model.min_count = args.min_count
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
@@ -311,14 +341,14 @@ def _test_s2w_correlation(args):
 
 
 def _test(args):
-    # if args.mode == 'nonces':
-    #     _test_nonces(args)
-    # if args.mode == 'chimeras':
-    #     _test_chimeras(args)
-    if args.what == 'perf':
-        pass
-    if args.what == 's2w':
-        _test_s2w_correlation(args)
+    if args.on == 'chimeras':
+        _test_on_chimeras(args)
+    elif args.on == 'nonces':
+        _test_on_nonces(args)
+
+
+def _check(args):
+    pass
 
 
 def main():
@@ -350,17 +380,14 @@ def main():
                                   'bidirectional language model')
     parser_info.add_argument('--info_model', type=str, dest='info_model_path',
                              help='Informativeness model path')
-    parser_info.add_argument('--info_entropy', choices=['shannon', 'weighted'],
-                             dest='entropy',
+    parser_info.add_argument('--entropy', choices=['shannon', 'weighted'],
                              help='which entropy to use')
-    parser_info.add_argument('--filters', default=[],
-                             choices=['random', 'self', 'w2w'],
-                             help='filters to be used for filtering context '
+    parser_info.add_argument('--filter', default=None,
+                             choices=['random', 'self', 'cwe'],
+                             help='filter to be used for filtering context '
                                   'items')
-    parser_info.add_argument('--self_info', type=int,
-                             dest='self_thresh',
-                             help='self information threshold for filtering '
-                                  'context items')
+    parser_info.add_argument('--threshold', type=int,
+                             help='threshold for filtering context items')
 
     # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(

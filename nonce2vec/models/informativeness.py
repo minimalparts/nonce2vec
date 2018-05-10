@@ -39,8 +39,7 @@ def entropy(x):
 class Informativeness():
     """Informativeness class relying on a bi-directional language model."""
 
-    def __init__(self, mode, w2v_model_path=None,
-                 torch_model_path=None, vocab_path=None,
+    def __init__(self, mode, model_path, vocab_path=None,
                  cuda=False, entropy=None):
         """Initialize the Informativeness instance.
 
@@ -60,10 +59,10 @@ class Informativeness():
         assert entropy == 'shannon' or 'weighted'
         self._mode = mode
         if self._mode == 'cbow':
-            if not w2v_model_path:
+            if not model_path:
                 raise Exception('Unspecified w2v model path for informativeness '
                                 'in CBOW mode')
-            self._model = Word2Vec.load(w2v_model_path)
+            self._model = Word2Vec.load(model_path)
         self._entropy = entropy
         # self._model = BDLM.load(torch_model_path)
         # self._vocab = Dictionary.load(vocab_path)
@@ -269,9 +268,13 @@ class Informativeness():
         #return (swi_without_source - swi_with_source) / swi_with_source
         return swi_with_source - swi_without_source
 
-    def word2word(self, tokens, source_word_index, target_word_index,
-                  seq_len=0):
-        """Get word-to-word informativeness."""
+    def get_context_word_entropy(self, tokens, source_word_index,
+                                 target_word_index, seq_len=0):
+        """Get context word entropy.
+
+        Characterizes how informative a source word is towards a target word
+        in a given sequence of tokens.
+        """
         if self._mode == 'bidir':
             return self._get_bidir_word2word(tokens, source_word_index,
                                              target_word_index, seq_len)
