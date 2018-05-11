@@ -22,10 +22,9 @@ class RandomFilter():
     def __init__(self, model):
         self._model = model  # a w2v model
 
-    def filter_tokens(self, tokens):
+    def filter_tokens(self, tokens, nonce):
         return [w for w in tokens if self._model.wv.vocab[w].sample_int >
-                self._model.random.rand() * 2 ** 32
-                or w == self._model.vocabulary.nonce]
+                self._model.random.rand() * 2 ** 32 or w == nonce]
 
 class SelfInformationFilter():
     """A filter based on self information computed from subsampling metrics."""
@@ -45,8 +44,9 @@ class ContextWordEntropyFilter():
         self._info = informativeness
         self._threshold = threshold
 
-    def filter_tokens(self, tokens):
-        return [w for w in tokens if self._entropy[w] > self._threshold]
+    def filter_tokens(self, tokens, nonce):
+        return [w for w in tokens if w != nonce and
+                self._entropy[w] > self._threshold or w == nonce]
 
     def compute_entropy(self, sentences, nonce):
         """Set context word entropy values for a list of sentences."""

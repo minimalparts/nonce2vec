@@ -91,7 +91,8 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         #                model.wv.vocab and model.wv.vocab[w].sample_int
         #                > model.random.rand() * 2 ** 32 or w == '___']
         in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
-        filtered_tokens = model.trainables.filter.filter_tokens(in_vocab_tokens)
+        filtered_tokens = model.trainables.filter.filter_tokens(
+            in_vocab_tokens, model.vocabulary.nonce)
         word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
         # Count the number of times that we see the nonce
         nonce_count = 0
@@ -267,16 +268,17 @@ class Nonce2VecTrainables(Word2VecTrainables):
             setattr(n2v_trainables, key, value)
         return n2v_trainables
 
-    def prepare_weights(self, pre_exist_words, hs, negative, wv, update=False):
+    def prepare_weights(self, pre_exist_words, hs, negative, wv, nonce,
+                        update=False):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
             raise Exception('prepare_weight on Nonce2VecTrainables should '
                             'always be used with update=True')
         else:
-            self.update_weights(pre_exist_words, hs, negative, wv)
+            self.update_weights(pre_exist_words, hs, negative, wv, nonce)
 
-    def update_weights(self, pre_exist_words, hs, negative, wv):
+    def update_weights(self, pre_exist_words, hs, negative, wv, nonce):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -300,7 +302,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            pre_exist_words = self.filter.filter_tokens(pre_exist_words)
+            pre_exist_words = self.filter.filter_tokens(pre_exist_words, nonce)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
@@ -386,6 +388,7 @@ class Nonce2Vec(Word2Vec):
             vocab_size=report_values['num_retained_words'])
         self.trainables.prepare_weights(pre_exist_words, self.hs,
                                         self.negative, self.wv,
+                                        self.vocabulary.nonce,
                                         update=update)
 
     def recompute_sample_ints(self):
