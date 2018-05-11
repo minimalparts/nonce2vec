@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class NoFilter():
     """No filter."""
 
-    def filter_tokens(self, tokens):
+    def filter_tokens(self, tokens, nonce):
         return tokens
 
 

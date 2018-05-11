@@ -119,8 +119,7 @@ def _test_on_chimeras(args):
         elif args.filter == 'cwe':
             info = Informativeness(mode=args.info_mode,
                                    model_path=args.info_model,
-                                   entropy=args.entropy,
-                                   threshold=args.threshold)
+                                   entropy=args.entropy)
             filter = ContextWordEntropyFilter(info, threshold)
         model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)

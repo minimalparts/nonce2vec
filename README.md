@@ -205,8 +205,9 @@ On the nonce dataset
 | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04135 | |
-| nonce2vec |  |  | | |  | |
+| nonce2vec | 0.03044 |  | 0.04139 | 0.05860 |  | |
 
+0.4093
 On the chimera dataset:
 
 | dataset | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
