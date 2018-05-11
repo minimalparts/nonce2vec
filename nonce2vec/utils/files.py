@@ -75,7 +75,9 @@ class Samples(object):
                 fields = line.rstrip('\n').split('\t')
                 sentences = []
                 for sent in fields[1].split('@@'):
-                    sentences.append(sent.strip().split(' '))
+                    tokens = sent.strip().split(' ')
+                    if '___' in tokens:
+                        sentences.append(tokens)
                 probes = fields[2].split(',')
                 responses = fields[3].split(',')
                 yield sentences, probes, responses
