@@ -32,10 +32,10 @@ class SelfInformationFilter():
         self._model = model  # a w2v model
         self._threshold = threshold
 
-    def filter_tokens(self, tokens):
+    def filter_tokens(self, tokens, nonce):
         return [w for w in tokens if
                 np.log(self._model.wv.vocab[w].sample_int)
-                > self._threshold or w == self._model.vocabulary.nonce]
+                > self._threshold or w == nonce]
 
 class ContextWordEntropyFilter():
     """A filter based on context word entropy."""
