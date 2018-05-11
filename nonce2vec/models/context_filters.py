@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class NoFilter():
     """No filter."""
-    
+
     def filter_tokens(self, tokens):
         return tokens
 
@@ -56,7 +56,7 @@ class ContextWordEntropyFilter():
         # all test sets but still, it's dirty. Final version should support
         # duplicate tokens and get informativeness based on their position
         for tokens in sentences:
-            for token, idx in enumerate(tokens):
+            for idx, token in enumerate(tokens):
                 if token != nonce:
                     self._entropy[token] = self._info.get_context_word_entropy(
                         tokens, idx, tokens.index(nonce))

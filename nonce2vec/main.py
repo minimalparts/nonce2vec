@@ -186,9 +186,8 @@ def _test_on_nonces(args):
         elif args.filter == 'cwe':
             info = Informativeness(mode=args.info_mode,
                                    model_path=args.info_model,
-                                   entropy=args.entropy,
-                                   threshold=args.threshold)
-            filter = ContextWordEntropyFilter(info, threshold)
+                                   entropy=args.entropy)
+            filter = ContextWordEntropyFilter(info, args.threshold)
         model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
@@ -378,7 +377,7 @@ def main():
                              help='how to compute probability distributions: '
                                   'either with word2vec CBOW or with a '
                                   'bidirectional language model')
-    parser_info.add_argument('--info_model', type=str, dest='info_model_path',
+    parser_info.add_argument('--info_model', type=str,
                              help='Informativeness model path')
     parser_info.add_argument('--entropy', choices=['shannon', 'weighted'],
                              help='which entropy to use')
