@@ -90,9 +90,9 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         # word_vocabs = [model.wv.vocab[w] for w in sentence if w in
         #                model.wv.vocab and model.wv.vocab[w].sample_int
         #                > model.random.rand() * 2 ** 32 or w == '___']
-        word_vocabs = [model.wv.vocab[w] for w in sentence if w in
-                       model.wv.vocab]
-        word_vocabs = model.trainables.filter.filter_tokens(word_vocabs)
+        in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
+        filtered_tokens = model.trainables.filter.filter_tokens(in_vocab_tokens)
+        word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
         # Count the number of times that we see the nonce
         nonce_count = 0
         for pos, word in enumerate(word_vocabs):

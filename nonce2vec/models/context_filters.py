@@ -23,8 +23,7 @@ class RandomFilter():
         self._model = model  # a w2v model
 
     def filter_tokens(self, tokens):
-        return [w for w in tokens if
-                self._model.wv.vocab[w].sample_int >
+        return [w for w in tokens if self._model.wv.vocab[w].sample_int >
                 self._model.random.rand() * 2 ** 32
                 or w == self._model.vocabulary.nonce]
 
@@ -35,7 +34,8 @@ class SelfInformationFilter():
         self._threshold = threshold
 
     def filter_tokens(self, tokens):
-        return [w for w in tokens if np.log(self._model.wv.vocab[w].sample_int)
+        return [w for w in tokens if
+                np.log(self._model.wv.vocab[w].sample_int)
                 > self._threshold or w == self._model.vocabulary.nonce]
 
 class ContextWordEntropyFilter():
@@ -50,6 +50,7 @@ class ContextWordEntropyFilter():
 
     def compute_entropy(self, sentences, nonce):
         """Set context word entropy values for a list of sentences."""
+        logger.info('Computing context word entropy for all context words...')
         self._entropy = {}
         # FIXME: this will work with CBOW in general and BIDIR as long as
         # context contains one instance of each word. Overall it's the case in
@@ -60,3 +61,4 @@ class ContextWordEntropyFilter():
                 if token != nonce:
                     self._entropy[token] = self._info.get_context_word_entropy(
                         tokens, idx, tokens.index(nonce))
+                    print('token = {} | cwe = {}'.format(token, self._entropy[token]))

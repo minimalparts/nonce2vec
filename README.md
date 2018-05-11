@@ -194,7 +194,7 @@ Details:
 
 Twi big problems with nonce2vec:
 1. random filter will return different context words at the build_vocab and training steps
-2. nonce2vec relies on a re-initialization of the model each turn. Keeping learned vectors in memory will dramatically deteriorate perfs. 
+2. nonce2vec relies on a re-initialization of the model each turn. Keeping learned vectors in memory will dramatically deteriorate perfs.
 
 1. Context entropy (s2w)
 2. Context word entropy (w2w)
@@ -204,8 +204,7 @@ On the nonce dataset
 
 | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sum-only | 0.01785 | 0.03370 | 0.02986 | 0.04816 | 0.04135 | |
-| sum-only |  |  |  |  |  | |
+| sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04135 | |
 | nonce2vec |  |  | | |  | |
 
 On the chimera dataset:
