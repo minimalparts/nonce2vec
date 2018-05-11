@@ -120,7 +120,7 @@ def _test_on_chimeras(args):
             info = Informativeness(mode=args.info_mode,
                                    model_path=args.info_model,
                                    entropy=args.entropy)
-            filter = ContextWordEntropyFilter(info, threshold)
+            filter = ContextWordEntropyFilter(info, args.threshold)
         model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
