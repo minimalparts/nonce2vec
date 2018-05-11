@@ -225,6 +225,7 @@ Experiments when removing window decay and adjusting window size to all context 
 
 Experiments when not resetting the model at each iteration: keep learned vectors in memory
 
+Experiments on chimeras when sorting sentences by context entropy
 
 Spearman correlation = -0.18694416650898932
 For s2w with rank on nonces
