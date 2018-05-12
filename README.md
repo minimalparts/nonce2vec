@@ -204,28 +204,51 @@ On the nonce dataset
 
 | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04135 | |
-| nonce2vec | 0.03044 | 0.0536 | 0.04139 | 0.05860 | 0.04808 |  |
+| sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04093 |  |
+| nonce2vec | 0.03044 | 0.0539 | 0.04139 | 0.05860 | 0.04808 |  |
 
 0.4093
 On the chimera dataset:
 
 | dataset | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| L2 | sum-only | 0.3079 | 0.3439 | 0.3329 | 0.3358 |  | |
-| L2 | nonce2vec | 0.2768 | 0.3322 | | |  | |
-| L4 | sum-only | 0.3624 | 0.3582 | 0.3679 | 0.3679 |  | |
-| L4 | nonce2vec | 0.3134 | 0.3515 | | |  | |
-| L6 | sum-only | 0.3812 | 0.3950 | 0.3789 | 0.4121 |  | |
-| L6 | nonce2vec | 0.3784 | 0.4052 | | |  | |
-
-Experiments with a CBOW model trained on a larger window
+| L2 | sum-only | 0.3079 | 0.3439 | 0.3329 | 0.3358 | 0.3235 | |
+| L2 | nonce2vec | 0.2768 | 0.3322 | 0.2935 | 0.3421 | 0.3379 | |
+| L4 | sum-only | 0.3624 | 0.3582 | 0.3679 | 0.3679 | 0.3491 | |
+| L4 | nonce2vec | 0.3134 | 0.3515 | 0.3221 | 0.3466 | 0.3258 | |
+| L6 | sum-only | 0.3812 | 0.3950 | 0.3789 | 0.4121 | 0.3907 | |
+| L6 | nonce2vec | 0.3784 | 0.4052 | 0.3786 | 0.4124 | 0.3907 | |
 
 Experiments when removing window decay and adjusting window size to all context for n2v
+
+| model | random | self 22 | w2w > 0 (CBOW) |
+| --- | --- | --- | --- |
+| nonce2vec | 0.05262 | 0.05832 | 0.04807 |
+No significant difference on nonces dataset
+
+| dataset | model | random | self 22 | w2w > 0 (CBOW) |
+| --- | --- | --- | --- | --- |
+| L2 | nonce2vec | 0.3433 | 0.3421 | 0.3379 |
+| L4 | nonce2vec | 0.3417 | 0.3466 | 0.3207 |
+| L6 | nonce2vec | 0.4046 | 0.4124 | 0.3742 |
+No significant difference either
+
+Check average value and standard deviation of s2w and w2w with CBOW
+
+Note that sample_decay does not work when not using random filter. This seems to
+have a significant positive impact. Maybe implement a form of sample_decay
+
+Experiments with a CBOW model trained on a larger window
 
 Experiments when not resetting the model at each iteration: keep learned vectors in memory
 
 Experiments on chimeras when sorting sentences by context entropy
+
+| dataset | model | order | score |
+| --- | --- | --- | --- |
+| L2 | random | as-is | 0.3322 |  |  |  | |
+| L4 | random | 0.3134 | 0.3515 | 0.3221 | 0.3466 | 0.3258 | |
+| L6 | random | 0.3784 | 0.4052 | 0.3786 | 0.4124 | 0.3907 | |
 
 Spearman correlation = -0.18694416650898932
 For s2w with rank on nonces
