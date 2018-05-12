@@ -85,7 +85,7 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     instead.
     """
     result = 0
-    #window = model.window
+    window = model.window
     for sentence in sentences:
         # word_vocabs = [model.wv.vocab[w] for w in sentence if w in
         #                model.wv.vocab and model.wv.vocab[w].sample_int
@@ -94,7 +94,7 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         filtered_tokens = model.trainables.filter.filter_tokens(
             in_vocab_tokens, model.vocabulary.nonce)
         word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
-        window = len(word_vocabs)
+        #window = len(word_vocabs)
         # Count the number of times that we see the nonce
         nonce_count = 0
         for pos, word in enumerate(word_vocabs):
@@ -114,8 +114,8 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                             compute_loss=compute_loss)
 
         result += len(word_vocabs)
-        # if window - 1 >= 3:
-        #     window = window - model.window_decay
+        if window - 1 >= 3:
+            window = window - model.window_decay
         model.recompute_sample_ints()
     return result
 
