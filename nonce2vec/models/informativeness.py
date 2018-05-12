@@ -113,7 +113,7 @@ class Informativeness():
         # Don't forget to add 1 for start <eos>
         return
 
-    def _get_bidir_sentence2word(self, tokens, word_index, seq_len=0):
+    def _get_bidir_ctx_entropy(self, tokens, word_index, seq_len=0):
         if not isinstance(word_index, int) or word_index < 0 \
          or word_index >= len(tokens):
             raise Exception('Invalid input word_index = {}. Should be a '
@@ -161,7 +161,7 @@ class Informativeness():
                 continue
         return  # TODO: raise Exception
 
-    def _get_cbow_s2w_with_weighted_entropy(self, tokens, word_index):
+    def _get_cbow_ctx_weighted_entropy(self, tokens, word_index):
         _tokens = copy.deepcopy(tokens)
         del _tokens[word_index]
         words_and_probs = self._model.predict_output_word(
@@ -191,29 +191,35 @@ class Informativeness():
         return [item[1] for item in words_and_probs]
         #return {word: prob for (word, prob) in words_and_probs}
 
-    def _get_cbow_s2w_with_shannon_entropy(self, tokens, word_index):
+    def _get_cbow_ctx_shannon_entropy(self, tokens, word_index):
         probs = self._get_cbow_probs(tokens, word_index)
         shannon_entropy = scipy.stats.entropy(probs)
         s2w = 1 - (shannon_entropy / numpy.log(len(self._model.wv.vocab)))
         return s2w
 
-    def _get_cbow_sentence2word(self, tokens, word_index):
+    def _get_cbow_ctx_entropy(self, tokens, word_index):
         if self._entropy == 'shannon':
-            return self._get_cbow_s2w_with_shannon_entropy(tokens, word_index)
+            return self._get_cbow_ctx_shannon_entropy(tokens, word_index)
         if self._entropy == 'weighted':
-            return self._get_cbow_s2w_with_weighted_entropy(tokens, word_index)
+            return self._get_cbow_ctx_weighted_entropy(tokens, word_index)
+        raise Exception('Could not return context entropy as '
+                        '--entropy parameter was not specified')
 
 
-    def sentence2word(self, tokens, word_index, seq_len=0):
-        """Get sentence-to-word informativeness."""
+    def get_context_entropy(self, tokens, word_index, seq_len=0):
+        """Get context entropy.
+
+        Quantifies how informative a given sequence of tokens is regarding
+        a specific word it contains.
+        """
         if self._mode == 'bidir':
-            return self._get_bidir_sentence2word(tokens, word_index, seq_len)
+            return self._get_bidir_ctx_entropy(tokens, word_index, seq_len)
         if self._mode == 'cbow':
-            return self._get_cbow_sentence2word(tokens, word_index)
+            return self._get_cbow_ctx_entropy(tokens, word_index)
 
 
-    def _get_bidir_word2word(self, tokens, source_word_index,
-                             target_word_index, seq_len=0):
+    def _get_bidir_ctx_word_entropy(self, tokens, source_word_index,
+                                    target_word_index, seq_len=0):
         # Use torch.where with condition
         # Better: use masked_select with ge(s2w) condition
         _tokens = copy.deepcopy(tokens)
@@ -257,13 +263,13 @@ class Informativeness():
                                                          evaluation=True)
                     predictions, hidden = self._model(data, hidden)
 
-    def _get_cbow_word2word(self, tokens, source_word_index, target_word_index):
-        swi_with_source = self._get_cbow_sentence2word(tokens, target_word_index)
+    def _get_cbow_ctx_word_entropy(self, tokens, source_word_index, target_word_index):
+        swi_with_source = self._get_cbow_ctx_entropy(tokens, target_word_index)
         _tokens = copy.deepcopy(tokens)
         del _tokens[source_word_index]
         if target_word_index > source_word_index:
             target_word_index -= 1
-        swi_without_source = self._get_cbow_sentence2word(_tokens, target_word_index)
+        swi_without_source = self._get_cbow_ctx_entropy(_tokens, target_word_index)
         #return numpy.abs(swi_without_source - swi_with_source) / swi_with_source
         #return (swi_without_source - swi_with_source) / swi_with_source
         return swi_with_source - swi_without_source
@@ -276,11 +282,11 @@ class Informativeness():
         in a given sequence of tokens.
         """
         if self._mode == 'bidir':
-            return self._get_bidir_word2word(tokens, source_word_index,
-                                             target_word_index, seq_len)
+            return self._get_bidir_ctx_word_entropy(tokens, source_word_index,
+                                                    target_word_index, seq_len)
         if self._mode == 'cbow':
-            return self._get_cbow_word2word(tokens, source_word_index,
-                                            target_word_index)
+            return self._get_cbow_ctx_word_entropy(tokens, source_word_index,
+                                                   target_word_index)
 
     def sentence2sentence(self, tokens_1, word_index_1, tokens_2,
                           word_index_2):

@@ -108,6 +108,21 @@ def _test_on_chimeras(args):
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
                                       args.num_threads, nonce)
+        if args.sort != 'asis' or args.filter == 'cwe':
+            info = Informativeness(mode=args.info_mode,
+                                   model_path=args.info_model,
+                                   entropy=args.entropy)
+            if args.sort == 'desc':
+                sentences = sorted(
+                    sentences,
+                    key=lambda tokens: info.get_context_entropy(
+                        tokens, tokens.index(nonce)),
+                    reverse=True)
+            elif args.sort == 'asc':
+                sentences = sorted(
+                    sentences,
+                    key=lambda tokens: info.get_context_entropy(
+                        tokens, tokens.index(nonce)))
         if not args.filter:
             logger.warning('Applying no filters to context selection: this should '
                            'negatively, and significantly, impact results')
@@ -117,9 +132,6 @@ def _test_on_chimeras(args):
         elif args.filter == 'self':
             filter = SelfInformationFilter(model, args.threshold)
         elif args.filter == 'cwe':
-            info = Informativeness(mode=args.info_mode,
-                                   model_path=args.info_model,
-                                   entropy=args.entropy)
             filter = ContextWordEntropyFilter(info, args.threshold)
         model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
@@ -386,6 +398,10 @@ def main():
                                   'items')
     parser_info.add_argument('--threshold', type=int,
                              help='threshold for filtering context items')
+    parser_info.add_argument('--sort', choices=['asis', 'asc', 'desc'],
+                             default='asis',
+                             help='how to sort test instances by context '
+                                  'entropy')
 
     # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(
