@@ -169,6 +169,8 @@ def _test_on_chimeras(args):
 
 def _test_on_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
+    ranks = []
+    ctx_ents = []
     relative_ranks = 0.0
     count = 0
     samples = Samples(args.dataset, source='nonces')
@@ -186,6 +188,10 @@ def _test_on_nonces(args):
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
                                       args.num_threads, nonce)
+        if args.what == 'correlations' or args.filter == 'cwe':
+            info = Informativeness(mode=args.info_mode,
+                                   model_path=args.info_model,
+                                   entropy=args.entropy)
         if not args.filter:
             logger.warning('Applying no filters to context selection: this should '
                            'negatively, and significantly, impact results')
@@ -195,9 +201,6 @@ def _test_on_nonces(args):
         elif args.filter == 'self':
             filter = SelfInformationFilter(model, args.threshold)
         elif args.filter == 'cwe':
-            info = Informativeness(mode=args.info_mode,
-                                   model_path=args.info_model,
-                                   entropy=args.entropy)
             filter = ContextWordEntropyFilter(info, args.threshold)
         model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
@@ -216,11 +219,21 @@ def _test_on_nonces(args):
             model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
         nns = model.most_similar(nonce, topn=vocab_size)
+        if args.what == 'correlations':
+            rank = _get_rank(probe, nns)
+            ranks.append(rank)
+            ctx_ent = info.get_context_entropy(sentences[0], sentences[0].index(nonce))
+            ctx_ents.append(ctx_ent)
+            num_sent += 1
+            logger.info(
+                'nonce: {} | ctx_ent = {} | rank = {} '
+                .format(nonce, round(ctx_ent, 4), rank))
         logger.info('10 most similar words: {}'.format(nns[:10]))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      nns, probe)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
+    return ctx_ents, ranks
 
 
 def _get_men_pairs_and_sim(men_dataset):
@@ -296,26 +309,22 @@ def _get_rank(probe, nns):
     return rank
 
 
-def _get_nonces_s2w_rank_distrib(samples, args):
+def _get_nonces_ctx_entropy_rank_distrib(samples, args):
     ranks = []
-    s2ws = []
-    informativeness = Informativeness(
-        mode=args.info_mode, w2v_model_path=args.info_model_path,
-        entropy=args.entropy)
+    ctx_ents = []
+    info = Informativeness(mode=args.info_mode,
+                           model_path=args.info_model,
+                           entropy=args.entropy)
     total_num_sent = sum(1 for line in samples)
     num_sent = 1
     for sentences, nonce, probe in samples:
-        logger.info('-' * 30)
-        logger.info('Processing sentence {}/{}'.format(num_sent,
-                                                       total_num_sent))
         model = _load_nonce2vec_model(args.background, args.alpha,
                                       args.sample, args.neg, args.window,
                                       args.epochs,
                                       args.lambda_den,
                                       args.sample_decay, args.window_decay,
-                                      args.num_threads)
+                                      args.num_threads, nonce)
         vocab_size = len(model.wv.vocab)
-        logger.debug('sentences: {}'.format(sentences))
         if nonce not in model.wv.vocab:
             logger.error('Nonce \'{}\' not in gensim.word2vec.model '
                          'vocabulary'.format(nonce))
@@ -329,36 +338,47 @@ def _get_nonces_s2w_rank_distrib(samples, args):
         nns = model.most_similar(nonce, topn=vocab_size)
         rank = _get_rank(probe, nns)
         ranks.append(rank)
-        s2w = informativeness.sentence2word(sentences[0], sentences[0].index(nonce))
-        s2ws.append(s2w)
+        ctx_ent = info.get_context_entropy(sentences[0], sentences[0].index(nonce))
+        ctx_ents.append(ctx_ent)
         num_sent += 1
-        logger.info('nonce: {} | s2w = {} | rank = {}'.format(nonce, round(s2w, 4), rank))
-    return (s2ws, ranks)
-
-
-def _test_s2w_correlation(args):
-    if args.on == 'nonces':
-        # Gather MRR and S2W distributions
-        samples = Samples(args.dataset, source='nonces')
-        distrib = _get_nonces_s2w_rank_distrib(
-            samples, args)
-    if args.on == 'chimeras':
-        # Gather RHO and S2W distributions
-        samples = Samples(args.dataset, source='chimeras')
-        distrib = _get_chimeras_s2w_rho_distrib(samples)
-    corr = _spearman(distrib[0], distrib[1])
-    logger.info('Spearman correlation = {}'.format(corr))
+        logger.info(
+            'nonce: {} | ctx_ent = {} | rank = {} | counter = {}/{}'
+            .format(nonce, round(ctx_ent, 4), rank, num_sent, total_num_sent))
+        if num_sent == 10:
+            break
+    return ctx_ents, ranks
 
 
 def _test(args):
-    if args.on == 'chimeras':
-        _test_on_chimeras(args)
-    elif args.on == 'nonces':
-        _test_on_nonces(args)
+    if args.what == 'performances':
+        if args.on == 'chimeras':
+            _test_on_chimeras(args)
+        elif args.on == 'nonces':
+            _test_on_nonces(args)
+    if args.what == 'correlations':
+        _check_ctx_entropy_dist(args)
+
+
+
+def _check_ctx_entropy_dist(args):
+    if args.on == 'nonces':
+        ctx_ents, ranks = _test_on_nonces(args)
+        logger.info('ranks stats:')
+        logger.info('ranks mean = {}'.format(np.mean(ranks)))
+        logger.info('ranks std = {}'.format(np.std(ranks)))
+        logger.info('ranks min = {}'.format(min(ranks)))
+        logger.info('ranks max = {}'.format(max(ranks)))
+        logger.info('context entropy stats:')
+        logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
+        logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
+        logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
+        logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
+        logger.info('Absolute correlation = {}'.format(_spearman(ctx_ents, ranks)))
 
 
 def _check(args):
-    pass
+    if args.what == 'ctx_entropy_dist':
+        _check_ctx_entropy_dist(args)
 
 
 def main():
@@ -422,10 +442,12 @@ def main():
         'check', formatter_class=argparse.RawTextHelpFormatter,
         parents=[parser_info],
         help='check w2v embeddings quality by calculating correlation with '
-             'the similarity ratings in the MEN dataset')
+             'the similarity ratings in the MEN dataset. Also, check the '
+             'distribution of context_entropy across datasets')
     parser_check.set_defaults(func=_check)
-    parser_check.add_argument('--what', required=True, choices=['men', 's2w'],
-                              help='what is to be checked')
+    parser_check.add_argument('--on', required=True,
+                              choices=['men', 'nonces', 'chimeras'],
+                              help='type of data on which to check')
     parser_check.add_argument('--data', required=True, dest='dataset',
                               help='absolute path to dataset')
     parser_check.add_argument('--model', required=True, dest='w2v_model',
@@ -437,6 +459,9 @@ def main():
         parents=[parser_gensim, parser_info],
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
+    parser_test.add_argument('--what', required=True,
+                             choices=['performances', 'correlations'],
+                             help='what is to be tested')
     parser_test.add_argument('--on', required=True,
                              choices=['nonces', 'chimeras'],
                              help='type of test data to be used')

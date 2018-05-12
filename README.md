@@ -236,7 +236,8 @@ No significant difference either
 Check average value and standard deviation of s2w and w2w with CBOW
 
 Note that sample_decay does not work when not using random filter. This seems to
-have a significant positive impact. Maybe implement a form of sample_decay
+have a significant positive impact. Maybe implement a form of sample_decay.
+Try all filters with a sample_decay
 
 Experiments with a CBOW model trained on a larger window
 
@@ -253,8 +254,8 @@ Experiments on chimeras when sorting sentences by context entropy
 | L4 | random | asc   |  |
 | L4 | random | desc  |  |
 | L6 | random | as-is | 0.4052 |
-| L6 | random | asc   |  |
-| L6 | random | desc  |  |  
+| L6 | random | asc   | 0.3902 |
+| L6 | random | desc  | 0.3817 |
 
 Spearman correlation = -0.18694416650898932
 For s2w with rank on nonces
