@@ -202,16 +202,16 @@ Twi big problems with nonce2vec:
 
 On the nonce dataset
 
-| model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR) |
+| --- | --- | --- | --- | --- | --- | --- |
 | sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04093 |  |
 | nonce2vec | 0.03044 | 0.0539 | 0.04139 | 0.05860 | 0.04808 |  |
 
 0.4093
 On the chimera dataset:
 
-| dataset | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR)
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| dataset | model | no filter | random | self 20 | self 22 | w2w > 0 (CBOW) | w2w (BIDIR) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | L2 | sum-only | 0.3079 | 0.3439 | 0.3329 | 0.3358 | 0.3235 | |
 | L2 | nonce2vec | 0.2768 | 0.3322 | 0.2935 | 0.3421 | 0.3379 | |
 | L4 | sum-only | 0.3624 | 0.3582 | 0.3679 | 0.3679 | 0.3491 | |
@@ -224,6 +224,7 @@ Experiments when removing window decay and adjusting window size to all context 
 | model | random | self 22 | w2w > 0 (CBOW) |
 | --- | --- | --- | --- |
 | nonce2vec | 0.05262 | 0.05832 | 0.04807 |
+
 No significant difference on nonces dataset
 
 | dataset | model | random | self 22 | w2w > 0 (CBOW) |
@@ -231,6 +232,7 @@ No significant difference on nonces dataset
 | L2 | nonce2vec | 0.3433 | 0.3421 | 0.3379 |
 | L4 | nonce2vec | 0.3417 | 0.3466 | 0.3207 |
 | L6 | nonce2vec | 0.4046 | 0.4124 | 0.3742 |
+
 No significant difference either
 
 Check average value and standard deviation of s2w and w2w with CBOW
