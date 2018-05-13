@@ -285,7 +285,9 @@ def _test_men(args):
 
 def _train(args):
     sentences = Samples(args.datadir, source='wiki')
-    output_model_filepath = futils.get_model_path(args.datadir, args.outputdir)
+    output_model_filepath = futils.get_model_path(args.datadir,
+                                                  args.outputdir,
+                                                  args.window)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,

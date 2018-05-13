@@ -7,15 +7,15 @@ __all__ = ('Samples', 'get_zipped_sentences', 'get_sentences',
            'get_model_path')
 
 
-def get_model_path(datadir, outputdir):
+def get_model_path(datadir, outputdir, window_size):
     """Return absolute path to w2v model file.
 
     Model absolute path is computer from the outputdir and the
     datadir name.
     """
     os.makedirs(outputdir, exist_ok=True)
-    return os.path.join(outputdir, '{}.w2v.model'.format(
-        os.path.basename(datadir)))
+    return os.path.join(outputdir, '{}.w2v.win{}.model'.format(
+        os.path.basename(datadir), window_size))
 
 
 def get_zipped_sentences(datazip):
