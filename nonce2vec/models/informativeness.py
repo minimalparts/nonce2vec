@@ -112,6 +112,6 @@ class Informativeness():
         del _tokens[word_index]
         ctx_ent_without_word = self.get_context_entropy(_tokens)
         cwe = ctx_ent_with_word - ctx_ent_without_word
-        if self._stats:
-            self._cwe_data.append(cwe)
+        # if self._stats:
+        #     self._cwe_data.append(cwe)
         return cwe
