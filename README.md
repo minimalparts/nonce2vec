@@ -248,14 +248,17 @@ Experiments on chimeras when sorting sentences by context entropy
 | dataset | model | order | score |
 | --- | --- | --- | --- |
 | L2 | random | as-is | 0.3322 |
-| L2 | random | asc   |  |
-| L2 | random | desc  |  |
+| L2 | random | asc   | 0.3391 |
+| L2 | random | desc  | 0.3125 |
 | L4 | random | as-is | 0.3515 |
-| L4 | random | asc   |  |
-| L4 | random | desc  |  |
+| L4 | random | asc   | 0.3701 |
+| L4 | random | desc  | 0.3619 |
 | L6 | random | as-is | 0.4052 |
 | L6 | random | asc   | 0.3902 |
 | L6 | random | desc  | 0.3817 |
+
+Experiments on chimeras when sorting by context entropy within margin of error
+(round context entropy at the right decimal)
 
 Spearman correlation = -0.18694416650898932
 For s2w with rank on nonces

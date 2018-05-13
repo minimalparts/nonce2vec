@@ -224,7 +224,6 @@ def _test_on_nonces(args):
             ranks.append(rank)
             ctx_ent = info.get_context_entropy(sentences[0], sentences[0].index(nonce))
             ctx_ents.append(ctx_ent)
-            num_sent += 1
             logger.info(
                 'nonce: {} | ctx_ent = {} | rank = {} '
                 .format(nonce, round(ctx_ent, 4), rank))
