@@ -4,10 +4,15 @@ from nonce2vec.models.informativeness import Informativeness
 from nonce2vec.utils.files import Sentences
 
 
+def _test_context_entropy():
+    model_path = '/Users/AKB/Github/nonce2vec/models/wiki_all.sent.split.model'
+    info = Informativeness(mode='cbow', model_path=model_path, entropy='shannon')
+    sent1 = 'gynecology is a branch of medicine '
+
 def _test_nonces():
     model_path = '/Users/AKB/Github/nonce2vec/models/wiki_all.sent.split.model'
     data_path = '/Users/AKB/Github/nonce2vec/data/definitions/nonce.definitions.300.test'
-    info = Informativeness(mode='cbow', w2v_model_path=model_path)
+    info = Informativeness(mode='cbow', model_path=model_path)
     sentences = Sentences(data_path, source='nonce_or_chimera')
     for fields in sentences:
         nonce = fields[0]
@@ -28,7 +33,7 @@ def _test_nonces():
 def _test_chimeras():
     model_path = '/Users/AKB/Github/nonce2vec/models/wiki_all.sent.split.model'
     data_path = '/Users/AKB/Github/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt'
-    info = Informativeness(mode='cbow', w2v_model_path=model_path, entropy='shannon')
+    info = Informativeness(mode='cbow', model_path=model_path, entropy='shannon')
     # sent_1 = 'The cat was chasing the mouse around the house'
     # sent_2 = 'The cat was chasing the rabbit around the house'
     # #sent_2 = 'The cat argued about the politics of the united states, freedom and the bill of rights'
@@ -54,4 +59,5 @@ def _test_chimeras():
 
 if __name__ == '__main__':
     #_test_nonces()
-    _test_chimeras()
+    #_test_chimeras()
+    _test_context_entropy()

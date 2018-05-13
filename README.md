@@ -207,6 +207,11 @@ On the nonce dataset
 | sum-only | 0.01785 | 0.03327 | 0.02986 | 0.04816 | 0.04093 |  |
 | nonce2vec | 0.03044 | 0.0539 | 0.04139 | 0.05860 | 0.04808 |  |
 
+Why the improvement on random nonce2vec scores? Because we changed the
+subsampling: originally there was two random subsampling: at sum time and
+at train time. We changed so that the sum and training would occur on the
+same context. This leads to an improvement in overall scores.
+
 0.4093
 On the chimera dataset:
 

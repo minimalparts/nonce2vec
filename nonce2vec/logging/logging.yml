@@ -12,9 +12,9 @@ loggers:
   gensim:
     level: WARNING
     handlers: [console]
-  nonce2vec:
+  nonce2vec.main:
     level: INFO
     handlers: [console]
-  nonce2vec.models:
-    level: WARNING
+  nonce2vec.models.informativeness:
+    level: DEBUG
     handlers: [console]

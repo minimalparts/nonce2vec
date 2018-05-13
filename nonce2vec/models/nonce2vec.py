@@ -43,6 +43,9 @@ def train_sg_pair(model, word, context_index, alpha,
     if model.vocabulary.nonce is not None \
      and model.wv.index2word[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
+        print('nonce = {}'.format(model.vocabulary.nonce))
+        print('nonce_count = {}'.format(nonce_count))
+        print('alpha = {}'.format(alpha))
         lock_factor = context_locks[context_index]
         lambda_den = model.lambda_den
         exp_decay = -(nonce_count-1) / lambda_den
@@ -76,14 +79,6 @@ def train_sg_pair(model, word, context_index, alpha,
 
 
 def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
-    """
-    Update skip-gram model by training on a sequence of sentences.
-    Each sentence is a list of string tokens, which are looked up in
-    the model's vocab dictionary. Called internally from `Word2Vec.train()`.
-    This is the non-optimized, Python version. If you have cython
-    installed, gensim will use the optimized version from word2vec_inner
-    instead.
-    """
     result = 0
     window = model.window
     for sentence in sentences:
@@ -260,7 +255,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
 
     def __init__(self, vector_size=100, seed=1, hashfxn=hash):
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
-        self.filter = None
+        self.info = None
 
     @classmethod
     def load(cls, w2v_trainables):
@@ -303,7 +298,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            pre_exist_words = self.filter.filter_tokens(pre_exist_words, nonce)
+            pre_exist_words = self.info.filter_tokens(pre_exist_words, nonce)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[
