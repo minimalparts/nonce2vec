@@ -30,7 +30,7 @@ on average content word will be above 22
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  | 0.03067 |  |
+| 0.02024 |  | 0.03067 |  |
 
 Impact of window size of pretrained model:
 
@@ -52,6 +52,7 @@ correlation with filtered context
 First replicate subsampling when training with nonce2vec
 On important point: in the original nonce2vec code, sum is operated on a different context than train due to the random
 subsampling beeing operated twice with a different RandomState
+We fix this by caching results
 
 Bugfixes:
 1. With the alpha learning rate
