@@ -231,7 +231,8 @@ def _test_on_nonces(args):
         rank = _get_rank(probe, nns)
         if args.with_stats:
             ranks.append(rank)
-            filtered_context = info.get_filtered_context(sentences[0], nonce)
+            filtered_context = info.get_filtered_context(sentences[0], nonce,
+                                                         stats=True)
             if args.sum_only:
                 filtered_context = list(set(filtered_context))  # remove duplicates as sum is done on set
             ctx_ent = info.get_context_entropy(filtered_context)

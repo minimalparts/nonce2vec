@@ -51,7 +51,7 @@ class Informativeness():
         self._cwe_data = []
         self._sort_by = sort_by
 
-    def filter_tokens(self, tokens):
+    def filter_tokens(self, tokens, stats=False):
         """Filter a list of tokens containing a nonce.
 
         Filter the list based on its informativeness towards the nonce.
@@ -65,8 +65,9 @@ class Informativeness():
         if self._filter == 'random':
             filtered_tokens = []
             for w in tokens:
-                logger.debug('word = {} | sample_int = {}'
-                             .format(w, self._model.wv.vocab[w].sample_int))
+                if not stats:
+                    logger.debug('word = {} | sample_int = {}'
+                                 .format(w, self._model.wv.vocab[w].sample_int))
                 if self._model.wv.vocab[w].sample_int > \
                 self._model.random.rand() * 2 ** 32:
                     filtered_tokens.append(w)
@@ -75,8 +76,9 @@ class Informativeness():
         if self._filter == 'self':
             filtered_tokens = []
             for w in tokens:
-                logger.debug('word = {} | log(sample_int) = {}'.format(
-                    w, np.log(self._model.wv.vocab[w].sample_int)))
+                if not stats:
+                    logger.debug('word = {} | log(sample_int) = {}'.format(
+                        w, np.log(self._model.wv.vocab[w].sample_int)))
                 if np.log(self._model.wv.vocab[w].sample_int) > \
                 self._threshold:
                     filtered_tokens.append(w)
@@ -86,7 +88,8 @@ class Informativeness():
             filtered_tokens = []
             for idx, w in enumerate(tokens):
                 cwe = self.get_context_word_entropy(tokens, idx)
-                logger.debug('word = {} | cwe = {}'.format(w, cwe))
+                if not stats:
+                    logger.debug('word = {} | cwe = {}'.format(w, cwe))
                 if cwe > self._threshold:
                     filtered_tokens.append(w)
             logger.debug('Output filtered tokens = {}'.format(filtered_tokens))
@@ -94,11 +97,11 @@ class Informativeness():
         raise Exception('Invalid ctx_filter parameter: {}'
                         .format(self._filter))
 
-    def get_filtered_context(self, tokens, nonce):
+    def get_filtered_context(self, tokens, nonce, stats=False):
         in_vocab = [w for w in tokens if w in self._model.wv.vocab]
         while nonce in in_vocab:
             in_vocab.remove(nonce)
-        filtered_tokens = self.filter_tokens(in_vocab)
+        filtered_tokens = self.filter_tokens(in_vocab, stats)
         return filtered_tokens
 
     def sort_context(self, tokens):
