@@ -231,10 +231,15 @@ def _test_on_nonces(args):
         rank = _get_rank(probe, nns)
         if args.with_stats:
             ranks.append(rank)
-            filtered_context = info.get_filtered_context(sentences[0], nonce,
-                                                         stats=True)
             if args.sum_only:
-                filtered_context = list(set(filtered_context))  # remove duplicates as sum is done on set
+                # remove duplicates as sum is done on set
+                _tokens = set()
+                tokens = [x for x in sentences[0] if not
+                          (x in _tokens or _tokens.add(x))]
+            else:
+                tokens = sentences[0]
+            filtered_context = info.get_filtered_context(tokens, nonce,
+                                                         stats=args.sum_only)
             ctx_ent = info.get_context_entropy(filtered_context)
             ctx_ents.append(ctx_ent)
             logger.info('nonce: {} | ctx_ent = {} | rank = {} '

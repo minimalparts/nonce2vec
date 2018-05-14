@@ -30,8 +30,10 @@ on average content word will be above 22
 
 | | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- | --- |
-| MRR | 0.02024 | 0.03088 | 0.03067 |  |
-| SPR | -0.21 |  | -0.17 |  |
+| MRR | 0.02024 | 0.02761 | 0.03067 | 0.03427 |
+| SPR | -0.11 | -0.06 | -0.05 | -0.20 |
+
+Big correlation drop (-0.2 -> -0.1) when turning list into set
 
 Impact of window size of pretrained model:
 
