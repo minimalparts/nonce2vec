@@ -46,7 +46,7 @@ Impact of window size of pretrained model:
 | --- | --- |
 | 5 | 0.03427 |
 | 10 | 0.03586 |
-| 15 | 0.03872 |
+| 15 | 0.03873 |
 | 20 | 0.03733 |
 | 50 | 0.03556 |
 
@@ -82,9 +82,9 @@ n2v window size as len(context) no sort
 
 n2v big window sort cwe desc
 
-| no filter | random | self 22 | CE > 0 |
-| --- | --- | --- | --- |
-| 0.02115 |  0.02984 | 0.02938 |  |
+| no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
+| --- | --- | --- | --- | --- |
+| 0.02115 |  0.02984 | 0.02938 |  | |
 
 n2v big window sort cwe asc
 

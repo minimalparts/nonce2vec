@@ -98,12 +98,12 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         # Count the number of times that we see the nonce
         nonce_count = 0
         for idx, ctx_vocab in enumerate(sorted_ctx_vocabs):
-            if len(sorted_context) > 1:
-                cwe = model.trainables.info.get_context_word_entropy(
-                    sorted_context, idx)
-                _alpha = compute_alpha(cwe)
-                print('word = {} | cwe = {} | alpha = {}'.format(
-                    model.wv.index2word[ctx_vocab.index], cwe, _alpha))
+            # if len(sorted_context) > 1:
+            #     cwe = model.trainables.info.get_context_word_entropy(
+            #         sorted_context, idx)
+            #     _alpha = compute_alpha(cwe)
+            #     print('word = {} | cwe = {} | alpha = {}'.format(
+            #         model.wv.index2word[ctx_vocab.index], cwe, _alpha))
             nonce_count += 1
             neu1e, alpha = train_sg_pair(
                 model, model.wv.index2word[ctx_vocab.index],
