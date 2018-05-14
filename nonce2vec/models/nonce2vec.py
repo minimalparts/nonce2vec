@@ -327,11 +327,17 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            pre_exist_words = self.info.filter_tokens(pre_exist_words)
-            for w in pre_exist_words:
-                # Initialise to sum
-                newvectors[i-len(wv.vectors)] += wv.vectors[
-                    wv.vocab[w].index]
+            filtered_pre_exist_words = self.info.filter_tokens(pre_exist_words)
+            if filtered_pre_exist_words:
+                for w in filtered_pre_exist_words:
+                    # Initialise to sum
+                    newvectors[i-len(wv.vectors)] += wv.vectors[
+                        wv.vocab[w].index]
+            else:  # If no filtered word remains, sum over everything to get 'some' information
+                for w in pre_exist_words:
+                    # Initialise to sum
+                    newvectors[i-len(wv.vectors)] += wv.vectors[
+                        wv.vocab[w].index]
 
 
         # Raise an error if an online update is run before initial training on

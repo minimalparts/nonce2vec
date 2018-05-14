@@ -121,6 +121,8 @@ class Informativeness():
 
     def get_context_entropy(self, tokens):
         #logger.debug('Getting context entropy of: {}'.format(tokens))
+        if not tokens:
+            return 0
         words_and_probs = self._model.predict_output_word(
             tokens, topn=len(self._model.wv.vocab))
         probs = [item[1] for item in words_and_probs]

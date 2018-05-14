@@ -88,6 +88,18 @@ n2v big window sort cwe desc
 
 n2v big window sort cwe asc
 
-| no filter | random | self 22 | CE > 0 |
+| no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
 | --- | --- | --- | --- |
 |  |  |  |  |
+
+Changing initial learning rate (on win15 sort desc):
+
+| 0.5 | 1 | 5 | 10 | 20 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+
+Changing exponential decay (on win15 sort desc):
+
+| 50 | 70 | 85 | 100 | 200 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
