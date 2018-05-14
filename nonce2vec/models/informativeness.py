@@ -6,6 +6,8 @@ entropy-based informativeness measures.
 
 import copy
 
+from functools import lru_cache
+
 import logging
 
 import numpy as np
@@ -50,6 +52,7 @@ class Informativeness():
         self._ctx_ent_data = []
         self._cwe_data = []
 
+    @lru_cache(maxsize=10)
     def filter_tokens(self, tokens, nonce):
         """Filter a list of tokens containing a nonce.
 
@@ -93,6 +96,7 @@ class Informativeness():
         raise Exception('Invalid ctx_filter parameter: {}'
                         .format(self._filter))
 
+    @lru_cache(maxsize=100)
     def get_context_entropy(self, tokens):
         words_and_probs = self._model.predict_output_word(
             tokens, topn=len(self._model.wv.vocab))
@@ -101,6 +105,7 @@ class Informativeness():
         ctx_ent = 1 - (shannon_entropy / np.log(len(probs)))
         return ctx_ent
 
+    @lru_cache(maxsize=100)
     def get_context_word_entropy(self, tokens, word_index):
         """Get how much a given word impacts the context entropy of a list of tokens.
 
