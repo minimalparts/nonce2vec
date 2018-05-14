@@ -80,9 +80,8 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
     #window = model.window
     for sentence in sentences:
-        in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
         filtered_context = model.trainables.info.get_filtered_context(
-            in_vocab_tokens, model.vocabulary.nonce)
+            sentence, model.vocabulary.nonce)
         sorted_context = model.trainables.info.sort_context(filtered_context)
         sorted_ctx_vocabs = [model.wv.vocab[w] for w in sorted_context]
         nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
@@ -315,7 +314,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             #         # Adding w to initialisation
             #         newvectors[i-len(wv.vectors)] += wv.vectors[
             #             wv.vocab[w].index]
-            pre_exist_words = self.info.filter_tokens(pre_exist_words, nonce)
+            pre_exist_words = self.info.filter_tokens(pre_exist_words)
             for w in pre_exist_words:
                 # Initialise to sum
                 newvectors[i-len(wv.vectors)] += wv.vectors[

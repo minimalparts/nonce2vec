@@ -50,6 +50,7 @@ Problem with replication: the order of words matter when training on nonce2vec!!
 First replicate subsampling when training with nonce2vec
 On important point: in the original nonce2vec code, sum is operated on a different context than train due to the random
 subsampling beeing operated twice with a different RandomState
+Also, sum is done on a set of context words when training is done on a list (not removing duplicates)
 
 Bugfixes:
 1. With the alpha learning rate
