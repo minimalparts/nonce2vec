@@ -70,11 +70,12 @@ def _load_nonce2vec_model(args, info, nonce):
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     #model.min_count = 1  # min_count should be the same as the background model!!
+    if args.filter == 'random':
+        model.sample = args.sample
     if not args.sum_only:
-        model.alpha = alpha
-        model.sample = sample
-        model.sample_decay = sample_decay
-        model.iter = epochs
+        model.alpha = args.alpha
+        model.sample_decay = args.sample_decay
+        model.iter = args.epochs
         model.negative = neg
         model.window = window
         model.window_decay = window_decay
