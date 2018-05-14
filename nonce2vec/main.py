@@ -26,10 +26,6 @@ from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
 from nonce2vec.utils.files import Samples
 from nonce2vec.models.informativeness import Informativeness
 
-from nonce2vec.models.context_filters import NoFilter, RandomFilter, \
-                                             SelfInformationFilter, \
-                                             ContextWordEntropyFilter
-
 
 logging.config.dictConfig(
     cutils.load(
@@ -124,17 +120,17 @@ def _test_on_chimeras(args):
                     sentences,
                     key=lambda tokens: info.get_context_entropy(
                         tokens, tokens.index(nonce)))
-        if not args.filter:
-            logger.warning('Applying no filters to context selection: this should '
-                           'negatively, and significantly, impact results')
-            filter = NoFilter()
-        elif args.filter == 'random':
-            filter = RandomFilter(model)
-        elif args.filter == 'self':
-            filter = SelfInformationFilter(model, args.threshold)
-        elif args.filter == 'cwe':
-            filter = ContextWordEntropyFilter(info, args.threshold)
-        model.trainables.filter = filter
+        # if not args.filter:
+        #     logger.warning('Applying no filters to context selection: this should '
+        #                    'negatively, and significantly, impact results')
+        #     filter = NoFilter()
+        # elif args.filter == 'random':
+        #     filter = RandomFilter(model)
+        # elif args.filter == 'self':
+        #     filter = SelfInformationFilter(model, args.threshold)
+        # elif args.filter == 'cwe':
+        #     filter = ContextWordEntropyFilter(info, args.threshold)
+        # model.trainables.filter = filter
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
         if args.filter == 'cwe':
@@ -198,7 +194,7 @@ def _load_informativeness_model(args):
         args.info_model = args.background
     return Informativeness(mode=args.info_mode, model_path=args.info_model,
                            entropy=args.entropy, ctx_filter=args.filter,
-                           threshold=args.threshold)
+                           threshold=args.threshold, sort_by=args.sort_by)
 
 
 def _test_on_nonces(args):
@@ -356,11 +352,8 @@ def main():
                                   'items')
     parser_info.add_argument('--threshold', type=int,
                              help='threshold for filtering context items')
-    # parser_info.add_argument('--display_stats', action='store_true',
-    #                          dest='stats',
-    #                          help='display informativeness statistics')
-    parser_info.add_argument('--sort', choices=['asis', 'asc', 'desc'],
-                             default='asis',
+    parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
+                             default=None,
                              help='how to sort test instances by context '
                                   'entropy')
 

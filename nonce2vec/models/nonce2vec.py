@@ -78,40 +78,48 @@ def train_sg_pair(model, word, context_index, alpha,
 
 def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
-    window = model.window
+    #window = model.window
     for sentence in sentences:
-        # word_vocabs = [model.wv.vocab[w] for w in sentence if w in
-        #                model.wv.vocab and model.wv.vocab[w].sample_int
-        #                > model.random.rand() * 2 ** 32 or w == '___']
         in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
-        filtered_tokens = model.trainables.info.filter_tokens(
+        filtered_context = model.trainables.info.get_filtered_context(
             in_vocab_tokens, model.vocabulary.nonce)
-        word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
+        sorted_context = model.trainables.info.sort_context(filtered_context)
+        sorted_ctx_vocabs = [model.wv.vocab[w] for w in sorted_context]
+        nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
         # Count the number of times that we see the nonce
         nonce_count = 0
-        for pos, word in enumerate(word_vocabs):
-            # Note: we have got rid of the random window size
-            start = max(0, pos - window)
-            for pos2, word2 in enumerate(word_vocabs[start:(pos + window + 1)],
-                                         start):
-                # don't train on the `word` itself
-                if pos2 != pos:
-                    # If training context nonce, increment its count
-                    if model.wv.index2word[word2.index] == \
-                    model.vocabulary.nonce:
-                        print('training on {} and {}'.format(
-                            model.wv.index2word[word.index],
-                            model.wv.index2word[word2.index]))
-                        nonce_count += 1
-                        neu1e, alpha = train_sg_pair(
-                            model, model.wv.index2word[word.index],
-                            word2.index, alpha, nonce_count,
-                            compute_loss=compute_loss)
+        for ctx_vocab in sorted_ctx_vocabs:
+            print('training on {} and {}'.format(
+                model.wv.index2word[ctx_vocab.index],
+                model.wv.index2word[nonce_vocab.index]))
+            nonce_count += 1
+            neu1e, alpha = train_sg_pair(
+                model, model.wv.index2word[ctx_vocab.index],
+                nonce_vocab.index, alpha, nonce_count,
+                compute_loss=compute_loss)
+        # for pos, word in enumerate(word_vocabs):
+        #     # Note: we have got rid of the random window size
+        #     start = max(0, pos - window)
+        #     for pos2, word2 in enumerate(word_vocabs[start:(pos + window + 1)],
+        #                                  start):
+        #         # don't train on the `word` itself
+        #         if pos2 != pos:
+        #             # If training context nonce, increment its count
+        #             if model.wv.index2word[word2.index] == \
+        #             model.vocabulary.nonce:
+        #                 print('training on {} and {}'.format(
+        #                     model.wv.index2word[word.index],
+        #                     model.wv.index2word[word2.index]))
+        #                 nonce_count += 1
+        #                 neu1e, alpha = train_sg_pair(
+        #                     model, model.wv.index2word[word.index],
+        #                     word2.index, alpha, nonce_count,
+        #                     compute_loss=compute_loss)
 
-        result += len(word_vocabs)
-        if window - 1 >= 3:
-            window = window - model.window_decay
-        model.recompute_sample_ints()
+        result += len(filtered_context) + 1
+        # if window - 1 >= 3:
+        #     window = window - model.window_decay
+        # model.recompute_sample_ints()
     return result
 
 

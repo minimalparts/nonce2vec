@@ -23,7 +23,7 @@ class Informativeness():
     """Informativeness class relying on a bi-directional language model."""
 
     def __init__(self, mode, model_path, ctx_filter=None, threshold=None,
-                 entropy=None, stats=False):
+                 entropy=None, stats=False, sort_by=None):
         """Initialize the Informativeness instance.
 
         Args:
@@ -49,6 +49,7 @@ class Informativeness():
         #self._stats = stats  # if set to True store computed info to analyze statistics (mean, std, etc.)
         self._ctx_ent_data = []
         self._cwe_data = []
+        self._sort_by = sort_by
 
     def filter_tokens(self, tokens, nonce):
         """Filter a list of tokens containing a nonce.
@@ -92,6 +93,24 @@ class Informativeness():
             return filtered_tokens
         raise Exception('Invalid ctx_filter parameter: {}'
                         .format(self._filter))
+
+    def get_filtered_context(self, tokens, nonce):
+        filtered_tokens = self.filter_tokens(tokens, nonce)
+        filtered_tokens.remove(nonce)
+        return filtered_tokens
+
+    def sort_context(self, tokens):
+        if not self._sort_by:
+            return tokens
+        if self._sort_by == 'desc':
+            return sorted(
+                tokens, key=lambda x: self.get_context_word_entropy(
+                    tokens, tokens.index(x)), reverse=True)
+        if self._sort_by == 'asc':
+            return sorted(
+                tokens, key=lambda x: self.get_context_word_entropy(
+                    tokens, tokens.index(x)))
+        raise Exception('Invalid sort_by value: {}'.format(self._sort_by))
 
     def get_context_entropy(self, tokens):
         words_and_probs = self._model.predict_output_word(
