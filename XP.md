@@ -30,4 +30,32 @@ on average content word will be above 22
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  |  |  |
+| 0.01968 | 0.02471 | 0.02852 |  |
+
+Impact of window size of pretrained model:
+
+| window size | MRR |
+| --- | --- |
+| 5 |  |
+| 10 |  |
+| 20 |  |
+| 50 |  |
+
+Problem with replication: the order of words matter when training on nonce2vec!! This totally depends on the underlying vocabulary!
+
+## Correlation between MRR and Context Entropy on nonces
+correlation with filtered context
+
+## Sorting words by CWE when training with nonce2vec
+
+First replicate subsampling when training with nonce2vec
+On important point: in the original nonce2vec code, sum is operated on a different context than train due to the random
+subsampling beeing operated twice with a different RandomState
+
+Bugfixes:
+1. With the alpha learning rate
+2. With the min_count (specified after building vocab)
+
+First XP: sorting words when training (with exp decay)
+
+Second XP: re-design exp decay to be function of cwe

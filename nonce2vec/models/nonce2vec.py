@@ -43,9 +43,6 @@ def train_sg_pair(model, word, context_index, alpha,
     if model.vocabulary.nonce is not None \
      and model.wv.index2word[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
-        print('nonce = {}'.format(model.vocabulary.nonce))
-        print('nonce_count = {}'.format(nonce_count))
-        print('alpha = {}'.format(alpha))
         lock_factor = context_locks[context_index]
         lambda_den = model.lambda_den
         exp_decay = -(nonce_count-1) / lambda_den
@@ -286,6 +283,15 @@ class Nonce2VecTrainables(Word2VecTrainables):
                                  dtype=numpy.float32)
 
         # randomize the remaining words
+        # FIXME as-is the code is bug-prone. We actually only want to
+        # initialize the vector for the nonce, not for the remaining gained
+        # vocab. This implies that the system should be run with the same
+        # min_count as the pre-trained background model. Otherwise
+        # we won't be able to sum as we won't have vectors for the other
+        # gained background words
+        if gained_vocab != 1:
+            raise Exception('Creating sum vector for non-nonce word. Do '
+                            'not specify a min_count when running Nonce2Vec.')
         for i in xrange(len(wv.vectors), len(wv.vocab)):
             # construct deterministic seed from word AND seed argument
             # newvectors[i - len(wv.vectors)] = self.seeded_vector(

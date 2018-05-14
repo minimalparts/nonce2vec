@@ -43,7 +43,7 @@ def _spearman(x, y):
     return scipy.stats.spearmanr(x, y)[0]
 
 
-def _update_rr_and_count(relative_ranks, count, nns, probe):
+def _get_rank(probe, nns):
     for idx, nonce_similar_word in enumerate(nns):
         word = nonce_similar_word[0]
         if word == probe:
@@ -51,6 +51,10 @@ def _update_rr_and_count(relative_ranks, count, nns, probe):
     if not rank:
         raise Exception('Could not find probe {} in nonce most similar words '
                         '{}'.format(probe, nns))
+    return rank
+
+
+def _update_rr_and_count(relative_ranks, count, rank):
     relative_rank = 1.0 / float(rank)
     relative_ranks += relative_rank
     count += 1
@@ -65,7 +69,7 @@ def _load_nonce2vec_model(args, info, nonce):
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
-    model.min_count = 1  # by definition keep everything already in backgrounf model in nonce2vec
+    #model.min_count = 1  # min_count should be the same as the background model!!
     if not args.sum_only:
         model.alpha = alpha
         model.sample = sample
@@ -171,6 +175,7 @@ def _display_stats(info):
     logger.info('std = {}')
     logger.info('')
 
+
 def _load_informativeness_model(args):
     if not args.info_model:
         args.info_model = args.background
@@ -210,13 +215,27 @@ def _test_on_nonces(args):
                         epochs=model.iter)
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
+        rank = _get_rank(probe, nns)
+        ranks.append(rank)
+        ctx_ent = info.get_context_entropy(sentences[0])
+        ctx_ents.append(ctx_ent)
+        logger.info('nonce: {} | ctx_ent = {} | rank = {} '
+                    .format(nonce, round(ctx_ent, 4), rank))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
-                                                     nns, probe)
+                                                     rank)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
-    # if args.stats:
-    #     _display_stats(info)
-    #return ctx_ents, ranks
+    logger.info('ranks stats:')
+    logger.info('ranks mean = {}'.format(np.mean(ranks)))
+    logger.info('ranks std = {}'.format(np.std(ranks)))
+    logger.info('ranks min = {}'.format(min(ranks)))
+    logger.info('ranks max = {}'.format(max(ranks)))
+    logger.info('context entropy stats:')
+    logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
+    logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
+    logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
+    logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
+    logger.info('Absolute correlation = {}'.format(_spearman(ctx_ents, ranks)))
 
 
 def _get_men_pairs_and_sim(men_dataset):
@@ -279,18 +298,6 @@ def _train(args):
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
     model.save(output_model_filepath)
-
-
-def _get_rank(probe, nns):
-    for idx, nonce_similar_word in enumerate(nns):
-        word = nonce_similar_word[0]
-        if word == probe:
-            logger.info('probe: {}'.format(word))
-            rank = idx + 1  # rank starts at 1
-    if not rank:
-        raise Exception('Could not find probe {} in nonce most similar words '
-                        '{}'.format(probe, nns))
-    return rank
 
 
 def _get_nonces_ctx_entropy_rank_distrib(samples, args):
