@@ -19,14 +19,14 @@ __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
 
+def compute_cwe_alpha(x, k, b, alpha, min_alpha):
+    decay = (numpy.exp(k*(b*x+1)) - 1) / (numpy.exp(2*k) - 1)
+    if decay > 1:
+        return alpha
+    return decay * alpha if decay * alpha > min_alpha else min_alpha
 
-def compute_alpha(x):
-    k = 1
-    _alpha = (numpy.exp(k*(x+1)) - 1) / (numpy.exp(2*k) - 1)
-    if _alpha > 1:
-        return 1
-    return _alpha
-
+# if __name__ == '__main__':
+#     print(compute_cwe_alpha(-0.00521, 1, 15, 1.0, 0.0001))
 
 def train_sg_pair(model, word, context_index, alpha,
                   nonce_count, learn_vectors=True, learn_hidden=True,
@@ -52,14 +52,14 @@ def train_sg_pair(model, word, context_index, alpha,
      and model.wv.index2word[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
         lock_factor = context_locks[context_index]
-        lambda_den = model.lambda_den
-        exp_decay = -(nonce_count-1) / lambda_den
-        if alpha * numpy.exp(exp_decay) > model.min_alpha:
-            alpha = alpha * numpy.exp(exp_decay)
-        else:
-            alpha = model.min_alpha
-        logger.debug('training on \'{}\' and \'{}\' with alpha = {}'.format(
-            model.wv.index2word[context_index], word, alpha))
+        # lambda_den = model.lambda_den
+        # exp_decay = -(nonce_count-1) / lambda_den
+        # if alpha * numpy.exp(exp_decay) > model.min_alpha:
+        #     alpha = alpha * numpy.exp(exp_decay)
+        # else:
+        #     alpha = model.min_alpha
+        # logger.debug('training on \'{}\' and \'{}\' with alpha = {}'.format(
+        #     model.wv.index2word[context_index], word, alpha))
         if model.negative:
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
@@ -98,17 +98,24 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         # Count the number of times that we see the nonce
         nonce_count = 0
         for idx, ctx_vocab in enumerate(sorted_ctx_vocabs):
-            # if len(sorted_context) > 1:
-            #     cwe = model.trainables.info.get_context_word_entropy(
-            #         sorted_context, idx)
-            #     _alpha = compute_alpha(cwe)
-            #     print('word = {} | cwe = {} | alpha = {}'.format(
-            #         model.wv.index2word[ctx_vocab.index], cwe, _alpha))
+            if len(sorted_context) > 1:
+                cwe = model.trainables.info.get_context_word_entropy(
+                    sorted_context, idx)
+                cwe_alpha = compute_cwe_alpha(cwe, model.k, model.bias,
+                                              alpha, model.min_alpha)
+                logger.debug('word = {} | cwe = {} | alpha = {}'.format(
+                             model.wv.index2word[ctx_vocab.index], cwe,
+                             cwe_alpha))
+            else:
+                cwe_alpha = model.min_alpha
             nonce_count += 1
-            neu1e, alpha = train_sg_pair(
-                model, model.wv.index2word[ctx_vocab.index],
-                nonce_vocab.index, alpha, nonce_count,
-                compute_loss=compute_loss)
+            # neu1e, alpha = train_sg_pair(
+            #     model, model.wv.index2word[ctx_vocab.index],
+            #     nonce_vocab.index, alpha, nonce_count,
+            #     compute_loss=compute_loss)
+            train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
+                          nonce_vocab.index, cwe_alpha, nonce_count,
+                          compute_loss=compute_loss)
         # for pos, word in enumerate(word_vocabs):
         #     # Note: we have got rid of the random window size
         #     start = max(0, pos - window)

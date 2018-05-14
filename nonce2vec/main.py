@@ -76,6 +76,8 @@ def _load_nonce2vec_model(args, info, nonce):
         model.window = args.window
         model.window_decay = args.window_decay
         model.lambda_den = args.lambda_den
+        model.k = args.k
+        model.bias = args.bias
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
@@ -415,6 +417,10 @@ def main():
     parser_test.add_argument('--sample_decay', type=float,
                              help='')
     parser_test.add_argument('--window_decay', type=int,
+                             help='')
+    parser_test.add_argument('--k', type=int,
+                             help='')
+    parser_test.add_argument('--bias', type=int,
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')
