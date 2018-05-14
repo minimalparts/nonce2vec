@@ -50,6 +50,7 @@ def train_sg_pair(model, word, context_index, alpha,
             alpha = alpha * numpy.exp(exp_decay)
         else:
             alpha = model.min_alpha
+        print('alpha = {}'.format(alpha))
         if model.negative:
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
@@ -83,10 +84,9 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         #                model.wv.vocab and model.wv.vocab[w].sample_int
         #                > model.random.rand() * 2 ** 32 or w == '___']
         in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
-        filtered_tokens = model.trainables.filter.filter_tokens(
+        filtered_tokens = model.trainables.info.filter_tokens(
             in_vocab_tokens, model.vocabulary.nonce)
         word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
-        #window = len(word_vocabs)
         # Count the number of times that we see the nonce
         nonce_count = 0
         for pos, word in enumerate(word_vocabs):
@@ -98,7 +98,10 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                 if pos2 != pos:
                     # If training context nonce, increment its count
                     if model.wv.index2word[word2.index] == \
-                     model.vocabulary.nonce:
+                    model.vocabulary.nonce:
+                        print('training on {} and {}'.format(
+                            model.wv.index2word[word.index],
+                            model.wv.index2word[word2.index]))
                         nonce_count += 1
                         neu1e, alpha = train_sg_pair(
                             model, model.wv.index2word[word.index],

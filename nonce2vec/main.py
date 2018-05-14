@@ -76,10 +76,10 @@ def _load_nonce2vec_model(args, info, nonce):
         model.alpha = args.alpha
         model.sample_decay = args.sample_decay
         model.iter = args.epochs
-        model.negative = neg
-        model.window = window
-        model.window_decay = window_decay
-        model.lambda_den = lambda_den
+        model.negative = args.neg
+        model.window = args.window
+        model.window_decay = args.window_decay
+        model.lambda_den = args.lambda_den
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
@@ -167,14 +167,30 @@ def _test_on_chimeras(args):
     logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
 
 
-def _display_stats(info):
-    logger.info('Informativeness statistics:')
-    logger.info('Context entropy:')
-    logger.info('min = {}')
-    logger.info('max = {}')
-    logger.info('mean = {}')
-    logger.info('std = {}')
-    logger.info('')
+def _display_stats(ranks, ctx_ents):
+    logger.info('-'*30)
+    logger.info('ranks stats:')
+    logger.info('ranks mean = {}'.format(np.mean(ranks)))
+    logger.info('ranks std = {}'.format(np.std(ranks)))
+    logger.info('ranks min = {}'.format(min(ranks)))
+    logger.info('ranks max = {}'.format(max(ranks)))
+    logger.info('context entropy stats:')
+    logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
+    logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
+    logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
+    logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
+    logger.info('Correlation no rounding = {}'.format(_spearman(ctx_ents,
+                                                                ranks)))
+    logger.info('Correlation round 6 = {}'.format(
+        _spearman([round(x, 6) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 5 = {}'.format(
+        _spearman([round(x, 5) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 4 = {}'.format(
+        _spearman([round(x, 4) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 3 = {}'.format(
+        _spearman([round(x, 3) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 2 = {}'.format(
+        _spearman([round(x, 2) for x in ctx_ents], ranks)))
 
 
 def _load_informativeness_model(args):
@@ -217,26 +233,19 @@ def _test_on_nonces(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
-        ranks.append(rank)
-        ctx_ent = info.get_context_entropy(sentences[0])
-        ctx_ents.append(ctx_ent)
-        logger.info('nonce: {} | ctx_ent = {} | rank = {} '
-                    .format(nonce, round(ctx_ent, 4), rank))
+        if args.with_stats:
+            ranks.append(rank)
+            ctx_ent = info.get_context_entropy(info.filter_tokens(sentences[0],
+                                                                  nonce))
+            ctx_ents.append(ctx_ent)
+            logger.info('nonce: {} | ctx_ent = {} | rank = {} '
+                        .format(nonce, round(ctx_ent, 4), rank))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
-    logger.info('ranks stats:')
-    logger.info('ranks mean = {}'.format(np.mean(ranks)))
-    logger.info('ranks std = {}'.format(np.std(ranks)))
-    logger.info('ranks min = {}'.format(min(ranks)))
-    logger.info('ranks max = {}'.format(max(ranks)))
-    logger.info('context entropy stats:')
-    logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
-    logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
-    logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
-    logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
-    logger.info('Absolute correlation = {}'.format(_spearman(ctx_ents, ranks)))
+    if args.with_stats:
+        _display_stats(ranks, ctx_ents)
 
 
 def _get_men_pairs_and_sim(men_dataset):
@@ -260,7 +269,7 @@ def _cosine_similarity(peer_v, query_v):
     return num / (math.sqrt(den_a) * math.sqrt(den_b))
 
 
-def _test_men(args):
+def _check_men(args):
     """Check embeddings quality.
 
     Calculate correlation with the similarity ratings in the MEN dataset.
@@ -301,76 +310,11 @@ def _train(args):
     model.save(output_model_filepath)
 
 
-def _get_nonces_ctx_entropy_rank_distrib(samples, args):
-    ranks = []
-    ctx_ents = []
-    info = Informativeness(mode=args.info_mode,
-                           model_path=args.info_model,
-                           entropy=args.entropy)
-    total_num_sent = sum(1 for line in samples)
-    num_sent = 1
-    for sentences, nonce, probe in samples:
-        model = _load_nonce2vec_model(args.background, args.alpha,
-                                      args.sample, args.neg, args.window,
-                                      args.epochs,
-                                      args.lambda_den,
-                                      args.sample_decay, args.window_decay,
-                                      args.num_threads, nonce)
-        vocab_size = len(model.wv.vocab)
-        if nonce not in model.wv.vocab:
-            logger.error('Nonce \'{}\' not in gensim.word2vec.model '
-                         'vocabulary'.format(nonce))
-            continue
-        model.vocabulary.nonce = nonce
-        model.build_vocab(sentences, update=True)
-        model.min_count = args.min_count
-        if not args.sum_only:
-            model.train(sentences, total_examples=model.corpus_count,
-                        epochs=model.iter)
-        nns = model.most_similar(nonce, topn=vocab_size)
-        rank = _get_rank(probe, nns)
-        ranks.append(rank)
-        ctx_ent = info.get_context_entropy(sentences[0], sentences[0].index(nonce))
-        ctx_ents.append(ctx_ent)
-        num_sent += 1
-        logger.info(
-            'nonce: {} | ctx_ent = {} | rank = {} | counter = {}/{}'
-            .format(nonce, round(ctx_ent, 4), rank, num_sent, total_num_sent))
-        if num_sent == 10:
-            break
-    return ctx_ents, ranks
-
-
 def _test(args):
-    if args.what == 'performances':
-        if args.on == 'chimeras':
-            _test_on_chimeras(args)
-        elif args.on == 'nonces':
-            _test_on_nonces(args)
-    if args.what == 'correlations':
-        _check_ctx_entropy_dist(args)
-
-
-
-def _check_ctx_entropy_dist(args):
-    if args.on == 'nonces':
-        ctx_ents, ranks = _test_on_nonces(args)
-        logger.info('ranks stats:')
-        logger.info('ranks mean = {}'.format(np.mean(ranks)))
-        logger.info('ranks std = {}'.format(np.std(ranks)))
-        logger.info('ranks min = {}'.format(min(ranks)))
-        logger.info('ranks max = {}'.format(max(ranks)))
-        logger.info('context entropy stats:')
-        logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
-        logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
-        logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
-        logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
-        logger.info('Absolute correlation = {}'.format(_spearman(ctx_ents, ranks)))
-
-
-def _check(args):
-    if args.what == 'ctx_entropy_dist':
-        _check_ctx_entropy_dist(args)
+    if args.on == 'chimeras':
+        _test_on_chimeras(args)
+    elif args.on == 'nonces':
+        _test_on_nonces(args)
 
 
 def main():
@@ -441,7 +385,7 @@ def main():
         help='check w2v embeddings quality by calculating correlation with '
              'the similarity ratings in the MEN dataset. Also, check the '
              'distribution of context_entropy across datasets')
-    parser_check.set_defaults(func=_check)
+    parser_check.set_defaults(func=_check_men)
     parser_check.add_argument('--on', required=True,
                               choices=['men', 'nonces', 'chimeras'],
                               help='type of data on which to check')
@@ -456,9 +400,6 @@ def main():
         parents=[parser_gensim, parser_info],
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
-    parser_test.add_argument('--what', required=True,
-                             choices=['performances', 'correlations'],
-                             help='what is to be tested')
     parser_test.add_argument('--on', required=True,
                              choices=['nonces', 'chimeras'],
                              help='type of test data to be used')
@@ -476,5 +417,7 @@ def main():
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')
+    parser_test.add_argument('--with_stats', action='store_true', default=False,
+                             help='display informativeness statistics alongside test results')
     args = parser.parse_args()
     args.func(args)

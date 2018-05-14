@@ -30,7 +30,7 @@ on average content word will be above 22
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  |  |  |
+|  |  | 0.03067 |  |
 
 Impact of window size of pretrained model:
 
