@@ -88,7 +88,7 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         # Count the number of times that we see the nonce
         nonce_count = 0
         for ctx_vocab in sorted_ctx_vocabs:
-            print('training on {} and {}'.format(
+            logger.debug('training on {} and {}'.format(
                 model.wv.index2word[ctx_vocab.index],
                 model.wv.index2word[nonce_vocab.index]))
             nonce_count += 1

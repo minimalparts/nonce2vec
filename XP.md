@@ -40,7 +40,7 @@ Impact of window size of pretrained model:
 | 5 |  |
 | 10 |  |
 | 15 |  |
-| 20 |  |
+| 20 | 0.03732608 |
 | 50 |  |
 
 Problem with replication: the order of words matter when training on nonce2vec!! This totally depends on the underlying vocabulary!
@@ -65,13 +65,13 @@ n2v as-is
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  |  |  |
+| 0.02177 | 0.02992 | 0.03026 |  |
 
 n2v window size as len(context) no sort
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  |  |  |
+| 0.02178 | 0.03098 | 0.03034 |  |
 
 n2v big window sort cwe desc
 
