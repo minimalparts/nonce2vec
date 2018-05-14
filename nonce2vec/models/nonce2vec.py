@@ -20,6 +20,14 @@ __all__ = ('Nonce2Vec')
 logger = logging.getLogger(__name__)
 
 
+def compute_alpha(x):
+    k = 1
+    _alpha = (numpy.exp(k*(x+1)) - 1) / (numpy.exp(2*k) - 1)
+    if _alpha > 1:
+        return 1
+    return _alpha
+
+
 def train_sg_pair(model, word, context_index, alpha,
                   nonce_count, learn_vectors=True, learn_hidden=True,
                   context_vectors=None, context_locks=None, compute_loss=False,
@@ -89,7 +97,13 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
         # Count the number of times that we see the nonce
         nonce_count = 0
-        for ctx_vocab in sorted_ctx_vocabs:
+        for idx, ctx_vocab in enumerate(sorted_ctx_vocabs):
+            if len(sorted_context) > 1:
+                cwe = model.trainables.info.get_context_word_entropy(
+                    sorted_context, idx)
+                _alpha = compute_alpha(cwe)
+                print('word = {} | cwe = {} | alpha = {}'.format(
+                    model.wv.index2word[ctx_vocab.index], cwe, _alpha))
             nonce_count += 1
             neu1e, alpha = train_sg_pair(
                 model, model.wv.index2word[ctx_vocab.index],

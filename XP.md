@@ -1,5 +1,10 @@
 # Experiments
 
+## Replication with Aurélie's background model
+with random subsampling:
+SUM: 0.02924
+N2V: 0.04338
+
 ## Subsampling
 We try and experiment with different kind of subsampling in *sum-only* mode on
 the nonce definitional dataset.
@@ -30,20 +35,20 @@ on average content word will be above 22
 
 | | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- | --- |
-| MRR | 0.02024 | 0.02761 | 0.03067 | 0.03427 |
-| SPR | -0.11 | -0.06 | -0.05 | -0.20 |
+| MRR | 0.02024 | 0.02796 | 0.03067 | 0.03427 |
+| SPR | -0.11 | -0.07 | -0.05 | -0.20 |
 
-Big correlation drop (-0.2 -> -0.1) when turning list into set
+Big correlation drop (-0.2 -> -0.1) when turning list into set ?
 
 Impact of window size of pretrained model:
 
 | window size | MRR |
 | --- | --- |
-| 5 |  |
-| 10 |  |
-| 15 |  |
-| 20 | 0.03732608 |
-| 50 |  |
+| 5 | 0.03427 |
+| 10 | 0.03586 |
+| 15 | 0.03872 |
+| 20 | 0.03733 |
+| 50 | 0.03556 |
 
 Problem with replication: the order of words matter when training on nonce2vec!! This totally depends on the underlying vocabulary!
 
@@ -65,21 +70,21 @@ Second XP: re-design exp decay to be function of cwe
 
 n2v as-is
 
-| no filter | random | self 22 | CE > 0 |
-| --- | --- | --- | --- |
-| 0.02177 | 0.02992 | 0.03026 |  |
+| no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
+| --- | --- | --- | --- | --- |
+| 0.02177 | 0.02992 | 0.03026 | 0.03448 |  |
 
 n2v window size as len(context) no sort
 
-| no filter | random | self 22 | CE > 0 |
-| --- | --- | --- | --- |
-| 0.02178 | 0.03098 | 0.03034 |  |
+| no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
+| --- | --- | --- | --- | --- |
+| 0.02178 | 0.03098 | 0.03034 | 0.03457 | |
 
 n2v big window sort cwe desc
 
 | no filter | random | self 22 | CE > 0 |
 | --- | --- | --- | --- |
-|  |  |  |  |
+| 0.02115 |  0.02984 | 0.02938 |  |
 
 n2v big window sort cwe asc
 
