@@ -50,7 +50,8 @@ def train_sg_pair(model, word, context_index, alpha,
             alpha = alpha * numpy.exp(exp_decay)
         else:
             alpha = model.min_alpha
-        print('alpha = {}'.format(alpha))
+        logger.debug('training on \'{}\' and \'{}\' with alpha = {}'.format(
+            model.wv.index2word[context_index], word, alpha))
         if model.negative:
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
@@ -83,14 +84,12 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         filtered_context = model.trainables.info.get_filtered_context(
             sentence, model.vocabulary.nonce)
         sorted_context = model.trainables.info.sort_context(filtered_context)
+        logger.debug('Done sorting. Starting training...')
         sorted_ctx_vocabs = [model.wv.vocab[w] for w in sorted_context]
         nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
         # Count the number of times that we see the nonce
         nonce_count = 0
         for ctx_vocab in sorted_ctx_vocabs:
-            logger.debug('training on {} and {}'.format(
-                model.wv.index2word[ctx_vocab.index],
-                model.wv.index2word[nonce_vocab.index]))
             nonce_count += 1
             neu1e, alpha = train_sg_pair(
                 model, model.wv.index2word[ctx_vocab.index],

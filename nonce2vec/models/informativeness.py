@@ -56,12 +56,13 @@ class Informativeness():
 
         Filter the list based on its informativeness towards the nonce.
         """
-        logger.debug('Filtering tokens: {}'.format(tokens))
         if not self._filter:
             logger.warning('Applying no filters to context selection: '
                            'this should negatively, and significantly, '
                            'impact results')
             return tokens
+        if not stats:
+            logger.debug('Filtering tokens: {}'.format(tokens))
         if self._filter == 'random':
             filtered_tokens = []
             for w in tokens:
@@ -71,7 +72,6 @@ class Informativeness():
                 if self._model.wv.vocab[w].sample_int > \
                 self._model.random.rand() * 2 ** 32:
                     filtered_tokens.append(w)
-            logger.debug('Output filtered tokens = {}'.format(filtered_tokens))
             return filtered_tokens
         if self._filter == 'self':
             filtered_tokens = []
@@ -82,7 +82,6 @@ class Informativeness():
                 if np.log(self._model.wv.vocab[w].sample_int) > \
                 self._threshold:
                     filtered_tokens.append(w)
-            logger.debug('Output filtered tokens = {}'.format(filtered_tokens))
             return filtered_tokens
         if self._filter == 'cwe':
             filtered_tokens = []
@@ -92,10 +91,11 @@ class Informativeness():
                     logger.debug('word = {} | cwe = {}'.format(w, cwe))
                 if cwe > self._threshold:
                     filtered_tokens.append(w)
-            logger.debug('Output filtered tokens = {}'.format(filtered_tokens))
             return filtered_tokens
         raise Exception('Invalid ctx_filter parameter: {}'
                         .format(self._filter))
+        if not stats:
+            logger.debug('Output filtered tokens = {}'.format(filtered_tokens))
 
     def get_filtered_context(self, tokens, nonce, stats=False):
         in_vocab = [w for w in tokens if w in self._model.wv.vocab]
@@ -107,6 +107,8 @@ class Informativeness():
     def sort_context(self, tokens):
         if not self._sort_by:
             return tokens
+        logger.debug('Sorting context items by context_word_entropy '
+                     'in {} order'.format(self._sort_by))
         if self._sort_by == 'desc':
             return sorted(
                 tokens, key=lambda x: self.get_context_word_entropy(
