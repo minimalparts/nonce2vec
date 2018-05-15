@@ -33,10 +33,10 @@ word = of | log(sample_int) = 20.565777364047005
 ```
 on average content word will be above 22
 
-| | no filter | random | self 22 | CE > 0 |
-| --- | --- | --- | --- | --- |
-| MRR | 0.02024 | 0.02796 | 0.03067 | 0.03427 |
-| SPR | -0.11 | -0.07 | -0.05 | -0.20 |
+| | no filter | random | self 22 | CWE > 0 (win5) | CWE > 0 (win15) |
+| --- | --- | --- | --- | --- | --- |
+| MRR | 0.02024 | 0.02796 | 0.03067 | 0.03427 | 0.03873 |
+| SPR | -0.11 | -0.07 | -0.05 | -0.20 |  |
 
 Big correlation drop (-0.2 -> -0.1) when turning list into set ?
 
@@ -78,28 +78,36 @@ n2v window size as len(context) no sort
 
 | no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
 | --- | --- | --- | --- | --- |
-| 0.02178 | 0.03098 | 0.03034 | 0.03457 | |
+| 0.02178 | 0.03098 | 0.03034 | 0.03457 | 0.03866 |
 
 n2v big window sort cwe desc
 
 | no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
 | --- | --- | --- | --- | --- |
-| 0.02115 |  0.02984 | 0.02938 |  | |
+| 0.02115 |  0.02984 | 0.02938 | 0.03436 | 0.03858 |
 
 n2v big window sort cwe asc
 
 | no filter | random | self 22 | CE > 0 (win5) | CE > 0 (win15) |
-| --- | --- | --- | --- |
-|  |  |  |  |
+| --- | --- | --- | --- | --- |
+| 0.01976 | 0.02825 | 0.02904 | 0.03444 | 0.03869 |
 
 Changing initial learning rate (on win15 sort desc):
 
 | 0.5 | 1 | 5 | 10 | 20 |
 | --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+| 0.03850 | 0.03858 | 0.04022 | 0.02815 | 0.01987 |
+
+| 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- |
+| | | 0.04022 | | |
 
 Changing exponential decay (on win15 sort desc):
 
 | 50 | 70 | 85 | 100 | 200 |
 | --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+| 0.03861 | 0.03858 | 0.03855 | 0.03855 | 0.03863 |
+
+Changing alpha decay (computing with cwe)
+| alpha | 1 | 5 | 10 |
+| MRR | 0.03868 | 0.03835 | 0.03811 |

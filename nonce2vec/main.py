@@ -59,22 +59,20 @@ def _update_rr_and_count(relative_ranks, count, rank):
     return relative_ranks, count
 
 
-def _load_nonce2vec_model(args, info, nonce):
+def _load_nonce2vec_model(args, info):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     #model.min_count = 1  # min_count should be the same as the background model!!
-    if args.filter == 'random':
+    if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample
     if not args.sum_only:
+        model.train_with = args.train_with
         model.alpha = args.alpha
-        model.sample_decay = args.sample_decay
         model.iter = args.epochs
         model.negative = args.neg
-        model.window = args.window
-        model.window_decay = args.window_decay
         model.lambda_den = args.lambda_den
         model.k = args.k
         model.bias = args.bias
@@ -85,7 +83,6 @@ def _load_nonce2vec_model(args, info, nonce):
             model.neg_labels[0] = 1.
     model.trainables.info = info
     model.workers = args.num_threads
-    model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -194,9 +191,10 @@ def _display_stats(ranks, ctx_ents):
 def _load_informativeness_model(args):
     if not args.info_model:
         args.info_model = args.background
-    return Informativeness(mode=args.info_mode, model_path=args.info_model,
-                           entropy=args.entropy, ctx_filter=args.filter,
-                           threshold=args.threshold, sort_by=args.sort_by)
+    return Informativeness(
+        model_path=args.info_model, sum_filter=args.sum_filter,
+        sum_thresh=args.sum_thresh, train_filter=args.train_filter,
+        train_thresh=args.train_thresh, sort_by=args.sort_by)
 
 
 def _test_on_nonces(args):
@@ -211,11 +209,13 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
+    model = _load_nonce2vec_model(args, info)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args, info, nonce)
+        #model = _load_nonce2vec_model(args, info, nonce)
+        model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
         logger.info('nonce: {}'.format(nonce))
@@ -346,26 +346,23 @@ def main():
 
     # a shared set of parameters when using informativeness
     parser_info = argparse.ArgumentParser(add_help=False)
-    parser_info.add_argument('--info_mode', choices=['cbow', 'bidir'],
-                             default='cbow',
-                             help='how to compute probability distributions: '
-                                  'either with word2vec CBOW or with a '
-                                  'bidirectional language model')
     parser_info.add_argument('--info_model', type=str,
                              help='Informativeness model path')
-    parser_info.add_argument('--entropy', choices=['shannon', 'weighted'],
-                             default='shannon',
-                             help='which entropy to use')
-    parser_info.add_argument('--filter', default=None,
+    parser_info.add_argument('--sum_filter', default=None,
                              choices=['random', 'self', 'cwe'],
-                             help='filter to be used for filtering context '
-                                  'items')
-    parser_info.add_argument('--threshold', type=int,
-                             help='threshold for filtering context items')
+                             help='')
+    parser_info.add_argument('--sum_threshold', type=int,
+                             dest='sum_thresh',
+                             help='')
+    parser_info.add_argument('--train_filter', default=None,
+                             choices=['random', 'self', 'cwe'],
+                             help='')
+    parser_info.add_argument('--train_threshold', type=int,
+                             dest='train_thresh',
+                             help='')
     parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
                              default=None,
-                             help='how to sort test instances by context '
-                                  'entropy')
+                             help='')
 
     # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(
@@ -411,12 +408,11 @@ def main():
                              help='absolute path to word2vec pretrained model')
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
+    parser_test.add_argument('--train_with',
+                             choices=['exp_alpha', 'cwe_alpha'],
+                             help='')
     parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',
-                             help='')
-    parser_test.add_argument('--sample_decay', type=float,
-                             help='')
-    parser_test.add_argument('--window_decay', type=int,
                              help='')
     parser_test.add_argument('--k', type=int,
                              help='')
