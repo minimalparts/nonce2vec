@@ -9,7 +9,15 @@ Refctoring:
 
 ## Replication with Aurélie's background model
 with random subsampling (sum + train)
-SUM: 0.00909 (no-reload)
+SUM: 0.00909 (no-reload) 0.02074657 (reload)
+N2V: 0.00442 (no-reload)
+
+with self filter:
+SUM: 0.0276477 (with reload) 0.0141539 (no reload)
+N2V:
+
+no filter:
+SUM: 0.00325612 (no-reload)
 N2V:
 
 ## Filtering context
@@ -47,11 +55,13 @@ Filters:
 
 | sample | MRR |
 | --- | --- |
-| 10000 |  |
-| 50000 |  |
-| 100000 |  |
-| 500000 |  |
-| 1000000 |  |
+| 1e5 |  |
+| 1e3 |  |
+| 1 |  |
+| 1e-3 |  |
+| 1e-5 |  |
+| 1e-10 |  |
+
 
 ## Impact of learning rate on training
 

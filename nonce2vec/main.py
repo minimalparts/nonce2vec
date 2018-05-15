@@ -83,7 +83,7 @@ def _load_nonce2vec_model(args, info, nonce):
             model.neg_labels[0] = 1.
     model.trainables.info = info
     model.workers = args.num_threads
-    #model.vocabulary.nonce = nonce
+    model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -210,12 +210,12 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
-    model = _load_nonce2vec_model(args, info, '___')
+    #model = _load_nonce2vec_model(args, info, '___')
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        #model = _load_nonce2vec_model(args, info, nonce)
+        model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
