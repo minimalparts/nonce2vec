@@ -210,7 +210,7 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
-    model = _load_nonce2vec_model(args, info)
+    model = _load_nonce2vec_model(args, info, '___')
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
