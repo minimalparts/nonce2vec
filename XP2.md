@@ -9,7 +9,7 @@ Refctoring:
 
 ## Replication with Aurélie's background model
 with random subsampling (sum + train)
-SUM:
+SUM: 0.00909 (no-reload)
 N2V:
 
 ## Filtering context
