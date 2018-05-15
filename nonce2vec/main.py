@@ -59,7 +59,7 @@ def _update_rr_and_count(relative_ranks, count, rank):
     return relative_ranks, count
 
 
-def _load_nonce2vec_model(args, info):
+def _load_nonce2vec_model(args, info, nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
@@ -83,6 +83,7 @@ def _load_nonce2vec_model(args, info):
             model.neg_labels[0] = 1.
     model.trainables.info = info
     model.workers = args.num_threads
+    model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -209,13 +210,13 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
-    model = _load_nonce2vec_model(args, info)
+    #model = _load_nonce2vec_model(args, info)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        #model = _load_nonce2vec_model(args, info, nonce)
-        model.vocabulary.nonce = nonce
+        model = _load_nonce2vec_model(args, info, nonce)
+        #model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
         logger.info('nonce: {}'.format(nonce))

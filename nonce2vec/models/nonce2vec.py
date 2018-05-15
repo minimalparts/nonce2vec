@@ -280,8 +280,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
         logger.info('updating layer weights')
         gained_vocab = len(wv.vocab) - len(wv.vectors)
         # newvectors = empty((gained_vocab, wv.vector_size), dtype=REAL)
-        newvectors = np.zeros((gained_vocab, wv.vector_size),
-                                 dtype=np.float32)
+        newvectors = np.zeros((gained_vocab, wv.vector_size), dtype=np.float32)
 
         # randomize the remaining words
         # FIXME as-is the code is bug-prone. We actually only want to
@@ -290,9 +289,12 @@ class Nonce2VecTrainables(Word2VecTrainables):
         # min_count as the pre-trained background model. Otherwise
         # we won't be able to sum as we won't have vectors for the other
         # gained background words
-        if gained_vocab != 1:
+        if gained_vocab > 1:
             raise Exception('Creating sum vector for non-nonce word. Do '
                             'not specify a min_count when running Nonce2Vec.')
+        if gained_vocab == 0:
+            raise Exception('Nonce word \'{}\' already in test set and not '
+                            'properly deleted'.format(nonce))
         for i in xrange(len(wv.vectors), len(wv.vocab)):
             # Initialise to sum
             raw_ctx, filtered_ctx = self.info.filter_sum_context(

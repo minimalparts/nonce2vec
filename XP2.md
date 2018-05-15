@@ -5,6 +5,7 @@ Refctoring:
 - no window decay and sample decay (useless on nonces dataset anyway)
 - fixed bug with alpha
 - summing on whole context (not set of context)
+- 'duran' nonce is tested twice in test set. We removed the second occurence
 
 ## Replication with Aurélie's background model
 with random subsampling (sum + train)
@@ -53,4 +54,4 @@ Filters:
 
 ## Impact of learning rate on training
 
-## Impact of alpha decay function 
+## Impact of alpha decay function
