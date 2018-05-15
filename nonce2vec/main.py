@@ -83,7 +83,7 @@ def _load_nonce2vec_model(args, info, nonce):
             model.neg_labels[0] = 1.
     model.trainables.info = info
     model.workers = args.num_threads
-    model.vocabulary.nonce = nonce
+    #model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -210,13 +210,13 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
-    #model = _load_nonce2vec_model(args, info)
+    model = _load_nonce2vec_model(args, info)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args, info, nonce)
-        #model.vocabulary.nonce = nonce
+        #model = _load_nonce2vec_model(args, info, nonce)
+        model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
         logger.info('nonce: {}'.format(nonce))
@@ -306,7 +306,8 @@ def _check_men(args):
 def _train(args):
     sentences = Samples(args.datadir, source='wiki')
     output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
-                                                  args.window)
+                                                  args.window, args.sample,
+                                                  args.min_count)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,

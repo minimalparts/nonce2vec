@@ -41,6 +41,7 @@ Filters:
 | 10 |  |
 | 25 |  |
 | 50 |  |
+| 100 |  |
 
 ## Impact of sampling rate of info model
 
