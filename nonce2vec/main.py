@@ -74,8 +74,8 @@ def _load_nonce2vec_model(args, info, nonce):
         model.iter = args.epochs
         model.negative = args.neg
         model.lambda_den = args.lambda_den
-        model.k = args.k
-        model.bias = args.bias
+        model.kappa = args.kappa
+        model.beta = args.beta
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
@@ -390,9 +390,9 @@ def main():
     parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',
                              help='')
-    parser_test.add_argument('--k', type=int,
+    parser_test.add_argument('--kappa', type=int,
                              help='')
-    parser_test.add_argument('--bias', type=int,
+    parser_test.add_argument('--beta', type=int,
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')

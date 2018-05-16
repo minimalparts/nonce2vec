@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     print(compute_cwe_alpha())
 
-def compute_cwe_alpha(x, k, b, alpha, min_alpha):
-    x = np.tanh(x*b)
-    decay = (np.exp(k*(x+1)) - 1) / (np.exp(2*k) - 1)
+def compute_cwe_alpha(cwe, kappa, beta, alpha, min_alpha):
+    x = np.tanh(cwe*beta)
+    decay = (np.exp(kappa*(x+1)) - 1) / (np.exp(2*kappa) - 1)
     if decay * alpha > min_alpha:
         return decay * alpha
     return min_alpha
@@ -99,13 +99,13 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
             raise Exception('Unspecified learning rate decay function. '
                             'You must specify a \'train_with\' parameter')
         if model.train_with == 'cwe_alpha':
-            alpha = compute_cwe_alpha(cwe, model.k, model.bias, model.alpha,
+            alpha = compute_cwe_alpha(cwe, model.kappa, model.beta, model.alpha,
                                       model.min_alpha)
             logger.debug('training on \'{}\' and \'{}\' with cwe = {}, b_cwe = {}, '
                          'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
                                              model.wv.index2word[ctx_vocab.index],
                                              round(cwe, 5),
-                                             round(np.tanh(model.bias * cwe), 4),
+                                             round(np.tanh(model.beta * cwe), 4),
                                              round(alpha, 5)))
         if model.train_with == 'exp_alpha':
             alpha = compute_exp_alpha(nonce_count, model.lambda_den,

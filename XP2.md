@@ -34,8 +34,8 @@ Filters:
 | config | no filter | random | self 22 | CWE > 0 (win5) |
 | --- | --- | --- | --- | --- | --- |
 | sum-only | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
-| sum filter + n2v train no filter + no sort | * | * | 0.02901 | 0.03375 |
-| sum filter + n2v filter (same) + no sort | * | * | 0.02908 | 0.03255 |
+| sum filter + n2v train no filter + no sort | 0.01985* | 0.02758* | 0.02901* | 0.03375* |
+| sum filter + n2v filter (same) + no sort | 0.01985* | 0.02787* | 0.02908* | 0.03255* |
 
 ## Impact of window size of info model (sum-only, sample 1e-3, min 50)
 
@@ -51,20 +51,20 @@ Filters:
 
 | min count | MRR |
 | --- | --- |
-| 5 | * |
+| 5 | 0.02839 |
 | 10 | 0.03081 |
 | 25 | 0.03211 |
 | 50 | 0.03147 |
-| 100 | * |
+| 100 | 0.03331 |
 
 ## Impact of sampling rate of info model (sum-only, with window 15, min 50)
 
 | sample | MRR |
 | --- | --- |
-| 1e-2 |  |
+| 1e-2 | * |
 | 1e-3 | 0.03147 |
 | 1e-5 | 0.03285 |
-| 1e-7 | * |
+| 1e-7 | 0.02968 |
 | 1e-9 | 0.00614 |
 
 ## Impact of desc. sorting with exp_decay (no filtering on train)
@@ -80,10 +80,10 @@ Filters:
 ## Impact of filtering and sorting on train with exp_decay
 
 On standard model (win 5, min 50, sample 1e-3)
-- with sorting no filter: *
-- with sorting and filter: *
-- no sorting no filter: 0.03375
-- no sorting filter: 0.03255
+- with sorting no filter: 0.03317*
+- with sorting and filter: 0.03261*
+- no sorting no filter: 0.03375*
+- no sorting filter: 0.03255*
 
 
 ## Impact of learning rate on training
