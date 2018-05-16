@@ -51,13 +51,13 @@ class Informativeness():
         self._model = Word2Vec.load(model_path)
         self._sort_by = sort_by
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=10)
     def _get_prob_distribution(self, context):
         words_and_probs = self._model.predict_output_word(
             context, topn=len(self._model.wv.vocab))
         return [item[1] for item in words_and_probs]
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=10)
     def _get_context_entropy(self, context):
         if not context:
             return 0
@@ -66,7 +66,7 @@ class Informativeness():
         ctx_ent = 1 - (shannon_entropy / np.log(len(probs)))
         return ctx_ent
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=50)
     def _get_context_word_entropy(self, context, word_index):
         ctx_ent_with_word = self._get_context_entropy(context)
         ctx_without_words = tuple(x for idx, x in enumerate(context) if
@@ -75,7 +75,7 @@ class Informativeness():
         cwe = ctx_ent_with_word - ctx_ent_without_word
         return cwe
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=50)
     def _keep_item(self, idx, context, filter_type, threshold):
         if not filter_type:
             return True
