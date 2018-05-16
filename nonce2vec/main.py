@@ -94,15 +94,17 @@ def _test_on_chimeras(args):
     count = 0
     samples = Samples(args.dataset, source='chimeras')
     total_num_batches = sum(1 for x in samples)
-    total_num_sent = sum(1 for x in batch for batch in samples)
+    total_num_sent = sum(1 for x in [sent for batch in samples for sent in batch])
     logger.info('Testing Nonce2Vec on the chimeras dataset containing '
                 '{} batches and {} sentences'.format(total_num_batches,
                                                      total_num_sent))
     num_batch = 1
+    info = _load_informativeness_model(args)
     for sentences, probes, responses in samples:
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
                                                     total_num_batches))
+        num_batch += 1
         logger.info('sentences = {}'.format(sentences))
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
