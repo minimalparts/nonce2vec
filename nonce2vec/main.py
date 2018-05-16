@@ -89,52 +89,26 @@ def _load_nonce2vec_model(args, info, nonce):
 
 
 def _test_on_chimeras(args):
-    samples = Samples(args.dataset, source='chimeras')
     nonce = '___'
     rhos = []
     count = 0
-    filter = _load_filter(args)
+    samples = Samples(args.dataset, source='chimeras')
+    total_num_batches = sum(1 for x in samples)
+    total_num_sent = sum(1 for x in batch for batch in samples)
+    logger.info('Testing Nonce2Vec on the chimeras dataset containing '
+                '{} batches and {} sentences'.format(total_num_batches,
+                                                     total_num_sent))
+    num_batch = 1
     for sentences, probes, responses in samples:
         logger.info('-' * 30)
+        logger.info('Processing batch {}/{}'.format(num_batch,
+                                                    total_num_batches))
         logger.info('sentences = {}'.format(sentences))
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
-        model = _load_nonce2vec_model(args.background, args.alpha,
-                                      args.sample, args.neg, args.window,
-                                      args.epochs,
-                                      args.lambda_den,
-                                      args.sample_decay, args.window_decay,
-                                      args.num_threads, nonce)
-        if args.sort != 'asis' or args.filter == 'cwe':
-            info = Informativeness(mode=args.info_mode,
-                                   model_path=args.info_model,
-                                   entropy=args.entropy)
-            if args.sort == 'desc':
-                sentences = sorted(
-                    sentences,
-                    key=lambda tokens: info.get_context_entropy(
-                        tokens, tokens.index(nonce)),
-                    reverse=True)
-            elif args.sort == 'asc':
-                sentences = sorted(
-                    sentences,
-                    key=lambda tokens: info.get_context_entropy(
-                        tokens, tokens.index(nonce)))
-        # if not args.filter:
-        #     logger.warning('Applying no filters to context selection: this should '
-        #                    'negatively, and significantly, impact results')
-        #     filter = NoFilter()
-        # elif args.filter == 'random':
-        #     filter = RandomFilter(model)
-        # elif args.filter == 'self':
-        #     filter = SelfInformationFilter(model, args.threshold)
-        # elif args.filter == 'cwe':
-        #     filter = ContextWordEntropyFilter(info, args.threshold)
-        # model.trainables.filter = filter
+        model = _load_nonce2vec_model(args, info, nonce)
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        if args.filter == 'cwe':
-            model.trainables.filter.compute_entropy(sentences, nonce)
         model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
@@ -206,7 +180,7 @@ def _test_on_nonces(args):
     count = 0
     samples = Samples(args.dataset, source='nonces')
     total_num_sent = sum(1 for line in samples)
-    logger.info('Testing Nonce2Vec on the definitional dataset containing '
+    logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
@@ -232,21 +206,21 @@ def _test_on_nonces(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
-        if args.with_stats:
-            ranks.append(rank)
-            if args.sum_only:
-                # remove duplicates as sum is done on set
-                _tokens = set()
-                tokens = [x for x in sentences[0] if not
-                          (x in _tokens or _tokens.add(x))]
-            else:
-                tokens = sentences[0]
-            filtered_context = info.get_filtered_context(tokens, nonce,
-                                                         stats=args.sum_only)
-            ctx_ent = info.get_context_entropy(filtered_context)
-            ctx_ents.append(ctx_ent)
-            logger.info('nonce: {} | ctx_ent = {} | rank = {} '
-                        .format(nonce, round(ctx_ent, 4), rank))
+        # if args.with_stats:
+        #     ranks.append(rank)
+        #     if args.sum_only:
+        #         # remove duplicates as sum is done on set
+        #         _tokens = set()
+        #         tokens = [x for x in sentences[0] if not
+        #                   (x in _tokens or _tokens.add(x))]
+        #     else:
+        #         tokens = sentences[0]
+        #     filtered_context = info.get_filtered_context(tokens, nonce,
+        #                                                  stats=args.sum_only)
+        #     ctx_ent = info.get_context_entropy(filtered_context)
+        #     ctx_ents.append(ctx_ent)
+        #     logger.info('nonce: {} | ctx_ent = {} | rank = {} '
+        #                 .format(nonce, round(ctx_ent, 4), rank))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
@@ -411,7 +385,7 @@ def main():
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
     parser_test.add_argument('--train_with',
-                             choices=['exp_alpha', 'cwe_alpha'],
+                             choices=['exp_alpha', 'cwe_alpha', 'cst_alpha'],
                              help='')
     parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',

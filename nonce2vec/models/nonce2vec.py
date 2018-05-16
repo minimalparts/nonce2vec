@@ -19,10 +19,12 @@ __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
 
+if __name__ == '__main__':
+    print(compute_cwe_alpha())
+
 def compute_cwe_alpha(x, k, b, alpha, min_alpha):
-    decay = (np.exp(k*(b*x+1)) - 1) / (np.exp(2*k) - 1)
-    if decay > 1:
-        return alpha
+    x = np.tanh(x*b)
+    decay = (np.exp(k*(x+1)) - 1) / (np.exp(2*k) - 1)
     if decay * alpha > min_alpha:
         return decay * alpha
     return min_alpha
@@ -57,8 +59,6 @@ def train_sg_pair(model, word, context_index, alpha,
      and model.wv.index2word[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
         lock_factor = context_locks[context_index]
-        logger.debug('training on \'{}\' and \'{}\' with alpha = {}'.format(
-            model.wv.index2word[context_index], word, alpha))
         if model.negative:
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
@@ -101,8 +101,16 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
             alpha = compute_exp_alpha(nonce_count, model.lambda_den, alpha,
                                       model.min_alpha)
         if model.train_with == 'cwe_alpha':
-            alpha = compute_cwe_alpha(cwe, model.k, model.bias, alpha,
+            alpha = compute_cwe_alpha(cwe, model.k, model.bias, model.alpha,
                                       model.min_alpha)
+        if model.train_with == 'cst_alpha':
+            alpha = model.alpha
+        logger.debug('training on \'{}\' and \'{}\' with cwe = {}, b_cwe = {}, '
+                     'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
+                                         model.wv.index2word[ctx_vocab.index],
+                                         round(cwe, 5),
+                                         round(np.tanh(model.bias * cwe), 4),
+                                         round(alpha, 5)))
         _, alpha = train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
                                  nonce_vocab.index, alpha,
                                  compute_loss=compute_loss)
