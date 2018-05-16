@@ -87,11 +87,11 @@ On standard model (win 5, min 50, sample 1e-3)
 
 
 ## Impact of learning rate on training
-Standard model (win 5, sample 1e-3, min 50) sum filter cwe no train filter,
-train sorting 
+Standard model (win 5, sample 1e-3, min 50, lambda 70) sum filter cwe
+no train filter, sorting desc
 
-| 1 | 3 | 4 | 5 | 6 | 7 | 10 |
-| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 10 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 |  | | | | | |
 
 ## Impact of alpha decay function

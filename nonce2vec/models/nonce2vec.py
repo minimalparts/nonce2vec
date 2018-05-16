@@ -97,14 +97,6 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
         if not model.train_with:
             raise Exception('Unspecified learning rate decay function. '
                             'You must specify a \'train_with\' parameter')
-        if model.train_with == 'exp_alpha':
-            alpha = compute_exp_alpha(nonce_count, model.lambda_den, alpha,
-                                      model.min_alpha)
-            logger.debug('training on \'{}\' and \'{}\' with cwe = {}, '
-                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
-                                             model.wv.index2word[ctx_vocab.index],
-                                             round(cwe, 5),
-                                             round(alpha, 5)))
         if model.train_with == 'cwe_alpha':
             alpha = compute_cwe_alpha(cwe, model.k, model.bias, model.alpha,
                                       model.min_alpha)
@@ -114,13 +106,19 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                                              round(cwe, 5),
                                              round(np.tanh(model.bias * cwe), 4),
                                              round(alpha, 5)))
+        train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
+                      nonce_vocab.index, alpha, compute_loss=compute_loss)
+        nonce_count += 1
+        if model.train_with == 'exp_alpha':
+            alpha = compute_exp_alpha(nonce_count, model.lambda_den, alpha,
+                                      model.min_alpha)
+            logger.debug('training on \'{}\' and \'{}\' with cwe = {}, '
+                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
+                                             model.wv.index2word[ctx_vocab.index],
+                                             round(cwe, 5),
+                                             round(alpha, 5)))
         if model.train_with == 'cst_alpha':
             alpha = model.alpha
-
-        _, alpha = train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
-                                 nonce_vocab.index, alpha,
-                                 compute_loss=compute_loss)
-        nonce_count += 1
         result += len(ctx_ent_tuples) + 1
     return result
 
