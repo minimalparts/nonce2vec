@@ -66,12 +66,14 @@ def _load_nonce2vec_model(args, info, nonce):
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     #model.min_count = 1  # min_count should be the same as the background model!!
-    if args.sum_filter == 'random' or args.train_filter == 'random':
+    model.replication = args.replication
+    model.sum_over_set = args.sum_over_set
+    model.train_over_set = args.train_over_set
+    if args.sum_filter == 'random' or args.train_filter == 'random' \
+    or args.replication:
         model.sample = args.sample
-    if args.sum_over_set:
-        model.sum_over_set = True
     if args.replication:
-        model.replication = True
+        logger.info('Running original n2v code for replication...')
         if args.window_decay is None:
             raise Exception('In replication mode you need to specify the '
                             'window_decay parameter')
@@ -407,6 +409,10 @@ def main():
     parser_test.add_argument('--kappa', type=int,
                              help='')
     parser_test.add_argument('--beta', type=int,
+                             help='')
+    parser_test.add_argument('--sample_decay', type=float,
+                             help='')
+    parser_test.add_argument('--window_decay', type=int,
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
                              help='')

@@ -95,14 +95,9 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
     result = 0
     window = model.window
     for sentence in sentences:
-        # word_vocabs = [model.wv.vocab[w] for w in sentence if w in
-        #                model.wv.vocab and model.wv.vocab[w].sample_int
-        #                > model.random.rand() * 2 ** 32 or w == '___']
-        in_vocab_tokens = [w for w in sentence if w in model.wv.vocab]
-        filtered_tokens = model.trainables.filter.filter_tokens(
-            in_vocab_tokens, model.vocabulary.nonce)
-        word_vocabs = [model.wv.vocab[w] for w in filtered_tokens]
-        #window = len(word_vocabs)
+        word_vocabs = [model.wv.vocab[w] for w in sentence if w in
+                       model.wv.vocab and model.wv.vocab[w].sample_int
+                       > model.random.rand() * 2 ** 32 or w == '___']
         # Count the number of times that we see the nonce
         nonce_count = 0
         for pos, word in enumerate(word_vocabs):
@@ -116,7 +111,7 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
                     if model.wv.index2word[word2.index] == \
                      model.vocabulary.nonce:
                         nonce_count += 1
-                        neu1e, alpha = train_sg_pair_replication(
+                        train_sg_pair_replication(
                             model, model.wv.index2word[word.index],
                             word2.index, alpha, nonce_count,
                             compute_loss=compute_loss)
@@ -411,6 +406,8 @@ class Nonce2VecTrainables(Word2VecTrainables):
                 # test sum over context vs. sum over set of ctx.
                 raw_ctx = set(raw_ctx)
                 filtered_ctx = set(filtered_ctx)
+                logger.debug('Summing over set of context items: {}'
+                             .format(filtered_ctx))
             if filtered_ctx:
                 for w in filtered_ctx:
                     # Initialise to sum
