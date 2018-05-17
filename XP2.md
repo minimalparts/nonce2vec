@@ -7,13 +7,20 @@ Refactoring:
 - summing on whole context (not set of context)
 - 'duran' nonce is tested twice in test set. We removed the second occurrence
 
-## Nonces
+## Replication from scracth on Aurélie's code with retrained background model:
+On nonces:
 
-### Replication with Aurélie's background model
 | XP | setup | MRR |
-| --- | --- | --- |
-| 022 | sum-only + random filter on sum | |
-| 023 | sum-only + random filter on both | |
+| 022 | N2V | |
+
+On chimeras:
+| XP | setup | RHO |
+| 023 | L2 | |
+| 030 | L4 | |
+| 031 | L6 | |
+
+
+## Nonces
 
 ### Filtering context
 Filters:
@@ -136,7 +143,7 @@ Sorting is desc order, no train filter, sum filter, standard config
 | --- | --- | --- |
 | 007 | L2 | 0.0664 |
 | 008 | L4 | 0.1551 |
-| 009 | L6 |  |
+| 009 | L6 | 0.1116 |
 
 Sorting is desc order with train filter + sum filter in standard config
 
@@ -144,7 +151,7 @@ Sorting is desc order with train filter + sum filter in standard config
 | --- | --- | --- |
 | 016 | L2 | 0.2524 |
 | 017 | L4 | 0.2420 |
-| 018 | L6 |  |
+| 018 | L6 | 0.3301 |
 
 ### alpha decay
 
@@ -154,7 +161,7 @@ With kappa = 1, alpha = 1, beta = 1000, sum filter, no train filter
 | --- | --- | --- |
 | 010 | L2 | 0.2578 |
 | 011 | L4 | 0.2410 |
-| 012 | L6 |  |
+| 012 | L6 | 0.3280 |
 
 With kappa = 1, alpha = 1, beta = 1000, sum filter + train filter
 
@@ -162,4 +169,28 @@ With kappa = 1, alpha = 1, beta = 1000, sum filter + train filter
 | --- | --- | --- |
 | 027 | L2 | 0.2622 |
 | 028 | L4 | 0.2389 |
-| 029 | L6 |  |
+| 029 | L6 | 0.3273 |
+
+With kappa = 1, alpha = 2, beta = 1000, sum filter + train filter
+
+| #XP | L | RHO |
+| --- | --- | --- |
+| 0 | L2 |  |
+| 0 | L4 |  |
+| 0 | L6 |  |
+
+With kappa = 1, alpha = 0.5, beta = 1000, sum filter + train filter
+
+| #XP | L | RHO |
+| --- | --- | --- |
+| 0 | L2 |  |
+| 0 | L4 |  |
+| 0 | L6 |  |
+
+With kappa = 2, alpha = 1, beta = 1000, sum filter + train filter
+
+| #XP | L | RHO |
+| --- | --- | --- |
+| 0 | L2 |  |
+| 0 | L4 |  |
+| 0 | L6 |  |
