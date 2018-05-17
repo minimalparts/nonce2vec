@@ -11,6 +11,10 @@ Refactoring:
 ## Replication from scracth on Aurélie's code with retrained background model:
 On nonces:
 
+On her background model (on the 300.test set):
+
+From now on, on our own background model, tested on 299.test:
+Replication:
 | XP | setup | MRR |
 | 022 | N2V | |
 
@@ -32,60 +36,68 @@ Filters:
 
 | #XP | config | no filter | random | self > 22 | cwe > 0 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 024 | Sum |  |  |  |  |
+| 024 | Sum | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
 | 025 | N2V + SF |  |  |  |  |
 | 026 | N2V + SF + TF |  |  |  |  |
 
 SF: sum filter
 TF: train filter
 
+sum on set vs. sum on all context (sum-only)
+
+
+All next experiences should be with **sum-only and with the cwe_alpha**
+
+First, make hyperparameters of cwe_alpha vary, then take care of background
+model hyperparameters.
+
 ### Impact of window size of info model (sum-only, sample 1e-3, min 50)
 
 | #XP | window size | MRR |
 | --- | --- | --- |
-| | 5 | 0.03284 |
-| | 10 | 0.03215 |
-| | 15 | 0.03147 |
-| | 20 | 0.03045 |
-| | 50 | 0.03139 |
+| | 5 |  |
+| | 10 |  |
+| | 15 |  |
+| | 20 |  |
+| | 50 |  |
 
 ### Impact of min_count of info model (sum-only, window 15, sample 1e-3)
 
 | #XP | min count | MRR |
 | --- | --- | --- |
-| | 5 | 0.02839* |
-| | 10 | 0.03081* |
-| | 25 | 0.03211 |
-| | 50 | 0.03147* |
-| | 100 | 0.03331* |
+| | 5 |  |
+| | 10 |  |
+| | 25 |  |
+| | 50 |  |
+| | 100 | |
 
 ### Impact of sampling rate of info model (sum-only, with window 15, min 50)
 
 | XP | sample | MRR |
 | --- | --- | --- |
-| | 1e-2 | 0.03055* |
-| | 1e-3 | 0.03147* |
-| | 1e-5 | 0.03285* |
-| | 1e-7 | 0.02968* |
-| | 1e-9 | 0.00614* |
+| | 1e-2 |  |
+| | 1e-3 |  |
+| | 1e-5 |  |
+| | 1e-7 |  |
+| | 1e-9 |  |
 
 ### Impact of desc. sorting with exp_decay (no filtering on train)
 
-- win5, sample 1e-3: 0.03317
-- win20, sample 1e-3: 0.03117
-- win15, sample 1e-3: 0.03207
-- win15, sample 1e-2: 0.02936
-- win15, sample 1e-5: 0.03333
-- win10, sample 1e-5: 0.03038
-- win5, sample 1e-5: *
+- win5, sample 1e-3:
+- win20, sample 1e-3:
+- win15, sample 1e-3:
+- win15, sample 1e-2:
+- win15, sample 1e-5:
+- win10, sample 1e-5:
+- win5, sample 1e-5:
 
 ### Impact of filtering and sorting on train with exp_decay
 
 On standard model (win 5, min 50, sample 1e-3)
-- with sorting no filter: 0.02848
-- with sorting and filter: 0.03263
-- no sorting no filter: 0.03375*
-- no sorting filter: 0.03255*
+- with sorting no filter:
+- with sorting and filter:
+- no sorting no filter:
+- no sorting filter:
 
 ## Lambda
 Sorting desc no train filter:

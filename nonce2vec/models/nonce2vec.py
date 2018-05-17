@@ -485,9 +485,11 @@ class Nonce2Vec(Word2Vec):
         tally = 0
         if self.sg:
             if self.replication:
+                logger.info('Training n2v with original code')
                 tally += train_batch_sg_replication(self, sentences, alpha,
                                                     work)
             else:
+                logger.info('Training n2v with refactored code')
                 tally += train_batch_sg(self, sentences, alpha, work)
         else:
             raise Exception('Nonce2Vec does not support cbow mode')
