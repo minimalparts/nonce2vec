@@ -5,6 +5,7 @@ Refactoring:
 - no window decay and sample decay (useless on nonces dataset anyway)
 - fixed bug with alpha
 - summing on whole context (not set of context)
+- Removed mincount (and actually it cannot be used as-is given that there won't be vectors for words below min count)
 - 'duran' nonce is tested twice in test set. We removed the second occurrence
 
 ## Replication from scracth on Aurélie's code with retrained background model:

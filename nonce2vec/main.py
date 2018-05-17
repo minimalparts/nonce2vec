@@ -68,6 +68,18 @@ def _load_nonce2vec_model(args, info, nonce):
     #model.min_count = 1  # min_count should be the same as the background model!!
     if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample
+    if args.sum_over_set:
+        model.sum_over_set = True
+    if args.replication:
+        model.replication = True
+        if args.window_decay is None:
+            raise Exception('In replication mode you need to specify the '
+                            'window_decay parameter')
+        if args.sample_decay is None:
+            raise Exception('In replication mode you need to specify the '
+                            'sample_decay parameter')
+        model.sample_decay = args.sample_decay
+        model.window_decay = args.window_decay
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
@@ -397,6 +409,12 @@ def main():
     parser_test.add_argument('--beta', type=int,
                              help='')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
+                             help='')
+    parser_test.add_argument('--replication', action='store_true', default=False,
+                             help='')
+    parser_test.add_argument('--sum_over_set', action='store_true', default=False,
+                             help='')
+    parser_test.add_argument('--train_over_set', action='store_true', default=False,
                              help='')
     parser_test.add_argument('--with_stats', action='store_true', default=False,
                              help='display informativeness statistics alongside test results')
