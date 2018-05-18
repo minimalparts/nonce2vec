@@ -50,6 +50,8 @@ sum and train on set vs. sum on all context (sum-only)
 | 033 | N2V + SFS | - |  |  |  |
 | 034 | N2V + SFS + TFS | - |  |  |  |
 
+### Sorting
+
 
 All next experiences should be with **sum-only and with the cwe_alpha**
 
