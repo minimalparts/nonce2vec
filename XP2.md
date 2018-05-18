@@ -34,7 +34,7 @@ Filters:
 3. Self information filter
 4. Context word entropy filter
 
-| #XP | config | no filter | random | self > 22 | cwe > 0 |
+| #XP | config | no filter | random | self | cwe |
 | --- | --- | --- | --- | --- | --- | --- |
 | 024 | Sum | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
 | 025 | N2V + SF | 0.01743 | 0.02612 | 0.02964 | 0.02937 |
