@@ -22,7 +22,9 @@ outputs a probability distribution over words in the vocab given a set of
 context words. CE has values is [0, 1], 1 being a maximally informative context
 
 Formally, context word entropy CWE is defined as:
+```
 CWE(context_words) = CE(context_with_context_word) - CE(context_without_context_word)
+```
 
 CWE has values in [-1, 1], 1 being a word that is maximally informative in
 the given context.
@@ -109,6 +111,7 @@ The baseline we are trying to beat is:
 | 0.03655 | 0.2759 | 0.2400 | |
 
 Details:
+
 | #XP | test set | sum over | no filter | random | self | cwe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 005 | nonces | list | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
@@ -156,6 +159,7 @@ def compute_exp_alpha(nonce_count, lambda_den, alpha, min_alpha):
 Results are:
 
 Best system on each:
+
 | #XP | test set  | setup | train over | eval metric |
 | --- | --- | --- | --- | --- |
 | 0 | nonces |  |  |  |
