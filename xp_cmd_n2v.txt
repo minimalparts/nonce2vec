@@ -1,0 +1,94 @@
+To install: sudo -H python3 setup.py develop
+In case of problems during the installation process, install scipy 0.19.0 manually via:
+pip3 install scipy==0.19.0 and redo sudo -H python3 setup.py develop
+
+XP001
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication --sum_filter random
+
+XP002
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication --sum_filter random
+
+XP003
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication --sum_filter random
+
+XP004
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication --sum_filter random
+
+XP005
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter random --sample 10000
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter self --sum_threshold 22
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter cwe --sum_threshold 0
+
+XP006
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_over_set
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter random --sample 10000 --sum_over_set
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter self --sum_threshold 22 --sum_over_set
+
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+XP007
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0
+
+XP008
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+XP009
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0
+
+XP010
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+XP011
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0
+
+XP012
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_only --sum_filter random --sample 10000 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter self --sum_threshold 22 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+XP013
+
+XP014
+
+XP015
+

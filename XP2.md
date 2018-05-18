@@ -20,9 +20,9 @@ Replication:
 
 On chimeras (replication)
 | XP | setup | RHO |
-| 023 | L2 | |
-| 030 | L4 | |
-| 031 | L6 | |
+| 023 | L2 | 0.2049 |
+| 030 | L4 | 0.1895 |
+| 031 | L6 | 0.1844 |
 
 
 ## Nonces
@@ -46,7 +46,7 @@ TF: train filter
 sum and train on set vs. sum on all context (sum-only)
 | #XP | config | no filter | random | self > 22 | cwe > 0 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 032 | Sum | - |  |  |  |
+| 032 | Sum | - |  |  | 0.03655 |
 | 033 | N2V + SFS | - |  |  |  |
 | 034 | N2V + SFS + TFS | - |  |  |  |
 
