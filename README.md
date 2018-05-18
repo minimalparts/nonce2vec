@@ -47,19 +47,19 @@ Results are (with our background model):
 
 | #XP | test set | eval metric |
 | --- | --- | --- |
-| 001 | nonces | 0.02686 |
-| 002 | chimeras L2 | 0.2155  |
-| 003 | chimeras L4 | 0.1787 |
-| 004 | chimeras L6 | 0.1612 |
+| 001 | nonces | 0.02954 |
+| 002 | chimeras L2 | 0.2049  |
+| 003 | chimeras L4 | 0.1895|
+| 004 | chimeras L6 | 0.1844 |
 
 With H & B's background model:
 
 | #XP | test set | eval metric |
 | --- | --- | --- |
-| 101 | nonces |  |
-| 102 | chimeras L2 |  |
-| 103 | chimeras L4 |  |
-| 104 | chimeras L6 |  |
+| 101 | nonces | 0.04303 |
+| 102 | chimeras L2 | 0.3336 |
+| 103 | chimeras L4 | 0.3438 |
+| 104 | chimeras L6 | 0.3922 |
 
 Differences of quality between the two background model (correlation with MEN):
 - our own: 0.7032
@@ -108,7 +108,7 @@ The baseline we are trying to beat is:
 
 | nonces | chimeras L2 | chimeras L4 | chimeras L6 |
 | --- | --- | --- | --- |
-| 0.03655 | 0.2759 | 0.2400 | |
+| 0.03655 | 0.2759 | 0.2400 | 0.3312 |
 
 Details:
 
@@ -121,7 +121,7 @@ Details:
 | 009 | chimeras L4 | list | 0.1367 | 0.1722 | 0.1780 | 0.2383 |
 | 010 | chimeras L4 | set | 0.1737 | 0.1879 | 0.1785 | 0.2400 |
 | 011 | chimeras L6 | list | 0.1290 | 0.1616 | 0.1999 | 0.3312 |
-| 012 | chimeras L6 | set | 0.1652 | 0.1800 | 0.2113 |  |
+| 012 | chimeras L6 | set | 0.1652 | 0.1800 | 0.2113 | 0.3256 |
 
 ### Nonce2Vec, exponential decay, filtering and sorting
 We now focus on measuring the contribution of n2v 'training' of context words,
@@ -158,39 +158,45 @@ def compute_exp_alpha(nonce_count, lambda_den, alpha, min_alpha):
 
 Results are:
 
+The baseline we are trying to beat is:
+
+| nonces | chimeras L2 | chimeras L4 | chimeras L6 |
+| --- | --- | --- | --- |
+| 0.03655 | 0.2759 | 0.2400 | 0.3312 |
+
 Best system on each:
 
 | #XP | test set  | setup | train over | eval metric |
 | --- | --- | --- | --- | --- |
-| 0 | nonces |  |  |  |
-| 0 | chimeras L2 |  |  |  |  |  |
-| 0 | chimeras L4 |  |  |  |  |  |
-| 0 | chimeras L6 |  |  |  |  |  |
+| 013 | nonces | n2v-asi | list | 0.03698 |
+| 018 | chimeras L2 | n2v-asi | list | 0.2786 |
+| 026 | chimeras L4 | n2v-sort | list | 0.2491 |
+| 031 | chimeras L6 | n2v-sort | list | 0.3301 |
 
 Details:
 
 | #XP | test set  | setup | train over | eval metric |
 | --- | --- | --- | --- | --- |
-| 013 | nonces | n2v-asi | list |  |
-| 014 | nonces | n2v-cwe | list |  |
-| 015 | nonces | n2v-cwe | set |  |
-| 016 | nonces | n2v-sort | list |  |
-| 017 | nonces | n2v-sort | set |  |
-| 018 | L2 | n2v-asi | list |  |
-| 019 | L2 | n2v-cwe | list | 0.2486 |
-| 020 | L2 | n2v-cwe | set |  |
-| 021 | L2 | n2v-sort | list | 0.2524 |
-| 022 | L2 | n2v-sort | set |  |
-| 023 | L4 | n2v-asi | list |  |
-| 024 | L4 | n2v-cwe | list | 0.2476 |
-| 025 | L4 | n2v-cwe | set |  |
-| 026 | L4 | n2v-sort | list | 0.2420 |
-| 027 | L4 | n2v-sort | set |  |
-| 028 | L6 | n2v-asi | list |  |
-| 029 | L6 | n2v-cwe | list | 0.3292 |
-| 030 | L6 | n2v-cwe | set |  |
+| 013 | nonces | n2v-asi | list | 0.03698 |
+| 014 | nonces | n2v-cwe | list | 0.03656 |
+| 015 | nonces | n2v-cwe | set | 0.03655 |
+| 016 | nonces | n2v-sort | list | 0.03668 |
+| 017 | nonces | n2v-sort | set | 0.03643 |
+| 018 | L2 | n2v-asi | list | 0.2786 |
+| 019 | L2 | n2v-cwe | list | 0.2621 |
+| 020 | L2 | n2v-cwe | set | 0.2648 |
+| 021 | L2 | n2v-sort | list | 0.2712 |
+| 022 | L2 | n2v-sort | set | 0.2720 |
+| 023 | L4 | n2v-asi | list | 0.2436 |
+| 024 | L4 | n2v-cwe | list | 0.2474 |
+| 025 | L4 | n2v-cwe | set | 0.2455 |
+| 026 | L4 | n2v-sort | list | 0.2491 |
+| 027 | L4 | n2v-sort | set | 0.2445 |
+| 028 | L6 | n2v-asi | list | 0.3255 |
+| 029 | L6 | n2v-cwe | list | 0.3280 |
+| 030 | L6 | n2v-cwe | set | 0.3216 |
 | 031 | L6 | n2v-sort | list | 0.3301 |
-| 032 | L6 | n2v-sort | set |  |
+| 032 | L6 | n2v-sort | set | 0.3285 |
 
 ### cwe-based learning rate
 We propose an alternative to the exponential decay-based learning rate.
@@ -233,31 +239,35 @@ Our best results are obtained with alpha = , beta = , kappa = .
 
 We are trying to beat the same model with a cwe train filter
 
+The baseline we are trying to beat is:
+
+| nonces | chimeras L2 | chimeras L4 | chimeras L6 |
+| --- | --- | --- | --- |
+| 0.03655 | 0.2759 | 0.2400 | 0.3312 |
+
 Details:
 
 | #XP | alpha | beta | kappa | train over| train filter | nonces | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 033 | 1 | 1000 | 1 | list | - | | 0.2578 | 0.2410 | 0.3280 |
-| 034 | 1 | 1000 | 1 | list | cwe | | 0.2622 | 0.2389 | 0.3273 |
-| 035 | 1 | 1000 | 1 | set | - | | | |
-| 036 | 1 | 1000 | 1 | set | cwe | | | |
-| 037 | 1 | 1000 | 2 | list | - | | | |
-| 038 | 1 | 1000 | 2 | list | cwe | | | |
-| 039 | 1 | 1000 | 2 | set | - | | | |
-| 040 | 1 | 1000 | 2 | set | cwe | | | |
-| 041 | 1 | 500 | 2 | list | - | | | |
-| 042 | 1 | 500 | 2 | list | cwe | | | |
-| 043 | 1 | 500 | 2 | set | - | | | |
-| 044 | 1 | 500 | 2 | set | cwe | | | |
-| 045 | 3 | 500 | 2 | list | - | | | |
-| 046 | 3 | 500 | 2 | list | cwe | | | |
-| 047 | 3 | 500 | 2 | set | - | | | |
-| 048 | 3 | 500 | 2 | set | cwe | | | |
-| 049 | 5 | 500 | 2 | list | - | | | |
-| 050 | 5 | 500 | 2 | list | cwe | | | |
-| 051 | 5 | 500 | 2 | set | - | | | |
-| 052 | 5 | 500 | 2 | set | cwe | | | |
-| 0 |  |  |  | set | | | | |
+| 033 | 1 | 1000 | 1 | list | - | 0.03654 | 0.2781 | 0.2505 | 0.3246 |
+| 034 | 1 | 1000 | 1 | list | cwe | 0.03678 | 0.2767 | 0.2461 | 0.3305 |
+| 035 | 1 | 1000 | 1 | set | - | 0.03647 | 0.2786 | 0.2455 | 0.3225 |
+| 036 | 1 | 1000 | 1 | set | cwe | 0.03674 | 0.2787 | 0.2457 | 0.3276 |
+| 037 | 2 | 1000 | 1 | list | - | | | |
+| 038 | 3 | 1000 | 1 | list | - | | | |
+| 039 | 5 | 1000 | 1 | list | - | | | |
+| 040 | 10 | 1000 | 1 | list | - | | | |
+| 041 | 0.5 | 1000 | 1 | list | - | | | |
+| 042 | 0.3 | 1000 | 1 | list | - | | | |
+| 043 | 0.1 | 1000 | 1 | list | - | | | |
+| 044 | 1 | 1000 | 2 | list | - | | | |
+| 045 | 1 | 1000 | 3 | list | - | | | |
+| 046 | 1 | 500 | 1 | list | - | | | |
+| 047 | 1 | 500 | 2 | list | - | | | |
+| 048 | 1 | 500 | 3 | list | - | | | |
+| 049 | 1 | 1500 | 1 | list | - | | | |
+| 050 | 1 | 1500 | 2 | list | - | | | |
+| 051 | 1 | 1500 | 3 | list | - | | | |
 
 ### Quality of the background model
 The performance of the cwe-based approach (filter and learning rate) are
@@ -268,15 +278,32 @@ positively impact cwe-based learning.
 
 | #XP | window | sample | min  | nonces | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 |  |  |  |  | | | |
-| 0 |  |  |  |  | | | |
-| 0 |  |  |  |  | | | |
-| 0 |  |  |  |  | | | |
-| 0 |  |  |  |  | | | |
-| 0 |  |  |  |  | | | |
+| 0XX | 5 | 10-3 | 50 |  | | | |
+| 052 | 5 | 10-5 | 50 |  | | | |
+| 053 | 10 | 10-3 | 50 |  | | | |
+| 054 | 15 | 10-3 | 50 |  | | | |
+| 055 | 15 | 10-2 | 50 |  | | | |
+| 056 | 15 | 10-3 | 5 |  | | | |
+| 057 | 15 | 10-3 | 10 |  | | | |
+| 058 | 15 | 10-3 | 15 | | | | |
+| 059 | 15 | 10-3 | 20 | | | | |
+| 060 | 15 | 10-3 | 25 | | | | |
+| 061 | 15 | 10-3 | 100 | | | | |
+| 062 | 15 | 10-5 | 50 |  | | | |
+| 063 | 15 | 10-7 | 50 |  | | | |
+| 064 | 15 | 10-9 | 50 |  | | | |
+| 065 | 15 | 1000 | 50 |  | | | |
+| 066 | 20 | 10-3 | 50 |  | | | |
+| 067 | 50 | 10-3 | 50 |  | | | |
 
 
 ### Going further: is context entropy useful in itself?
 Two questions I would like to ask if I still have time:
 1. Can context entropy help us determine 'minimally-informative' sentences?
 2. Does context entropy correlates well with our overall results?
+
+### Notes
+try out with very low learning rate
+if sum is doing everything should see a decrease in perf if increasing learning rate
+
+MRR versus density of gold vectors. Claculate distance to nearest neighbors.
