@@ -94,12 +94,12 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
                                compute_loss=False):
     result = 0
     window = model.window
+    # Count the number of times that we see the nonce
+    nonce_count = 0
     for sentence in sentences:
         word_vocabs = [model.wv.vocab[w] for w in sentence if w in
                        model.wv.vocab and model.wv.vocab[w].sample_int
                        > model.random.rand() * 2 ** 32 or w == '___']
-        # Count the number of times that we see the nonce
-        nonce_count = 0
         for pos, word in enumerate(word_vocabs):
             # Note: we have got rid of the random window size
             start = max(0, pos - window)
