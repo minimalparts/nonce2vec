@@ -5,7 +5,7 @@ A modified version of gensim.Word2Vec.
 """
 
 import logging
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 import numpy as np
 from scipy.special import expit
@@ -18,9 +18,6 @@ from gensim.models.keyedvectors import Vocab
 __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
-
-if __name__ == '__main__':
-    print(compute_cwe_alpha())
 
 def compute_cwe_alpha(cwe, kappa, beta, alpha, min_alpha):
     x = np.tanh(cwe*beta)
@@ -66,6 +63,10 @@ def train_sg_pair_replication(model, word, context_index, alpha,
             alpha = alpha * np.exp(exp_decay)
         else:
             alpha = model.min_alpha
+        logger.debug('training on \'{}\' and \'{}\' with '
+                     'alpha = {}'.format(model.vocabulary.nonce,
+                                         word,
+                                         round(alpha, 5)))
         if model.negative:
             # use this word (label = 1) + `negative` other random words not
             # from this sentence (label = 0)
@@ -171,13 +172,24 @@ def train_sg_pair(model, word, context_index, alpha,
     return neu1e
 
 
+def _get_unique_ctx_ent_tuples(ctx_ent_tuples):
+    ctx_ent_dict = OrderedDict()
+    for ctx, ent in ctx_ent_tuples:
+        if ctx not in ctx_ent_dict:
+            ctx_ent_dict[ctx] = ent
+        else:
+            ctx_ent_dict[ctx] = max(ent, ctx_ent_dict[ctx])
+    return [(ctx, ent) for ctx, ent in ctx_ent_dict.items()]
+
+
 def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
     result = 0
     alpha = model.alpha  # re-initialize learning rate before each batch
     ctx_ent_tuples = model.trainables.info.filter_and_sort_train_ctx_ent(
         sentences, model.wv.vocab, model.vocabulary.nonce)
     if model.train_over_set:
-        pass
+        logger.debug('Training over set of context items')
+        ctx_ent_tuples = _get_unique_ctx_ent_tuples(ctx_ent_tuples)
     logger.debug('Training on context = {}'.format(ctx_ent_tuples))
     nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
     nonce_count = 0
@@ -401,9 +413,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
             # Initialise to sum
             raw_ctx, filtered_ctx = self.info.filter_sum_context(
                 sentences, pre_exist_words, nonce)
-            if replication or sum_over_set:
-                # To replicate past n2v code, sum over set of context. Also
-                # test sum over context vs. sum over set of ctx.
+            if sum_over_set:
                 raw_ctx = set(raw_ctx)
                 filtered_ctx = set(filtered_ctx)
                 logger.debug('Summing over set of context items: {}'

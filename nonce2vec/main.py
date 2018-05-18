@@ -69,12 +69,13 @@ def _load_nonce2vec_model(args, info, nonce):
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
     model.train_over_set = args.train_over_set
-    if args.sum_filter == 'random' or args.train_filter == 'random' \
-    or args.replication:
+    if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample
-        info.sum_filter = 'random'
     if args.replication:
         logger.info('Running original n2v code for replication...')
+        if args.sample is None:
+            raise Exception('In replication mode you need to specify the '
+                            'sample parameter')
         if args.window_decay is None:
             raise Exception('In replication mode you need to specify the '
                             'window_decay parameter')
@@ -83,6 +84,7 @@ def _load_nonce2vec_model(args, info, nonce):
                             'sample_decay parameter')
         model.sample_decay = args.sample_decay
         model.window_decay = args.window_decay
+        model.sample = args.sample
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
@@ -201,7 +203,6 @@ def _test_on_nonces(args):
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
-    #model = _load_nonce2vec_model(args, info, '___')
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
