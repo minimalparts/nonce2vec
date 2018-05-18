@@ -64,7 +64,14 @@ Differences of quality between the two background model (correlation with MEN):
 - H & B: 0.7496
 
 Conclusion:
-
+- we cannot replicate the MEN correlation by training a background model with
+the same hyperparameters as H & B on gensim 3.4 (they used 0.13)
+- a drop in background model quality (measured by MEN correlation) seems to lead
+to a significant drop in performance of N2V, especially on the definitional dataset
+- with our background model, we see a marginal difference between N2V and
+an additive model with a stopwords list (see 'self' mode in XP section below)
+- the improvements observed (by N2V over SUM) seem to be due to N2V summing
+over a *set* of context words in the initialization phase. 
 
 ### Filtering and summing
 In the first round of experiment we start from the following considerations:
