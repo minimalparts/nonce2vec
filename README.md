@@ -71,7 +71,7 @@ to a significant drop in performance of N2V, especially on the definitional data
 - with our background model, we see a marginal difference between N2V and
 an additive model with a stopwords list (see 'self' mode in XP section below)
 - the improvements observed (by N2V over SUM) seem to be due to N2V summing
-over a *set* of context words in the initialization phase. 
+over a *set* of context words in the initialization phase.
 
 ### Filtering and summing
 In the first round of experiment we start from the following considerations:
@@ -96,13 +96,17 @@ words (cwe > 0)
 All filters are tested in 'sum-only' mode, with and without duplicates
 (summing over list vs. summing over set)
 
-Results are:
+**RESULT**
+An additive model (SUM) based on a CWE-filtered set of context words
+systematically outperforms any other additive model and provides a robust
+baseline across all datasets.
+
 
 The baseline we are trying to beat is:
+
 | nonces | chimeras L2 | chimeras L4 | chimeras L6 |
-| --- | --- | --- | --- | --- |
-| | | | | |
-| | | | | |
+| --- | --- | --- | --- |
+| 0.03655 | 0.2759 | 0.2400 | |
 
 Details:
 | #XP | test set | sum over | no filter | random | self | cwe |
@@ -112,7 +116,7 @@ Details:
 | 007 | chimeras L2 | list | 0.1832 | 0.2115 | 0.2157 | 0.2557 |
 | 008 | chimeras L2 | set | 0.1966 | 0.1995 | 0.2213 | 0.2759 |
 | 009 | chimeras L4 | list | 0.1367 | 0.1722 | 0.1780 | 0.2383 |
-| 010 | chimeras L4 | set | 0.1737 | 0.1879 | 0.1785 |  |
+| 010 | chimeras L4 | set | 0.1737 | 0.1879 | 0.1785 | 0.2400 |
 | 011 | chimeras L6 | list | 0.1290 | 0.1616 | 0.1999 | 0.3312 |
 | 012 | chimeras L6 | set | 0.1652 | 0.1800 | 0.2113 |  |
 
