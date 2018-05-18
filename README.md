@@ -44,10 +44,10 @@ Evaluation metric is:
 Results are:
 | #XP | test set | eval metric |
 | --- | --- | --- |
-| 001 | nonces |  |
-| 002 | chimeras L2 |  |
-| 003 | chimeras L4 |  |
-| 004 | chimeras L6 |  |
+| 001 | nonces | 0.02954 |
+| 002 | chimeras L2 | 0.2049  |
+| 003 | chimeras L4 | 0.1895 |
+| 004 | chimeras L6 | 0.1844 |
 
 Conclusion:
 
@@ -86,12 +86,12 @@ Details:
 | #XP | test set | sum over | no filter | random | self | cwe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 005 | nonces | list | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
-| 006 | nonces | set |  |  |  |  |
-| 007 | chimeras L2 | list |  |  |  |  |
+| 006 | nonces | set |  |  |  | 0.03655 |
+| 007 | chimeras L2 | list | 0.1832 | 0.2115 | 0.2157 | 0.2557 |
 | 008 | chimeras L2 | set |  |  |  |  |
-| 009 | chimeras L4 | list |  |  |  |  |
+| 009 | chimeras L4 | list | 0.1367 | 0.1722 | 0.1780 | 0.2383 |
 | 010 | chimeras L4 | set |  |  |  |  |
-| 011 | chimeras L6 | list |  |  |  |  |
+| 011 | chimeras L6 | list | 0.1290 | 0.1616 | 0.1999 | 0.3312 |
 | 012 | chimeras L6 | set |  |  |  |  |
 
 ### Nonce2Vec, exponential decay, filtering and sorting
@@ -111,9 +111,12 @@ We compare 3 models:
 - n2v-asi: the original n2v model, random filter + window decay + sample decay
 (minus the original bug)
 - n2v-cwe: a model using exponential decay, no window-size limit
-(window = whole context) and a cwe filter
+(window = whole context) and a cwe filter on training context
 - n2v-sort: the n2v-cwe model sorting context words in descending order
 of cwe value
+
+We do not sum over a set with n2v-asi as we assume the window/window_decay
+part of the model to deal with this.
 
 Reminder: the learning rate alpha is computed by:
 ```python
@@ -139,21 +142,25 @@ Details:
 | #XP | test set  | setup | train over | eval metric |
 | --- | --- | --- | --- | --- |
 | 013 | nonces | n2v-asi | list |  |
-| 014 | nonces | n2v-cwe | list |  |  |  |
-| 015 | nonces | n2v-sort | list |  |  |  |
-| 016 | nonces | n2v-sort | set |  |  |  |
-| 017 | L2 | n2v-asi | list |  |  |  |
-| 018 | L2 | n2v-cwe | list |  |  |  |
-| 019 | L2 | n2v-sort | list |  |  |  |
-| 020 | L2 | n2v-sort | set |  |  |  |
-| 021 | L4 | n2v-asi | list |  |  |  |
-| 022 | L4 | n2v-cwe | list |  |  |  |
-| 023 | L4 | n2v-sort | list |  |  |  |
-| 024 | L4 | n2v-sort | set |  |  |  |
-| 025 | L6 | n2v-asi | list |  |  |  |
-| 026 | L6 | n2v-cwe | list |  |  |  |
-| 027 | L6 | n2v-sort | list |  |  |  |
-| 028 | L6 | n2v-sort | set |  |  |  |
+| 014 | nonces | n2v-cwe | list |  |
+| 015 | nonces | n2v-cwe | set |  |
+| 016 | nonces | n2v-sort | list |  |
+| 017 | nonces | n2v-sort | set |  |
+| 018 | L2 | n2v-asi | list |  |
+| 019 | L2 | n2v-cwe | list | 0.2486 |
+| 020 | L2 | n2v-cwe | set |  |
+| 021 | L2 | n2v-sort | list | 0.2524 |
+| 022 | L2 | n2v-sort | set |  |
+| 023 | L4 | n2v-asi | list |  |
+| 024 | L4 | n2v-cwe | list | 0.2476 |
+| 025 | L4 | n2v-cwe | set |  |
+| 026 | L4 | n2v-sort | list | 0.2420 |
+| 027 | L4 | n2v-sort | set |  |
+| 028 | L6 | n2v-asi | list |  |
+| 029 | L6 | n2v-cwe | list | 0.3292 |
+| 030 | L6 | n2v-cwe | set |  |
+| 031 | L6 | n2v-sort | list | 0.3301 |
+| 032 | L6 | n2v-sort | set |  |
 
 ### cwe-based learning rate
 We propose an alternative to the exponential decay-based learning rate.
@@ -194,22 +201,32 @@ We test with values:
 
 Our best results are obtained with alpha = , beta = , kappa = .
 
-We are trying to beat the same model with a cwe train filter 
+We are trying to beat the same model with a cwe train filter
 
 Details:
 
-| #XP | alpha | beta | kappa | train over | nonces | L2 | L4 | L6 |
+| #XP | alpha | beta | kappa | train over| train filter | nonces | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 029 | 1 | 1000 | 1 | list | | | | |
-| 030 | 1 | 1000 | 1 | set | | | | |
-| 031 | 1 | 1000 | 2 | list | | | | |
-| 032 | 1 | 1000 | 2 | set | | | | |
-| 033 | 1 | 500 | 2 | list | | | | |
-| 034 | 1 | 500 | 2 | set | | | | |
-| 035 | 3 | 500 | 2 | list | | | | |
-| 036 | 3 | 500 | 2 | set | | | | |
-| 037 | 5 | 500 | 2 | list | | | | |
-| 038 | 5 | 500 | 2 | set | | | | |
+| 029 | 1 | 1000 | 1 | list | - | | 0.2578 | 0.2410 | 0.3280 |
+| 030 | 1 | 1000 | 1 | list | cwe | | 0.2622 | 0.2389 | 0.3273 |
+| 031 | 1 | 1000 | 1 | set | - | | | |
+| 032 | 1 | 1000 | 1 | set | cwe | | | |
+| 033 | 1 | 1000 | 2 | list | - | | | |
+| 034 | 1 | 1000 | 2 | list | cwe | | | |
+| 035 | 1 | 1000 | 2 | set | - | | | |
+| 036 | 1 | 1000 | 2 | set | cwe | | | |
+| 037 | 1 | 500 | 2 | list | - | | | |
+| 038 | 1 | 500 | 2 | list | cwe | | | |
+| 039 | 1 | 500 | 2 | set | - | | | |
+| 040 | 1 | 500 | 2 | set | cwe | | | |
+| 041 | 3 | 500 | 2 | list | - | | | |
+| 042 | 3 | 500 | 2 | list | cwe | | | |
+| 043 | 3 | 500 | 2 | set | - | | | |
+| 044 | 3 | 500 | 2 | set | cwe | | | |
+| 045 | 5 | 500 | 2 | list | - | | | |
+| 046 | 5 | 500 | 2 | list | cwe | | | |
+| 047 | 5 | 500 | 2 | set | - | | | |
+| 048 | 5 | 500 | 2 | set | cwe | | | |
 | 0 |  |  |  | set | | | | |
 
 ### Quality of the background model
