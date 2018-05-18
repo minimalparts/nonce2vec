@@ -51,6 +51,15 @@ class Informativeness():
         self._model = Word2Vec.load(model_path)
         self._sort_by = sort_by
 
+    @property
+    def sum_filter(self):
+        return self._sum_filter
+
+    @sum_filter.setter
+    def sum_filter(self, sum_filter):
+        self._sum_filter = sum_filter
+
+
     @lru_cache(maxsize=10)
     def _get_prob_distribution(self, context):
         words_and_probs = self._model.predict_output_word(
