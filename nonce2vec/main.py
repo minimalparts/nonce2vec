@@ -72,6 +72,7 @@ def _load_nonce2vec_model(args, info, nonce):
     if args.sum_filter == 'random' or args.train_filter == 'random' \
     or args.replication:
         model.sample = args.sample
+        info.sum_filter = 'random'
     if args.replication:
         logger.info('Running original n2v code for replication...')
         if args.window_decay is None:

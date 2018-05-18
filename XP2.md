@@ -11,14 +11,14 @@ Refactoring:
 ## Replication from scracth on Aurélie's code with retrained background model:
 On nonces:
 
-On her background model (on the 300.test set):
+On her background model (on the 300.test set): 0.04299
 
 From now on, on our own background model, tested on 299.test:
 Replication:
 | XP | setup | MRR |
-| 022 | N2V | |
+| 022 | N2V | 0.02954 |
 
-On chimeras:
+On chimeras (replication)
 | XP | setup | RHO |
 | 023 | L2 | |
 | 030 | L4 | |
@@ -37,13 +37,18 @@ Filters:
 | #XP | config | no filter | random | self > 22 | cwe > 0 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 024 | Sum | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
-| 025 | N2V + SF |  |  |  |  |
-| 026 | N2V + SF + TF |  |  |  |  |
+| 025 | N2V + SF | 0.01743 | 0.02612 | 0.02964 | 0.02937 |
+| 026 | N2V + SF + TF | 0.01743 | 0.02904 | 0.02931 | 0.03256 |
 
 SF: sum filter
 TF: train filter
 
-sum on set vs. sum on all context (sum-only)
+sum and train on set vs. sum on all context (sum-only)
+| #XP | config | no filter | random | self > 22 | cwe > 0 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 032 | Sum | - |  |  |  |
+| 033 | N2V + SFS | - |  |  |  |
+| 034 | N2V + SFS + TFS | - |  |  |  |
 
 
 All next experiences should be with **sum-only and with the cwe_alpha**
