@@ -41,15 +41,30 @@ Evaluation metric is:
 - MRR for nonces
 - Average RHO for chimeras
 
-Results are:
+Results are (with our background model):
+
 | #XP | test set | eval metric |
 | --- | --- | --- |
-| 001 | nonces | 0.02954 |
-| 002 | chimeras L2 | 0.2049  |
-| 003 | chimeras L4 | 0.1895 |
-| 004 | chimeras L6 | 0.1844 |
+| 001 | nonces | 0.02686 |
+| 002 | chimeras L2 | 0.2155  |
+| 003 | chimeras L4 | 0.1787 |
+| 004 | chimeras L6 | 0.1612 |
+
+With H & B's background model:
+
+| #XP | test set | eval metric |
+| --- | --- | --- |
+| 101 | nonces |  |
+| 102 | chimeras L2 |  |
+| 103 | chimeras L4 |  |
+| 104 | chimeras L6 |  |
+
+Differences of quality between the two background model (correlation with MEN):
+- our own: 0.7032
+- H & B: 0.7496
 
 Conclusion:
+
 
 ### Filtering and summing
 In the first round of experiment we start from the following considerations:
@@ -86,13 +101,13 @@ Details:
 | #XP | test set | sum over | no filter | random | self | cwe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 005 | nonces | list | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
-| 006 | nonces | set |  |  |  | 0.03655 |
+| 006 | nonces | set | 0.02031 | 0.02743 | 0.03077 | 0.03655 |
 | 007 | chimeras L2 | list | 0.1832 | 0.2115 | 0.2157 | 0.2557 |
-| 008 | chimeras L2 | set |  |  |  |  |
+| 008 | chimeras L2 | set | 0.1966 | 0.1995 | 0.2213 | 0.2759 |
 | 009 | chimeras L4 | list | 0.1367 | 0.1722 | 0.1780 | 0.2383 |
-| 010 | chimeras L4 | set |  |  |  |  |
+| 010 | chimeras L4 | set | 0.1737 | 0.1879 | 0.1785 |  |
 | 011 | chimeras L6 | list | 0.1290 | 0.1616 | 0.1999 | 0.3312 |
-| 012 | chimeras L6 | set |  |  |  |  |
+| 012 | chimeras L6 | set | 0.1652 | 0.1800 | 0.2113 |  |
 
 ### Nonce2Vec, exponential decay, filtering and sorting
 We now focus on measuring the contribution of n2v 'training' of context words,
