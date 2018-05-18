@@ -102,51 +102,115 @@ XP017
 n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
 
 XP018
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
 
 XP019
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
 
 XP020
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
 
 XP021
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc
 
 XP022
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
 
 XP023
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
 
 XP024
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
 
 XP025
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
 
 XP026
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc
 
 XP027
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
 
 XP028
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
 
 XP029
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1
 
 XP030
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --train_over_set
 
 XP031
 n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc
 
 XP032
-n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_filter cwe --train_threshold 0 --train_with exp_alpha --alpha 1 --neg 3 --lambda 70 --epochs 1 --sort_by desc --train_over_set
 
 XP033
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
 
 XP034
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0
+
+XP035
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_over_set
+
+XP036
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0 --train_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1 --train_filter cwe --train_threshold 0 --train_over_set
+
+XP037
+
+XP038
+
+XP039
+
+XP040
+
+XP041
+
+XP042
+
+XP043
+
+XP044
+
+XP045
+
+XP046
+
+XP047
+
+XP048
+
+XP049
+
+XP050
+
+XP051
+
+XP052
 
