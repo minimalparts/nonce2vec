@@ -181,6 +181,12 @@ def _display_stats(ranks, ctx_ents):
     logger.info('Correlation round 2 = {}'.format(
         _spearman([round(x, 2) for x in ctx_ents], ranks)))
 
+def _display_density_stats(ranks, sum_10, sum_25, sum_50):
+    logger.info('-'*30)
+    logger.info('density stats')
+    logger.info('d10 rho = {}'.format(_spearman(sum_10, ranks)))
+    logger.info('d25 rho = {}'.format(_spearman(sum_25, ranks)))
+    logger.info('d50 rho = {}'.format(_spearman(sum_50, ranks)))
 
 def _load_informativeness_model(args):
     if not args.info_model:
@@ -191,10 +197,18 @@ def _load_informativeness_model(args):
         train_thresh=args.train_thresh, sort_by=args.sort_by)
 
 
+def _compute_average_sim(sims):
+    sim_sum = sum(sim[1] for sim in sims)
+    return sim_sum / len(sims)
+
+
 def _test_on_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
     ranks = []
     ctx_ents = []
+    sum_10 = []
+    sum_25 = []
+    sum_50 = []
     relative_ranks = 0.0
     count = 0
     samples = Samples(args.dataset, source='nonces')
@@ -224,6 +238,13 @@ def _test_on_nonces(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
+        if args.with_stats:
+            ranks.append(rank)
+            gold_nns = model.most_similar('{}_true'.format(nonce),
+                                          topn=vocab_size)
+            sum_10.append(_compute_average_sim(gold_nns[:10]))
+            sum_25.append(_compute_average_sim(gold_nns[:25]))
+            sum_50.append(_compute_average_sim(gold_nns[:50]))
         # if args.with_stats:
         #     ranks.append(rank)
         #     if args.sum_only:
@@ -244,7 +265,8 @@ def _test_on_nonces(args):
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
     if args.with_stats:
-        _display_stats(ranks, ctx_ents)
+        #_display_stats(ranks, ctx_ents)
+        _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
 
 def _get_men_pairs_and_sim(men_dataset):
