@@ -113,7 +113,7 @@ The baseline we are trying to beat is:
 Details:
 
 | #XP | test set | sum over | no filter | random | self | cwe |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- | --- |
 | 005 | nonces | list | 0.01955 | 0.02600 | 0.02762 | 0.03284 |
 | 006 | nonces | set | 0.02031 | 0.02743 | 0.03077 | 0.03655 |
 | 007 | chimeras L2 | list | 0.1832 | 0.2115 | 0.2157 | 0.2557 |
@@ -248,7 +248,7 @@ The baseline we are trying to beat is:
 Details:
 
 | #XP | alpha | beta | kappa | train over| train filter | nonces | L2 | L4 | L6 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 033 | 1 | 1000 | 1 | list | - | 0.03654 | 0.2781 | 0.2505 | 0.3246 |
 | 034 | 1 | 1000 | 1 | list | cwe | 0.03678 | 0.2767 | 0.2461 | 0.3305 |
 | 035 | 1 | 1000 | 1 | set | - | 0.03647 | 0.2786 | 0.2455 | 0.3225 |
