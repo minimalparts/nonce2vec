@@ -266,6 +266,51 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.
 
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1250 --kappa 3
 
+XPC38
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1100 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1100 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1100 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1100 --kappa 3
+
+XPD38
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1200 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1200 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1200 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1200 --kappa 3
+
+XPE38
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1300 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1300 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1300 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1300 --kappa 3
+
+XPF38
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 900 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 900 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 900 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 900 --kappa 3
+
+XPG38
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 800 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 800 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 800 --kappa 3
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 800 --kappa 3
+
 XP538
 n2v test --on nonces --model /home/kabbach/nonce2vec/models/wikidump.w2v.win5.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1500 --kappa 3
 
@@ -563,4 +608,34 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win50
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win50.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
 
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wikidump.w2v.win50.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 1 --beta 1000 --kappa 1
+
+XP068
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_only 
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_only
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_only
+
+XP069
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
+
+
+XP070
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
+
+XP071
 

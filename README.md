@@ -29,6 +29,44 @@ CWE(context_words) = CE(context_with_context_word) - CE(context_without_context_
 CWE has values in [-1, 1], 1 being a word that is maximally informative in
 the given context.
 
+## Summary of the results
+
+On replicating past n2v results:
+- we could not replicate the quality of the background model with previously
+reported hyperparameters (see MEN score, we get a lower quality model)
+- the reported sum baseline was actually a no-filter-sum-over-list baseline.
+When comparing to that baseline, we found n2v to consistently outperform
+the baseline on all datasets; however
+- we found the performance of n2v on nonces to be lower (in absolute)
+- we found the performance of n2v on chimeras to be higher (in comparison)
+- we found the contribution of n2v to mostly come from the random filter in the
+initialization phase, in comparison with the no-filter-sum-over-list baseline.
+
+Upon proposing a context-word-informativeness filter:
+- we found the additive model based on sum over cwi filtered set of context words
+to outperform all alternative additive baselines by a significant margin
+(those baselines included no filter, random, self; both in list and set config)
+- we found n2v as-is to still outperform the strong cwi sum baseline (overall),
+when initialized on cwi sum. We therefore found the exponential decay training
+model to consistently positively impact results (except on L6)
+
+Upon proposing an alternative exponential decay-based learning model
+sorting context words by cwi in descending order:
+- we found mixed results: overall this model beats the additive baseline, but
+only marginally, and is often outperformed by n2v-asis.
+
+Upon proposing an exponential cwi learning model:
+- awaiting xp
+
+Upon testing the robustness of our results against H&B's background model:
+- awaiting xp
+
+Upong testing the correlation between density and MRR scores:
+- awaiting xp
+
+The most important contribution of this work is probably the CWI additive
+baseline which proved very hard to beat.
+
 ## Experiments
 
 ### Replication
@@ -255,18 +293,23 @@ Details:
 | 036 | 1 | 1000 | 1 | set | cwe | 0.03674 | 0.2787 | 0.2457 | 0.3276 |
 | 037 | 2 | 1000 | 1 | list | - | 0.03744 | 0.2480 | 0.1821 | 0.1690 |
 | 038 | 3 | 1000 | 1 | list | - | 0.03808 | 0.2141 | 0.1152 | 0.1428 |
-| 138 | 3 | 1000 | 2 | list | - | 0.03762 | 0.2520 | | |
-| 238 | 3 | 1500 | 2 | list | - | 0.03732 | 0.2538 | | |
-| 338 | 3 | 500 | 2 | list | - | 0.03613 | 0.2710 | | |
-| 438 | 3 | 1000 | 3 | list | - | 0.03713 | 0.2791 | | |
-| A38 | 3 | 750 | 3 | list | - |  |  | | |
-| B38 | 3 | 1250 | 3 | list | - |  |  | | |
-| 538 | 3 | 1500 | 3 | list | - | 0.03692 | 0.2701 | | |
-| 638 | 3 | 500 | 3 | list | - | 0.03557 | | 0.2819 | |
-| 738 | 4 | 1000 | 1 | list | - | 0.03442 | 0.1508 | | |
-| 838 | 4 | 500 | 3 | list | - | | |  | |
+| 138 | 3 | 1000 | 2 | list | - | 0.03762 | 0.2520 | 0.1984 | 0.1797 |
+| 238 | 3 | 1500 | 2 | list | - | 0.03732 | 0.2538 | 0.1798 | 0.2153 |
+| 338 | 3 | 500 | 2 | list | - | 0.03613 | 0.2710 | 0.1859 | 0.1714 |
+| 438 | 3 | 1000 | 3 | list | - | 0.03713 | 0.2791 | 0.2341 | 0.2751 |
+| A38 | 3 | 750 | 3 | list | - | 0.03570 | 0.2810 | | |
+| B38 | 3 | 1250 | 3 | list | - |  | 0.2837 | | |
+| C38 | 3 | 1100 | 3 | list | - |  |  | | |
+| D38 | 3 | 1200 | 3 | list | - |  |  | | |
+| E38 | 3 | 1300 | 3 | list | - |  |  | | |
+| F38 | 3 | 900 | 3 | list | - |  | 0.2795 | | |
+| G38 | 3 | 800 | 3 | list | - |  | 0.2784 | | |
+| 538 | 3 | 1500 | 3 | list | - | 0.03692 | 0.2701 | | 0.2843 |
+| 638 | 3 | 500 | 3 | list | - | 0.03557 | 0.2819 | 0.2455 | 0.3224 |
+| 738 | 4 | 1000 | 1 | list | - | 0.03442 | 0.1508 | 0.0407 | 0.1339 |
+| 838 | 4 | 500 | 3 | list | - | 0.03494 | 0.2801 |  | |
 | 039 | 5 | 1000 | 1 | list | - | 0.03423 | 0.1667 | 0.0934 | 0.1082 |
-| 040 | 10 | 1000 | 1 | list | - | 0.0288 | 0.1010 | 0.0052 |  |
+| 040 | 10 | 1000 | 1 | list | - | 0.0288 | 0.1010 | 0.0052 | 0.0149 |
 | 041 | 0.5 | 1000 | 1 | list | - | 0.03647 | 0.2728 | 0.2424 | 0.3263 |
 | 042 | 0.3 | 1000 | 1 | list | - | 0.03653 | 0.2728 | 0.2413 | 0.3248 |
 | 043 | 0.1 | 1000 | 1 | list | - | 0.03655 | 0.2738 | 0.2400 | 0.3256 |
@@ -294,17 +337,28 @@ positively impact cwe-based learning.
 | 054 | 15 | 10-3 | 50 | 0.03623 | 0.2635 | 0.2636 | 0.3336 |
 | 055 | 15 | 10-2 | 50 | 0.03596 | 0.2239 | 0.2424 | 0.2903 |
 | 056 | 15 | 10-3 | 5 | 0.03363 | | | |
-| 057 | 15 | 10-3 | 10 |  | 0.2523 | | |
-| 058 | 15 | 10-3 | 15 | | | | |
-| 059 | 15 | 10-3 | 20 | 0.03534 | | | |
-| 060 | 15 | 10-3 | 25 | 0.03792 | 0.2404 | | |
-| 061 | 15 | 10-3 | 100 | 0.03753 | 0.2514 | | |
-| 062 | 15 | 10-5 | 50 |  | | | |
-| 063 | 15 | 10-7 | 50 |  | | | |
-| 064 | 15 | 10-9 | 50 |  | | | |
-| 065 | 15 | 1000 | 50 |  | | | |
-| 066 | 20 | 10-3 | 50 |  | | | |
+| 057 | 15 | 10-3 | 10 | 0.03575 | 0.2523 | | |
+| 058 | 15 | 10-3 | 15 | 0.04023 | 0.2657 | | |
+| 059 | 15 | 10-3 | 20 | 0.03534 | 0.2550 | 0.2646 | |
+| 060 | 15 | 10-3 | 25 | 0.03792 | 0.2404 | 0.2731 | |
+| 061 | 15 | 10-3 | 100 | 0.03753 | 0.2514 | 0.2622 | 0.3327 |
+| 062 | 15 | 10-5 | 50 | 0.03563 | 0.2593 | 0.2317 | |
+| 063 | 15 | 10-7 | 50 | 0.01448 | 0.2712 | | |
+| 064 | 15 | 10-9 | 50 |  | -0.0247 | | |
+| 065 | 15 | 1000 | 50 |  | 0.2616 | | |
+| 066 | 20 | 10-3 | 50 |  | 0.2612 | | |
 | 067 | 50 | 10-3 | 50 |  | | | |
+
+### Robustness of our results
+Testing all our results (CWI SUM baseline + best CWI_ALPHA model) on H&B's
+background model:
+
+| #XP | System | Nonces  | Chimeras L2 | Chimeras L4 | Chimeras L6 |
+| --- | --- | --- | --- | --- | --- |
+| 068 | Sum over list no filter | | | |
+| 069 | Sum over set cwi filter | | | |
+| 070 | n2v asi | | | |
+| 071 | n2v cwi alpha best | | | |
 
 
 ### Going further: is context entropy useful in itself?
