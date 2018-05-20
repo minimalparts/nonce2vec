@@ -190,7 +190,8 @@ def _display_density_stats(ranks, sum_10, sum_25, sum_50):
 
 def _load_informativeness_model(args):
     if not args.info_model:
-        args.info_model = args.background
+        #args.info_model = args.background
+        raise Exception('Please specify an --info_model')
     return Informativeness(
         model_path=args.info_model, sum_filter=args.sum_filter,
         sum_thresh=args.sum_thresh, train_filter=args.train_filter,

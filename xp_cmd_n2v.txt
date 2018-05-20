@@ -637,6 +637,11 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.spli
 
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_only --sum_filter cwe --sum_threshold 0 --sum_over_set
 
+XP169
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_over_set
+
+XP269
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_only --sum_filter random --sample 10000 --sum_over_set
 
 XP070
 n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --alpha 1 --neg 3 --window 15 --sample 10000 --epochs 1 --lambda 70 --sample_decay 1.9 --window_decay 5 --replication
@@ -665,5 +670,8 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.spli
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1250 --kappa 3
 
 n2v test --on chimeras --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1250 --kappa 3
+
+XP073
+n2v test --on nonces --model /home/kabbach/nonce2vec/models/wiki_all.sent.split.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --sum_filter cwe --sum_threshold 0 --sum_over_set --train_with cwe_alpha --neg 3 --epochs 1 --alpha 3 --beta 1000 --kappa 1
 
 
