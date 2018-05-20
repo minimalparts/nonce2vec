@@ -355,11 +355,11 @@ background model:
 | #XP | System | Nonces  | Chimeras L2 | Chimeras L4 | Chimeras L6 |
 | --- | --- | --- | --- | --- | --- |
 | 068 | Sum over list no filter | 0.0095 | 0.3066 | 0.3337 | 0.3260 |
+| 168 | Sum over set self filter | 0.03393 | 0.3352 | 0.3485 | 0.4095 |
 | 069 | Sum over set cwi filter | 0.04160 | 0.3271 | 0.3538 | 0.3890 |
 | 070 | n2v asi | 0.05392 | 0.3092 | 0.3268 | 0.3871 |
 | 071 | n2v cwi alpha (a = 1 b = 1000 k = 1) | 0.04729 | 0.3423 | 0.3369 | 0.3765 |
-| 072 | n2v cwi alpha (a = 3 b = k = 3) | | | | |
-| 073 | n2v cwi alpha with  | | | | |
+| 072 | n2v cwi alpha (a = 3 b = 1250 k = 3) | 0.04634 | 0.3218 | 0.3100 | |
 
 
 ### Going further: is context entropy useful in itself?
