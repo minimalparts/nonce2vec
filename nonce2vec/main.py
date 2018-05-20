@@ -326,6 +326,12 @@ def _train(args):
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,
         size=args.size, workers=args.num_threads)
+    if not args.train_mode:
+        raise Exception('Unspecified train mode')
+    if args.train_mode == 'cbow':
+        model.sg = 0
+    if args.train_mode == 'skipgram':
+        model.sg = 1
     model.build_vocab(sentences)
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
@@ -391,6 +397,8 @@ def main():
                               help='absolute path to training data directory')
     parser_train.add_argument('--size', type=int, default=400,
                               help='vector dimensionality')
+    parser_train.add_argument('--train_mode', choices=['cbow', 'skipgram'],
+                              help='')
     parser_train.add_argument('--outputdir', required=True,
                               help='Absolute path to outputdir to save model')
 
