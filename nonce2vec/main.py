@@ -319,15 +319,16 @@ def _check_men(args):
 
 def _train(args):
     sentences = Samples(args.datadir, source='wiki')
+    if not args.train_mode:
+        raise Exception('Unspecified train mode')
     output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
+                                                  args.train_mode,
                                                   args.window, args.sample,
                                                   args.min_count)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,
         size=args.size, workers=args.num_threads)
-    if not args.train_mode:
-        raise Exception('Unspecified train mode')
     if args.train_mode == 'cbow':
         model.sg = 0
     if args.train_mode == 'skipgram':
