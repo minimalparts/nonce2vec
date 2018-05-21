@@ -415,7 +415,7 @@ def main():
     parser_check.add_argument('--on', required=True,
                               choices=['men', 'nonces', 'chimeras'],
                               help='type of data on which to check')
-    parser_check.add_argument('--data', required=True, dest='dataset',
+    parser_check.add_argument('--data', required=True, dest='men_dataset',
                               help='absolute path to dataset')
     parser_check.add_argument('--model', required=True, dest='w2v_model',
                               help='absolute path to the word2vec model')
