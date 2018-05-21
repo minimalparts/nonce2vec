@@ -14,15 +14,15 @@ Sum over set all the time
 | 003 | none | 0.02031 | 0.01791 |
 | 004 | random | 0.02743 | 0.02610 |
 | 005 | self | 0.03077 | 0.03393 |
-| 006 | cwi |  |  |
+| 006 | cwi | 0.03670 | 0.03851 |
 
 
 | #XP | System | Ours | H&B |
 | --- | --- | --- | --- |
-| 006 | cwi sum |  |  |
+| 006 | cwi sum | 0.03670 | 0.03851 |
 | 007 | n2v as-is | 0.02954 | 0.04303 |
-| 008 | n2v cwi init |  |  |
-| 009 | n2v cwi alpha |  |  |
+| 008 | n2v cwi init | 0.03756 | 0.04786 |
+| 009 | n2v cwi alpha | 0.03651 | 0.04501 |
 
 
 On our background model
@@ -30,17 +30,17 @@ On our background model
 | #XP | System | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- |
 | 010 | self sum | 0.2213 | 0.1785 | 0.2113 |
-| 011 | cwi sum |  |  |
+| 011 | cwi sum | 0.2644 | 0.2205 | 0.2647 |
 | 012 | n2v as-is | 0.2049 | 0.1895 | 0.1844 |
-| 013 | n2v cwi init |  |  |
-| 014 | n2v cwi alpha |  |  |
+| 013 | n2v cwi init | 0.2698 | 0.2176 | 0.2711 |
+| 014 | n2v cwi alpha | 0.2745 | 0.2139 | 0.2734 |
 
 On H&B's
 
 | #XP | System | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- |
 | 015 | self sum | 0.3352 | 0.3485 | 0.4095 |
-| 016 | cwi sum |  |  |
+| 016 | cwi sum | 0.3052 | 0.3365 | 0.3824 |
 | 017 | n2v as-is | 0.3336 | 0.3438 | 0.3922 |
-| 018 | n2v cwi init |  |  |
-| 019 | n2v cwi alpha |  |  |
+| 018 | n2v cwi init | 0.2903 | 0.3417 | 0.3666 |
+| 019 | n2v cwi alpha | 0.3252 | 0.3606 | 0.3674 |
