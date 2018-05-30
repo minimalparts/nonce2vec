@@ -11,7 +11,7 @@ setup(
     description='A python module to generate word embeddings from tiny data',
     author='Aurélie Herbelot and Alexandre Kabbach',
     author_email='akb@3azouz.net',
-    version='0.1.0',
+    version='2.0.0',
     url='https://github.com/akb89/nonce2vec',
     download_url='https://github.com/akb89/nonce2vec/archive/2.0.0.tar.gz',
     license='MIT',
@@ -26,7 +26,8 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['PyYAML==3.12', 'gensim==3.4.0'],
+    install_requires=['PyYAML==3.12', 'gensim==3.4.0', 'scipy==0.19.0',
+                      'numpy==1.14.1'],
     setup_requires=['pytest-runner==4.0', 'pytest-pylint==0.8.0'],
     tests_require=['pytest==3.4.1', 'pylint==1.8.2', 'pytest-cov==2.5.1'],
     classifiers=['Development Status :: 2 - Pre-Alpha',

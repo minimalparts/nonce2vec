@@ -18,10 +18,10 @@ import gensim
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
 
-from gensim.models import Word2Vec
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
-from nonce2vec.utils.files import Sentences
+from nonce2vec.utils.files import Samples
+from nonce2vec.models.informativeness import Informativeness
 
 
 logging.config.dictConfig(
@@ -36,15 +36,18 @@ def _spearman(x, y):
     return scipy.stats.spearmanr(x, y)[0]
 
 
-def _update_rr_and_count(relative_ranks, count, nns, probe):
+def _get_rank(probe, nns):
     for idx, nonce_similar_word in enumerate(nns):
         word = nonce_similar_word[0]
         if word == probe:
-            logger.info('probe: {}'.format(word))
             rank = idx + 1  # rank starts at 1
     if not rank:
         raise Exception('Could not find probe {} in nonce most similar words '
                         '{}'.format(probe, nns))
+    return rank
+
+
+def _update_rr_and_count(relative_ranks, count, rank):
     relative_rank = 1.0 / float(rank)
     relative_ranks += relative_rank
     count += 1
@@ -53,59 +56,76 @@ def _update_rr_and_count(relative_ranks, count, nns, probe):
     return relative_ranks, count
 
 
-
-def _load_nonce2vec_model(background, alpha, sample, neg, window, epochs,
-                          lambda_den, sample_decay, window_decay,
-                          num_threads):
+def _load_nonce2vec_model(args, info, nonce):
     logger.info('Loading Nonce2Vec model...')
-    model = Nonce2Vec.load(background)
+    model = Nonce2Vec.load(args.background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
-    model.alpha = alpha
-    model.sample = sample
-    model.sample_decay = sample_decay
-    model.iter = epochs
-    model.negative = neg
-    model.window = window
-    model.window_decay = window_decay
-    model.lambda_den = lambda_den
-    model.workers = num_threads
-    model.neg_labels = []
-    if model.negative > 0:
-        # precompute negative labels optimization for pure-python training
-        model.neg_labels = np.zeros(model.negative + 1)
-        model.neg_labels[0] = 1.
+    #model.min_count = 1  # min_count should be the same as the background model!!
+    model.replication = args.replication
+    model.sum_over_set = args.sum_over_set
+    model.train_over_set = args.train_over_set
+    if args.sum_filter == 'random' or args.train_filter == 'random':
+        model.sample = args.sample
+    if args.replication:
+        logger.info('Running original n2v code for replication...')
+        if args.sample is None:
+            raise Exception('In replication mode you need to specify the '
+                            'sample parameter')
+        if args.window_decay is None:
+            raise Exception('In replication mode you need to specify the '
+                            'window_decay parameter')
+        if args.sample_decay is None:
+            raise Exception('In replication mode you need to specify the '
+                            'sample_decay parameter')
+        model.sample_decay = args.sample_decay
+        model.window_decay = args.window_decay
+        model.sample = args.sample
+    if not args.sum_only:
+        model.train_with = args.train_with
+        model.alpha = args.alpha
+        model.iter = args.epochs
+        model.negative = args.neg
+        model.lambda_den = args.lambda_den
+        model.kappa = args.kappa
+        model.beta = args.beta
+        model.neg_labels = []
+        if model.negative > 0:
+            # precompute negative labels optimization for pure-python training
+            model.neg_labels = np.zeros(model.negative + 1)
+            model.neg_labels[0] = 1.
+    model.trainables.info = info
+    model.workers = args.num_threads
+    model.vocabulary.nonce = nonce
     logger.info('Model loaded')
     return model
 
 
-def _test_chimeras(args):
-    _sentences = Sentences(args.dataset, source='nonce_or_chimera')
+def _test_on_chimeras(args):
     nonce = '___'
     rhos = []
     count = 0
-    for fields in _sentences:
-        sentences = []
-        for sent in fields[1].split('@@'):
-            sentences.append(sent.split(' '))
-        probes = fields[2].split(',')
-        responses = fields[3].split(',')
+    samples = Samples(args.dataset, source='chimeras')
+    total_num_batches = sum(1 for x in samples)
+    total_num_sent = sum(1 for x in [sent for batch in samples for sent in batch])
+    logger.info('Testing Nonce2Vec on the chimeras dataset containing '
+                '{} batches and {} sentences'.format(total_num_batches,
+                                                     total_num_sent))
+    num_batch = 1
+    info = _load_informativeness_model(args)
+    for sentences, probes, responses in samples:
         logger.info('-' * 30)
+        logger.info('Processing batch {}/{}'.format(num_batch,
+                                                    total_num_batches))
+        num_batch += 1
         logger.info('sentences = {}'.format(sentences))
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
-        model = _load_nonce2vec_model(args.background, args.alpha,
-                                      args.sample, args.neg, args.window,
-                                      args.epochs,
-                                      args.lambda_den,
-                                      args.sample_decay, args.window_decay,
-                                      args.num_threads)
+        model = _load_nonce2vec_model(args, info, nonce)
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        model.vocabulary.nonce = nonce
         model.build_vocab(sentences, update=True)
-        model.min_count = args.min_count
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
@@ -114,7 +134,7 @@ def _test_chimeras(args):
         probe_count = 0
         for probe in probes:
             try:
-                cos = model.similarity('___', probe)
+                cos = model.similarity(nonce, probe)
                 system_responses.append(cos)
                 human_responses.append(responses[probe_count])
             except:
@@ -133,48 +153,104 @@ def _test_chimeras(args):
     logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
 
 
-def _test_nonces(args):
+def _display_stats(ranks, ctx_ents):
+    logger.info('-'*30)
+    logger.info('ranks stats:')
+    logger.info('ranks mean = {}'.format(np.mean(ranks)))
+    logger.info('ranks std = {}'.format(np.std(ranks)))
+    logger.info('ranks min = {}'.format(min(ranks)))
+    logger.info('ranks max = {}'.format(max(ranks)))
+    logger.info('context entropy stats:')
+    logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
+    logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
+    logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
+    logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
+    logger.info('Correlation no rounding = {}'.format(_spearman(ctx_ents,
+                                                                ranks)))
+    logger.info('Correlation round 6 = {}'.format(
+        _spearman([round(x, 6) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 5 = {}'.format(
+        _spearman([round(x, 5) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 4 = {}'.format(
+        _spearman([round(x, 4) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 3 = {}'.format(
+        _spearman([round(x, 3) for x in ctx_ents], ranks)))
+    logger.info('Correlation round 2 = {}'.format(
+        _spearman([round(x, 2) for x in ctx_ents], ranks)))
+
+
+def _display_density_stats(ranks, sum_10, sum_25, sum_50):
+    logger.info('-'*30)
+    logger.info('density stats')
+    logger.info('d10 rho = {}'.format(_spearman(sum_10, ranks)))
+    logger.info('d25 rho = {}'.format(_spearman(sum_25, ranks)))
+    logger.info('d50 rho = {}'.format(_spearman(sum_50, ranks)))
+
+
+def _load_informativeness_model(args):
+    if not args.info_model:
+        logger.warning('Unspecified --info_model. Using background model '
+                       'to compute informativeness-related probabilities')
+        args.info_model = args.background
+    return Informativeness(
+        model_path=args.info_model, sum_filter=args.sum_filter,
+        sum_thresh=args.sum_thresh, train_filter=args.train_filter,
+        train_thresh=args.train_thresh, sort_by=args.sort_by)
+
+
+def _compute_average_sim(sims):
+    sim_sum = sum(sim[1] for sim in sims)
+    return sim_sum / len(sims)
+
+
+def _test_on_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
+    ranks = []
+    sum_10 = []
+    sum_25 = []
+    sum_50 = []
     relative_ranks = 0.0
     count = 0
-    sentences = Sentences(args.dataset, source='nonce_or_chimera')
-    total_num_sent = sum(1 for line in sentences)
-    logger.info('Testing Nonce2Vec on the definitional dataset containing '
+    samples = Samples(args.dataset, source='nonces')
+    total_num_sent = sum(1 for line in samples)
+    logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
-    for fields in sentences:
+    info = _load_informativeness_model(args)
+    for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args.background, args.alpha,
-                                      args.sample, args.neg, args.window,
-                                      args.epochs,
-                                      args.lambda_den,
-                                      args.sample_decay, args.window_decay,
-                                      args.num_threads)
+        model = _load_nonce2vec_model(args, info, nonce)
+        model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        nonce = fields[0]
-        sentence = fields[1].replace('___', nonce).split()
-        probe = '{}_true'.format(nonce)
         logger.info('nonce: {}'.format(nonce))
-        logger.info('sentence: {}'.format(sentence))
+        logger.info('sentence: {}'.format(sentences))
         if nonce not in model.wv.vocab:
             logger.error('Nonce \'{}\' not in gensim.word2vec.model '
                          'vocabulary'.format(nonce))
             continue
-        model.vocabulary.nonce = nonce
-        model.build_vocab([sentence], update=True)
-        model.min_count = args.min_count
+        model.build_vocab(sentences, update=True)
         if not args.sum_only:
-            model.train([sentence], total_examples=model.corpus_count,
+            model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
+        rank = _get_rank(probe, nns)
+        if args.with_stats:
+            ranks.append(rank)
+            gold_nns = model.most_similar('{}_true'.format(nonce),
+                                          topn=vocab_size)
+            sum_10.append(_compute_average_sim(gold_nns[:10]))
+            sum_25.append(_compute_average_sim(gold_nns[:25]))
+            sum_50.append(_compute_average_sim(gold_nns[:50]))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
-                                                     nns, probe)
+                                                     rank)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
+    if args.with_stats:
+        _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
 
 def _get_men_pairs_and_sim(men_dataset):
@@ -198,7 +274,7 @@ def _cosine_similarity(peer_v, query_v):
     return num / (math.sqrt(den_a) * math.sqrt(den_b))
 
 
-def _test_men(args):
+def _check_men(args):
     """Check embeddings quality.
 
     Calculate correlation with the similarity ratings in the MEN dataset.
@@ -226,12 +302,21 @@ def _test_men(args):
 
 
 def _train(args):
-    sentences = Sentences(args.datadir, source='wiki')
-    output_model_filepath = futils.get_model_path(args.datadir, args.outputdir)
+    sentences = Samples(args.datadir, source='wiki')
+    if not args.train_mode:
+        raise Exception('Unspecified train mode')
+    output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
+                                                  args.train_mode,
+                                                  args.window, args.sample,
+                                                  args.min_count)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,
         size=args.size, workers=args.num_threads)
+    if args.train_mode == 'cbow':
+        model.sg = 0
+    if args.train_mode == 'skipgram':
+        model.sg = 1
     model.build_vocab(sentences)
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
@@ -239,77 +324,119 @@ def _train(args):
 
 
 def _test(args):
-    if args.mode == 'nonces':
-        _test_nonces(args)
-    if args.mode == 'chimeras':
-        _test_chimeras(args)
+    if args.on == 'chimeras':
+        _test_on_chimeras(args)
+    elif args.on == 'nonces':
+        _test_on_nonces(args)
 
 
 def main():
     """Launch Nonce2Vec."""
     parser = argparse.ArgumentParser(prog='nonce2vec')
     subparsers = parser.add_subparsers()
-    # a shared set of parameters
-    parser_template = argparse.ArgumentParser(add_help=False)
-    parser_template.add_argument('--num_threads',
-                                 type=int, default=1,
-                                 help='number of threads to be used by gensim')
-    parser_template.add_argument('--alpha', type=float, default=0.025,
-                                 help='initial learning rate')
-    parser_template.add_argument('--neg', required=True, type=int,
-                                 help='number of negative samples')
-    parser_template.add_argument('--window', type=int, default=5,
-                                 help='window size')
-    parser_template.add_argument('--sample', type=float, default=1e-3,
-                                 help='subsampling')
-    parser_template.add_argument('--epochs', type=int, default=5,
-                                 help='number of epochs')
-    parser_template.add_argument('--min_count', type=int, default=50,
-                                 help='min frequency count')
+    # a shared set of parameters when using gensim
+    parser_gensim = argparse.ArgumentParser(add_help=False)
+    parser_gensim.add_argument('--num_threads', type=int, default=1,
+                               help='number of threads to be used by gensim')
+    parser_gensim.add_argument('--alpha', type=float,
+                               help='initial learning rate')
+    parser_gensim.add_argument('--neg', type=int,
+                               help='number of negative samples')
+    parser_gensim.add_argument('--window', type=int,
+                               help='window size')
+    parser_gensim.add_argument('--sample', type=float,
+                               help='subsampling rate')
+    parser_gensim.add_argument('--epochs', type=int,
+                               help='number of epochs')
+    parser_gensim.add_argument('--min_count', type=int,
+                               help='min frequency count')
+
+    # a shared set of parameters when using informativeness
+    parser_info = argparse.ArgumentParser(add_help=False)
+    parser_info.add_argument('--info_model', type=str,
+                             help='informativeness model path')
+    parser_info.add_argument('--sum_filter', default=None,
+                             choices=['random', 'self', 'cwi'],
+                             help='filter for sum initialization')
+    parser_info.add_argument('--sum_threshold', type=int,
+                             dest='sum_thresh',
+                             help='sum filter threshold for self and cwi')
+    parser_info.add_argument('--train_filter', default=None,
+                             choices=['random', 'self', 'cwi'],
+                             help='filter over training context')
+    parser_info.add_argument('--train_threshold', type=int,
+                             dest='train_thresh',
+                             help='train filter threshold for self and cwi')
+    parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
+                             default=None,
+                             help='cwi sorting order for context items')
+
+    # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(
         'train', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_template],
+        parents=[parser_gensim],
         help='generate pre-trained embeddings from wikipedia dump via '
              'gensim.word2vec')
     parser_train.set_defaults(func=_train)
     parser_train.add_argument('--data', required=True, dest='datadir',
                               help='absolute path to training data directory')
-    parser_train.add_argument('--size',
-                              type=int, default=400,
+    parser_train.add_argument('--size', type=int, default=400,
                               help='vector dimensionality')
-    parser_train.add_argument('--outputdir',
-                              required=True,
+    parser_train.add_argument('--train_mode', choices=['cbow', 'skipgram'],
+                              help='how to train word2vec')
+    parser_train.add_argument('--outputdir', required=True,
                               help='Absolute path to outputdir to save model')
-    parser_test_men = subparsers.add_parser(
-        'men', formatter_class=argparse.RawTextHelpFormatter,
+
+    # check various metrics
+    parser_check = subparsers.add_parser(
+        'check', formatter_class=argparse.RawTextHelpFormatter,
+        parents=[parser_info],
         help='check w2v embeddings quality by calculating correlation with '
-             'the similarity ratings in the MEN dataset')
-    parser_test_men.set_defaults(func=_test_men)
-    parser_test_men.add_argument('--data', required=True, dest='men_dataset',
-                                 help='absolute path to MEN dataset')
-    parser_test_men.add_argument('--model', required=True, dest='w2v_model',
-                                 help='absolute path to the word2vec model')
+             'the similarity ratings in the MEN dataset. Also, check the '
+             'distribution of context_entropy across datasets')
+    parser_check.set_defaults(func=_check_men)
+    parser_check.add_argument('--data', required=True, dest='men_dataset',
+                              help='absolute path to dataset')
+    parser_check.add_argument('--model', required=True, dest='w2v_model',
+                              help='absolute path to the word2vec model')
+
+    # test nonce2vec in various config on the chimeras and nonces datasets
     parser_test = subparsers.add_parser(
         'test', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_template],
+        parents=[parser_gensim, parser_info],
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
-    parser_test.add_argument('--mode', required=True,
+    parser_test.add_argument('--on', required=True,
                              choices=['nonces', 'chimeras'],
-                             help='what is to be tested')
+                             help='type of test data to be used')
     parser_test.add_argument('--model', required=True,
                              dest='background',
                              help='absolute path to word2vec pretrained model')
     parser_test.add_argument('--data', required=True, dest='dataset',
-                             help='')
-    parser_test.add_argument('--lambda', required=True, type=float,
+                             help='absolute path to test dataset')
+    parser_test.add_argument('--train_with',
+                             choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
+                             help='learning rate computation function')
+    parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',
-                             help='')
-    parser_test.add_argument('--sample_decay', required=True, type=float,
-                             help='')
-    parser_test.add_argument('--window_decay', required=True, type=int,
-                             help='')
+                             help='lambda decay')
+    parser_test.add_argument('--kappa', type=int,
+                             help='kappa')
+    parser_test.add_argument('--beta', type=int,
+                             help='beta')
+    parser_test.add_argument('--sample_decay', type=float,
+                             help='sample decay')
+    parser_test.add_argument('--window_decay', type=int,
+                             help='window decay')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
-                             help='')
+                             help='sum only: no additional training after sum initialization')
+    parser_test.add_argument('--replication', action='store_true', default=False,
+                             help='use original n2v code')
+    parser_test.add_argument('--sum_over_set', action='store_true', default=False,
+                             help='sum over set of context items rather than list')
+    parser_test.add_argument('--train_over_set', action='store_true', default=False,
+                             help='train over set of context items rather than list')
+    parser_test.add_argument('--with_stats', action='store_true', default=False,
+                             help='display informativeness statistics alongside test results')
     args = parser.parse_args()
     args.func(args)
