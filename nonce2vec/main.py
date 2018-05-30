@@ -18,7 +18,6 @@ import gensim
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
 
-from gensim.models import Word2Vec
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
 from nonce2vec.utils.files import Samples
@@ -179,6 +178,7 @@ def _display_stats(ranks, ctx_ents):
     logger.info('Correlation round 2 = {}'.format(
         _spearman([round(x, 2) for x in ctx_ents], ranks)))
 
+
 def _display_density_stats(ranks, sum_10, sum_25, sum_50):
     logger.info('-'*30)
     logger.info('density stats')
@@ -186,10 +186,12 @@ def _display_density_stats(ranks, sum_10, sum_25, sum_50):
     logger.info('d25 rho = {}'.format(_spearman(sum_25, ranks)))
     logger.info('d50 rho = {}'.format(_spearman(sum_50, ranks)))
 
+
 def _load_informativeness_model(args):
     if not args.info_model:
-        #args.info_model = args.background
-        raise Exception('Please specify an --info_model')
+        logger.warning('Unspecified --info_model. Using background model '
+                       'to compute informativeness-related probabilities')
+        args.info_model = args.background
     return Informativeness(
         model_path=args.info_model, sum_filter=args.sum_filter,
         sum_thresh=args.sum_thresh, train_filter=args.train_filter,
@@ -204,7 +206,6 @@ def _compute_average_sim(sims):
 def _test_on_nonces(args):
     """Test the definitional nonces with a one-off learning procedure."""
     ranks = []
-    ctx_ents = []
     sum_10 = []
     sum_25 = []
     sum_50 = []
@@ -244,27 +245,11 @@ def _test_on_nonces(args):
             sum_10.append(_compute_average_sim(gold_nns[:10]))
             sum_25.append(_compute_average_sim(gold_nns[:25]))
             sum_50.append(_compute_average_sim(gold_nns[:50]))
-        # if args.with_stats:
-        #     ranks.append(rank)
-        #     if args.sum_only:
-        #         # remove duplicates as sum is done on set
-        #         _tokens = set()
-        #         tokens = [x for x in sentences[0] if not
-        #                   (x in _tokens or _tokens.add(x))]
-        #     else:
-        #         tokens = sentences[0]
-        #     filtered_context = info.get_filtered_context(tokens, nonce,
-        #                                                  stats=args.sum_only)
-        #     ctx_ent = info.get_context_entropy(filtered_context)
-        #     ctx_ents.append(ctx_ent)
-        #     logger.info('nonce: {} | ctx_ent = {} | rank = {} '
-        #                 .format(nonce, round(ctx_ent, 4), rank))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
     if args.with_stats:
-        #_display_stats(ranks, ctx_ents)
         _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
 
