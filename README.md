@@ -18,20 +18,33 @@ please cite the following:
 }
 ```
 
-## Replication HowTo
-The following sections detail the steps required to replicate results from scratch.
-
-### Install nonce2vec
+## Install nonce2vec
 Under the nonce2vec directory, run:
 ```bash
-sudo -H python3 setup.py develop
+sudo -H python3 setup.py install
 ```
 
-### Download and extract required resources
+## Download and extract the required resources
+To download the nonces and chimeras datasets:
+```bash
+wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
+```
+To use the pretrained gensim model from Herbelot and Baroni (2017):
+```bash
+wget http://129.194.21.122/~kabbach/wiki_all.model.7z
+```
 
 
-### Generate a pre-trained word2vec model
-To generate a gensim.word2vec model, run:
+## Generate a pre-trained word2vec model
+To generate a gensim.word2vec model from scratch, with the same wikidump and the same hyperparameters as Herbelot and Baroni (2017)
+
+### Download the Wikipedia dump
+Lowercase UTF-8 dump:
+```bash
+wget http://129.194.21.122/~kabbach/
+```
+
+### Train the model
 ```bash
 n2v train \
   --data /absolute/path/to/wikipedia/dump \
@@ -44,18 +57,17 @@ n2v train \
   --min_count 50 \
   --size 400 \
   --num_threads number_of_threads_available_in_your_env
+  --train_mode skipgram
 ```
 
 ### Check the correlation with the MEN dataset
-To check the quality of your pre-trained gensim.word2vec model
-against the MEN dataset, run:
 ```bash
 n2v men \
   --data /absolute/path/to/MEN/MEN_dataset_natural_form_full
   --model /absolute/path/to/gensim/word2vec/model
 ```
 
-### Test nonce2vec on the nonce definitional dataset
+## Test nonce2vec on the nonce definitional dataset
 ```bash
 n2v test \
   --mode nonces \
@@ -93,7 +105,7 @@ n2v test \
 ```
 
 
-### Test nonce2vec on the chimera dataset
+### Test nonce2vec on the chimeras dataset
 ```bash
 n2v test \
   --mode chimeras \
@@ -166,4 +178,4 @@ Average RHO values reported in the paper are (for n2v):
 
 Details:
 - Results on the definitional dataset are robust across n2v versions and pre-trained w2v models
-- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v. 
+- Results on the chimera dataset are systematically lower than previously reported and we cannot replicate the hierarchy on L4. We find that the Sum version systematically outperforms n2v.

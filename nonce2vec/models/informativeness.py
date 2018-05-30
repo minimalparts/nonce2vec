@@ -4,41 +4,26 @@ Loads a bi-directional language model and computes various
 entropy-based informativeness measures.
 """
 
-import numpy
-import spacy
-import copy
-import torch
-import torch.nn.functional as F
+from functools import lru_cache
 
-import bdlm.utils as bdlm_utils
+import logging
 
-from bdlm.language_model import BDLM  # TODO change to language ultimately
-import bdlm.bilstm2
-from bdlm.models.corpus import Dictionary
+import numpy as np
+import scipy
+
+from gensim.models import Word2Vec
+
 
 __all__ = ('Informativeness')
 
-
-def entropy(x):
-    """Compute the Shannon entropy of a tensor x along its lines.
-
-    Args:
-        x (torch.autograd.Variable): A pyTorch Variable: wrapper around a
-                                     torch.Tensor of size n x m.
-
-    Returns:
-        a torch.Tensor of size n x 1
-
-    """
-    plogp = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
-    shannon_entropy = -1.0 * plogp.sum(dim=1)
-    return shannon_entropy
+logger = logging.getLogger(__name__)
 
 
 class Informativeness():
     """Informativeness class relying on a bi-directional language model."""
 
-    def __init__(self, torch_model_path, vocab_path, cuda=False):
+    def __init__(self, model_path, sum_filter=None, sum_thresh=None,
+                 train_filter=None, train_thresh=None, sort_by=None):
         """Initialize the Informativeness instance.
 
         Args:
@@ -53,109 +38,113 @@ class Informativeness():
             nlp: a spacy.nlp loaded instance (for English)
             cuda: set to True to use GPUs with pyTorch
         """
-        self.model = BDLM.load(torch_model_path)
-        self.vocab = Dictionary.load(vocab_path)
-        #self.nlp = spacy.load('en_core_web_sm')
-        self.cuda = cuda
+        self._sum_filter = sum_filter
+        if sum_filter and sum_filter != 'random' and sum_thresh is None:
+            raise Exception('Setting sum_filter as \'{}\' requires specifying '
+                            'a threshold parameter'.format(sum_filter))
+        self._sum_thresh = sum_thresh
+        self._train_filter = train_filter
+        if train_filter and train_filter != 'random' and train_thresh is None:
+            raise Exception('Setting train_filter as \'{}\' requires specifying '
+                            'a threshold parameter'.format(train_filter))
+        self._train_thresh = train_thresh
+        self._model = Word2Vec.load(model_path)
+        self._sort_by = sort_by
 
-    def _tokenize(self, sentence):
-        return self.nlp(sentence).to_array()
+    @property
+    def sum_filter(self):
+        return self._sum_filter
 
-    @classmethod
-    def _add_eos(cls, tokens):
-        preppend = numpy.append(['<eos>'], tokens)
-        append = numpy.append(preppend, ['<eos>'])
-        return append
+    @sum_filter.setter
+    def sum_filter(self, sum_filter):
+        self._sum_filter = sum_filter
 
-    def _map_to_idx(self, tokens_with_eos):
-        ids = torch.LongTensor(len(tokens_with_eos))
-        idx = 0
-        for token in tokens_with_eos:
-            if token not in self.vocab.word2idx:
-                ids[idx] = self.vocab.word2idx['<unk>']
-            else:
-                ids[idx] = self.vocab.word2idx[token]
-            idx += 1
-        return ids
 
-    def _preprocess(self, sentence):
-        """Preprocess input sentence.
+    @lru_cache(maxsize=10)
+    def _get_prob_distribution(self, context):
+        words_and_probs = self._model.predict_output_word(
+            context, topn=len(self._model.wv.vocab))
+        return [item[1] for item in words_and_probs]
 
-        Tokenize and add <eos> symbols to the beginning and the end of the
-        string. Map to ids with vocab and batchify with bdlm utils.
+    @lru_cache(maxsize=10)
+    def _get_context_entropy(self, context):
+        if not context:
+            return 0
+        probs = self._get_prob_distribution(context)
+        shannon_entropy = scipy.stats.entropy(probs)
+        ctx_ent = 1 - (shannon_entropy / np.log(len(probs)))
+        return ctx_ent
 
-        Args:
-            sentence (str): The input sentence string.
+    @lru_cache(maxsize=50)
+    def _get_context_word_entropy(self, context, word_index):
+        ctx_ent_with_word = self._get_context_entropy(context)
+        ctx_without_words = tuple(x for idx, x in enumerate(context) if
+                                  idx != word_index)
+        ctx_ent_without_word = self._get_context_entropy(ctx_without_words)
+        cwi = ctx_ent_with_word - ctx_ent_without_word
+        return cwi
 
-        Returns:
-            tokens_batch: a batchified BDLM sentence as a torch.Tensor.
-            tokens: an iterable spacy.Doc wrapping the tokenized sentence
-        """
-        tokens = self._tokenize(sentence)
-        tokens_with_eos = Informativeness._add_eos(tokens)
-        tokens_as_ints = self._map_to_idx(tokens_with_eos)
-        tokens_batch = bdlm_utils.batchify(tokens_as_ints, bsz=1,
-                                           cuda=self.cuda)
-        return tokens_batch, tokens
+    @lru_cache(maxsize=50)
+    def _keep_item(self, idx, context, filter_type, threshold):
+        if not filter_type:
+            return True
+        if filter_type == 'random':
+            return self._model.wv.vocab[context[idx]].sample_int > self._model.random.rand() * 2 ** 32
+        if filter_type == 'self':
+            return np.log(self._model.wv.vocab[context[idx]].sample_int) > threshold
+        if filter_type == 'cwi':
+            return self._get_context_word_entropy(context, idx) > threshold
+        raise Exception('Invalid ctx_filter parameter: {}'.format(filter_type))
 
-    def _update_word_index(self, tokens, sentence, word_index):
-        # Don't forget to add 1 for start <eos>
-        return
+    def _filter_context(self, context, filter_type, threshold):
+        if not filter_type:
+            logger.warning('Applying no filters to context selection: '
+                           'this should negatively, and significantly, '
+                           'impact results')
+        else:
+            logger.debug('Filtering with filter: {} and threshold = {}'
+                         .format(filter_type, threshold))
+        return tuple(ctx for idx, ctx in enumerate(context) if
+                     self._keep_item(idx, context, filter_type, threshold))
 
-    def sentence2sentence(self):
-        """Get sentence-to-sentence informativeness."""
-        pass
+    def _get_in_vocab_context(self, sentence, vocab, nonce):
+        return tuple([w for w in sentence if w in vocab and w != nonce])
 
-    def sentence2word(self, tokens, word_index, seq_len=0):
-        """Get sentence-to-word informativeness."""
-        if not isinstance(word_index, int) or word_index < 0 \
-         or word_index >= len(tokens):
-            raise Exception('Invalid input word_index = {}. Should be a '
-                            'positive integer within input tokens length '
-                            '= {}'.format(word_index, len(tokens)))
-        _tokens = copy.deepcopy(tokens)
-        _tokens.insert(0, '<eos>')
-        _tokens.append('<eos>')
-        word_index += 1
-        tokens_as_ints = self._map_to_idx(_tokens)
-        assert len(_tokens) == len(tokens) + 2
-        assert _tokens[word_index] == tokens[word_index - 1]
-        batches = bdlm_utils.batchify(tokens_as_ints, bsz=1, cuda=self.cuda)
-        assert batches.size(0) == len(_tokens)
-        assert batches[0][0] == batches[0][-1]  # start/end with <eos>
-        # TODO: maybe change this to a max seq_length ultimately?
-        #seq_len = len(batches) - 2
-        #assert seq_len <= len(batches) - 2
-        hidden = self.model.init_hidden(bsz=1)
-        for i in range(0, batches.size(0), seq_len):
-            hidden = bdlm_utils.update_hidden(self.model, mode='bidir',
-                                              hidden=hidden,
-                                              batch_size=1)
-            if batches.size(0) - i < seq_len + 2:
-                seq_len = batches.size(0) - i - 2
-            if seq_len < 3:
-                continue  # TODO: raise exception
-            if word_index > i and word_index < i + seq_len + 1:
-                data, targets = bdlm_utils.get_batch(batches, i, seq_len,
-                                                     mode='bidir',
-                                                     evaluation=True)
-                print(data)
-                assert data[0].size(0) == seq_len
-                assert data[1].size(0) == seq_len
-                assert targets.size(0) == seq_len
-                predictions, hidden = self.model(data, hidden)
-                assert 0 <= word_index-i-1 <= seq_len - 1
-                pred_tens_variable = predictions[word_index-i-1]
-                # Ultimately 1 should be replaced by the number of batches for w2wi
-                shannon_entropy = float(entropy(pred_tens_variable))
-                # as-is the code supposes that entropy returns a float and not a tensor
-                return 1 - (shannon_entropy / numpy.log(len(self.vocab)))
-            else:
-                continue
-        return  # TODO: raise Exception
+    def _get_filtered_train_ctx_ent(self, sentences, vocab, nonce):
+        ctx_ent = []
+        for sentence in sentences:
+            context = self._get_in_vocab_context(sentence, vocab, nonce)
+            for idx, ctx in enumerate(context):
+                if self._keep_item(idx, context, self._train_filter,
+                                   self._train_thresh):
+                    cwi = self._get_context_word_entropy(context, idx)
+                    logger.debug('word = {} | cwi = {}'.format(context[idx],
+                                                               cwi))
+                    ctx_ent.append((ctx, cwi))
+        return ctx_ent
 
-    def word2word(self):
-        """Get word-to-word informativeness."""
-        # Use torch.where with condition
-        # Better: use masked_select with ge(s2w) condition
-        pass
+    def filter_and_sort_train_ctx_ent(self, sentences, vocab, nonce):
+        """Sort context and return a list of (ctx_word, ctx_word_entropy)."""
+        logger.debug('Filtering and sorting train context...')
+        ctx_ent = self._get_filtered_train_ctx_ent(sentences, vocab, nonce)
+        if not self._sort_by:
+            return ctx_ent
+        if self._sort_by == 'desc':
+            return sorted(ctx_ent, key=lambda x: x[1], reverse=True)
+        if self._sort_by == 'asc':
+            return sorted(ctx_ent, key=lambda x: x[1])
+        raise Exception('Invalid sort_by value: {}'.format(self._sort_by))
+
+    def filter_sum_context(self, sentences, vocab, nonce):
+        """Filter the context to be summed over."""
+        logger.debug('Filtering sum context...')
+        filtered_ctx = []
+        raw_ctx = []
+        for sentence in sentences:
+            _ctx = self._get_in_vocab_context(sentence, vocab, nonce)
+            _filtered_ctx = self._filter_context(_ctx, self._sum_filter,
+                                                 self._sum_thresh)
+            raw_ctx.extend(list(_ctx))
+            filtered_ctx.extend(list(_filtered_ctx))
+        logger.debug('Filtered sum context = {}'.format(filtered_ctx))
+        return raw_ctx, filtered_ctx
