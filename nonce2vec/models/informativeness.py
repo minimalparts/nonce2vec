@@ -81,8 +81,8 @@ class Informativeness():
         ctx_without_words = tuple(x for idx, x in enumerate(context) if
                                   idx != word_index)
         ctx_ent_without_word = self._get_context_entropy(ctx_without_words)
-        cwe = ctx_ent_with_word - ctx_ent_without_word
-        return cwe
+        cwi = ctx_ent_with_word - ctx_ent_without_word
+        return cwi
 
     @lru_cache(maxsize=50)
     def _keep_item(self, idx, context, filter_type, threshold):
@@ -92,7 +92,7 @@ class Informativeness():
             return self._model.wv.vocab[context[idx]].sample_int > self._model.random.rand() * 2 ** 32
         if filter_type == 'self':
             return np.log(self._model.wv.vocab[context[idx]].sample_int) > threshold
-        if filter_type == 'cwe':
+        if filter_type == 'cwi':
             return self._get_context_word_entropy(context, idx) > threshold
         raise Exception('Invalid ctx_filter parameter: {}'.format(filter_type))
 
@@ -117,10 +117,10 @@ class Informativeness():
             for idx, ctx in enumerate(context):
                 if self._keep_item(idx, context, self._train_filter,
                                    self._train_thresh):
-                    cwe = self._get_context_word_entropy(context, idx)
-                    logger.debug('word = {} | cwe = {}'.format(context[idx],
-                                                               cwe))
-                    ctx_ent.append((ctx, cwe))
+                    cwi = self._get_context_word_entropy(context, idx)
+                    logger.debug('word = {} | cwi = {}'.format(context[idx],
+                                                               cwi))
+                    ctx_ent.append((ctx, cwi))
         return ctx_ent
 
     def filter_and_sort_train_ctx_ent(self, sentences, vocab, nonce):

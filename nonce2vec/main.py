@@ -9,8 +9,6 @@ import argparse
 import logging
 import logging.config
 
-from functools import lru_cache
-
 import math
 import scipy
 import numpy as np
@@ -362,7 +360,7 @@ def main():
     parser_gensim.add_argument('--window', type=int,
                                help='window size')
     parser_gensim.add_argument('--sample', type=float,
-                               help='subsampling')
+                               help='subsampling rate')
     parser_gensim.add_argument('--epochs', type=int,
                                help='number of epochs')
     parser_gensim.add_argument('--min_count', type=int,
@@ -371,22 +369,22 @@ def main():
     # a shared set of parameters when using informativeness
     parser_info = argparse.ArgumentParser(add_help=False)
     parser_info.add_argument('--info_model', type=str,
-                             help='Informativeness model path')
+                             help='informativeness model path')
     parser_info.add_argument('--sum_filter', default=None,
-                             choices=['random', 'self', 'cwe'],
-                             help='')
+                             choices=['random', 'self', 'cwi'],
+                             help='filter for sum initialization')
     parser_info.add_argument('--sum_threshold', type=int,
                              dest='sum_thresh',
-                             help='')
+                             help='sum filter threshold for self and cwi')
     parser_info.add_argument('--train_filter', default=None,
-                             choices=['random', 'self', 'cwe'],
-                             help='')
+                             choices=['random', 'self', 'cwi'],
+                             help='filter over training context')
     parser_info.add_argument('--train_threshold', type=int,
                              dest='train_thresh',
-                             help='')
+                             help='train filter threshold for self and cwi')
     parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
                              default=None,
-                             help='')
+                             help='cwi sorting order for context items')
 
     # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(
@@ -400,7 +398,7 @@ def main():
     parser_train.add_argument('--size', type=int, default=400,
                               help='vector dimensionality')
     parser_train.add_argument('--train_mode', choices=['cbow', 'skipgram'],
-                              help='')
+                              help='how to train word2vec')
     parser_train.add_argument('--outputdir', required=True,
                               help='Absolute path to outputdir to save model')
 
@@ -412,9 +410,6 @@ def main():
              'the similarity ratings in the MEN dataset. Also, check the '
              'distribution of context_entropy across datasets')
     parser_check.set_defaults(func=_check_men)
-    parser_check.add_argument('--on', required=True,
-                              choices=['men', 'nonces', 'chimeras'],
-                              help='type of data on which to check')
     parser_check.add_argument('--data', required=True, dest='men_dataset',
                               help='absolute path to dataset')
     parser_check.add_argument('--model', required=True, dest='w2v_model',
@@ -435,27 +430,27 @@ def main():
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
     parser_test.add_argument('--train_with',
-                             choices=['exp_alpha', 'cwe_alpha', 'cst_alpha'],
-                             help='')
+                             choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
+                             help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',
-                             help='')
+                             help='lambda decay')
     parser_test.add_argument('--kappa', type=int,
-                             help='')
+                             help='kappa')
     parser_test.add_argument('--beta', type=int,
-                             help='')
+                             help='beta')
     parser_test.add_argument('--sample_decay', type=float,
-                             help='')
+                             help='sample decay')
     parser_test.add_argument('--window_decay', type=int,
-                             help='')
+                             help='window decay')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
-                             help='')
+                             help='sum only: no additional training after sum initialization')
     parser_test.add_argument('--replication', action='store_true', default=False,
-                             help='')
+                             help='use original n2v code')
     parser_test.add_argument('--sum_over_set', action='store_true', default=False,
-                             help='')
+                             help='sum over set of context items rather than list')
     parser_test.add_argument('--train_over_set', action='store_true', default=False,
-                             help='')
+                             help='train over set of context items rather than list')
     parser_test.add_argument('--with_stats', action='store_true', default=False,
                              help='display informativeness statistics alongside test results')
     args = parser.parse_args()
