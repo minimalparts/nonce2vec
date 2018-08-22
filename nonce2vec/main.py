@@ -15,6 +15,8 @@ import numpy as np
 
 import gensim
 
+from gensim.models import Word2Vec
+
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
 
@@ -307,8 +309,10 @@ def _train(args):
         raise Exception('Unspecified train mode')
     output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
                                                   args.train_mode,
+                                                  args.alpha, args.neg,
                                                   args.window, args.sample,
-                                                  args.min_count)
+                                                  args.epochs,
+                                                  args.min_count, args.size)
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,

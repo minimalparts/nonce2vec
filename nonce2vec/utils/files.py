@@ -7,17 +7,19 @@ __all__ = ('Samples', 'get_zipped_sentences', 'get_sentences',
            'get_model_path')
 
 
-def get_model_path(datadir, outputdir, train_mode, window_size, sample,
-                   min_count):
+def get_model_path(datadir, outputdir, train_mode, alpha, neg, window_size,
+                   sample, epochs, min_count, size):
     """Return absolute path to w2v model file.
 
-    Model absolute path is computer from the outputdir and the
+    Model absolute path is computed from the outputdir and the
     datadir name.
     """
     os.makedirs(outputdir, exist_ok=True)
-    return os.path.join(outputdir, '{}.w2v.{}.win{}.sample{}.mincount{}.model'
-                        .format(os.path.basename(datadir), train_mode,
-                                window_size, sample, min_count))
+    return os.path.join(
+        outputdir,
+        '{}.{}.alpha{}.neg{}.win{}.sample{}.epochs{}.mincount{}.size{}.model'
+        .format(os.path.basename(datadir), train_mode, alpha, neg, window_size,
+                sample, epochs, min_count, size))
 
 
 def get_zipped_sentences(datazip):
