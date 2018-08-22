@@ -50,19 +50,12 @@ class Samples(object):
         if source != 'wiki' and source != 'nonces' and source != 'chimeras':
             raise Exception('Invalid source parameter \'{}\''.format(source))
         self._source = source
-        if source == 'wiki':
-            self._datadir = input_data
-        if source == 'nonces' or source == 'chimeras':
-            self._datafile = input_data
+        self._datafile = input_data
 
     def _iterate_over_wiki(self):
-        for filename in os.listdir(self._datadir):
-            if filename.startswith('.'):
-                continue
-            with open(os.path.join(self._datadir, filename), 'rt') \
-             as input_stream:
-                for line in input_stream:
-                    yield line.strip().split()
+        with open(self._datafile, 'rt') as input_stream:
+            for line in input_stream:
+                yield line.strip().split()
 
     def _iterate_over_nonces(self):
         with open(self._datafile, 'rt') as input_stream:
