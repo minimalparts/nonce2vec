@@ -19,6 +19,7 @@ from gensim.models import Word2Vec
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
+import nonce2vec.utils.wikipedia as wutils
 
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
@@ -334,6 +335,10 @@ def _test(args):
         _test_on_nonces(args)
 
 
+def _extract(args):
+    wutils.extract(args.wiki_input_filepath, args.wiki_output_filepath)
+
+
 def main():
     """Launch Nonce2Vec."""
     parser = argparse.ArgumentParser(prog='nonce2vec')
@@ -442,5 +447,18 @@ def main():
                              help='train over set of context items rather than list')
     parser_test.add_argument('--with_stats', action='store_true', default=False,
                              help='display informativeness statistics alongside test results')
+
+    # extract data from Wikipedia XML dump and convert to UTF-8
+    # lowercase 1 sentence-per-line format.
+    parser_extract = subparsers.add_parser(
+        'extract', formatter_class=argparse.RawTextHelpFormatter,
+        help='extract content from Wikipedia XML dump')
+    parser_extract.set_defaults(func=_extract)
+    parser_extract.add_argument('-i', '--input', required=True,
+                                dest='wiki_input_filepath',
+                                help='absolute path to Wikipedia XML file corresponding to the extracted .xml.bz2 archive')
+    parser_extract.add_argument('-o', '--output', required=True,
+                                dest='wiki_output_filepath',
+                                help='absolute path to output .txt file')
     args = parser.parse_args()
     args.func(args)
