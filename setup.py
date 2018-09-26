@@ -37,7 +37,7 @@ setup(
     setup_requires=['pytest-runner==4.0', 'pytest-pylint==0.8.0'],
     tests_require=['pytest==3.4.1', 'pylint==1.8.2', 'pytest-cov==2.5.1'],
     dependency_links=[
-        'https://github.com/akb89/wikiextractor/tarball/master#egg=wikiextractor-3.0.1',
+        'https://github.com/akb89/wikiextractor/tarball/master#egg=wikiextractor-3.0.2',
         'https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
                  'Environment :: Web Environment',
