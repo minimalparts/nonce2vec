@@ -33,7 +33,7 @@ setup(
     },
     install_requires=['PyYAML==3.12', 'gensim==3.4.0', 'scipy==0.19.0',
                       'numpy==1.14.1', 'wikiextractor==3.0.1', 'spacy==2.0.12',
-                      'en_core_web_sm==2.0.0'],
+                      'en_core_web_sm==2.0.0', 'natsort==5.4.1'],
     setup_requires=['pytest-runner==4.0', 'pytest-pylint==0.8.0'],
     tests_require=['pytest==3.4.1', 'pylint==1.8.2', 'pytest-cov==2.5.1'],
     dependency_links=[

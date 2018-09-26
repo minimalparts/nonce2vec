@@ -6,6 +6,8 @@ This is the entry point of the application.
 import os
 
 import argparse
+import multiprocessing
+import functools
 import logging
 import logging.config
 
@@ -336,7 +338,22 @@ def _test(args):
 
 
 def _extract(args):
-    wutils.extract(args.wiki_input_filepath, args.wiki_output_filepath)
+    logger.info('Extracting content of wikipedia archive under {}'
+                .format(args.wiki_input_dirpath))
+    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
+    with multiprocessing.Pool(args.num_threads) as pool:
+        extract = functools.partial(wutils.extract,
+                                    args.wiki_output_filepath)
+        list(pool.imap_unordered(extract, input_filepaths))
+    # concatenate all .txt files into single output .txt file
+    logger.info('Concatenating tmp files...')
+    tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
+    with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
+        for tmp_filepath in tmp_filepaths:
+            with open(tmp_filepath, 'r') as tmp_stream:
+                for line in tmp_stream:
+                    print(line, file=output_stream)
+    logger.info('Done extracting content of Wikipedia archive')
 
 
 def main():
@@ -455,10 +472,14 @@ def main():
         help='extract content from Wikipedia XML dump')
     parser_extract.set_defaults(func=_extract)
     parser_extract.add_argument('-i', '--input', required=True,
-                                dest='wiki_input_filepath',
-                                help='absolute path to Wikipedia XML file corresponding to the extracted .xml.bz2 archive')
+                                dest='wiki_input_dirpath',
+                                help='absolute path to directory containing Wikipedia XML files')
     parser_extract.add_argument('-o', '--output', required=True,
                                 dest='wiki_output_filepath',
                                 help='absolute path to output .txt file')
+    parser_extract.add_argument('-n', '--num_threads', type=int,
+                                required=False, default=1,
+                                dest='num_threads',
+                                help='number of CPU threads to be used')
     args = parser.parse_args()
     args.func(args)
