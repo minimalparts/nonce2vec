@@ -6,17 +6,17 @@ import natsort
 
 __all__ = ('Samples', 'get_zipped_sentences', 'get_sentences',
            'get_model_path', 'get_input_filepaths', 'get_output_filepath',
-           'get_tmp_filepaths')
+           'get_tmp_filepaths', 'get_tmp_dirpath')
 
 
-def _get_tmp_dirpath(output_txt_filepath):
+def get_tmp_dirpath(output_txt_filepath):
     """Return absolute path to output_txt_dirpath/tmp/."""
     return os.path.join(os.path.dirname(output_txt_filepath), 'tmp')
 
 
 def get_tmp_filepaths(output_txt_filepath):
     """Return all .txt files under the output_txt_dirpath/tmp/ dir."""
-    tmp_dirpath = _get_tmp_dirpath(output_txt_filepath)
+    tmp_dirpath = get_tmp_dirpath(output_txt_filepath)
     return natsort.natsorted([os.path.join(tmp_dirpath, filename) for filename
                               in os.listdir(tmp_dirpath)],
                              alg=natsort.ns.IGNORECASE)
@@ -27,7 +27,7 @@ def get_output_filepath(input_xml_filepath, output_txt_filepath):
 
     Create tmp dir if not exists.
     """
-    tmp_dirpath = _get_tmp_dirpath(output_txt_filepath)
+    tmp_dirpath = get_tmp_dirpath(output_txt_filepath)
     os.makedirs(tmp_dirpath, exist_ok=True)
     output_filename = os.path.basename(input_xml_filepath)
     output_txt_filepath = os.path.join(tmp_dirpath, '{}.txt'.format(output_filename))

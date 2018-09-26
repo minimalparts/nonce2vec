@@ -354,6 +354,7 @@ def _extract(args):
                 for line in tmp_stream:
                     print(line, file=output_stream)
     logger.info('Done extracting content of Wikipedia archive')
+    shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
 
 
 def main():
