@@ -6,6 +6,8 @@ This is the entry point of the application.
 import os
 
 import argparse
+import multiprocessing
+import functools
 import logging
 import logging.config
 
@@ -19,6 +21,7 @@ from gensim.models import Word2Vec
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
+import nonce2vec.utils.wikipedia as wutils
 
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
@@ -334,6 +337,26 @@ def _test(args):
         _test_on_nonces(args)
 
 
+def _extract(args):
+    logger.info('Extracting content of wikipedia archive under {}'
+                .format(args.wiki_input_dirpath))
+    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
+    with multiprocessing.Pool(args.num_threads) as pool:
+        extract = functools.partial(wutils.extract,
+                                    args.wiki_output_filepath)
+        list(pool.imap_unordered(extract, input_filepaths))
+    # concatenate all .txt files into single output .txt file
+    logger.info('Concatenating tmp files...')
+    tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
+    with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
+        for tmp_filepath in tmp_filepaths:
+            with open(tmp_filepath, 'r') as tmp_stream:
+                for line in tmp_stream:
+                    print(line, file=output_stream)
+    logger.info('Done extracting content of Wikipedia archive')
+    shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
+
+
 def main():
     """Launch Nonce2Vec."""
     parser = argparse.ArgumentParser(prog='nonce2vec')
@@ -442,5 +465,22 @@ def main():
                              help='train over set of context items rather than list')
     parser_test.add_argument('--with_stats', action='store_true', default=False,
                              help='display informativeness statistics alongside test results')
+
+    # extract data from Wikipedia XML dump and convert to UTF-8
+    # lowercase 1 sentence-per-line format.
+    parser_extract = subparsers.add_parser(
+        'extract', formatter_class=argparse.RawTextHelpFormatter,
+        help='extract content from Wikipedia XML dump')
+    parser_extract.set_defaults(func=_extract)
+    parser_extract.add_argument('-i', '--input', required=True,
+                                dest='wiki_input_dirpath',
+                                help='absolute path to directory containing Wikipedia XML files')
+    parser_extract.add_argument('-o', '--output', required=True,
+                                dest='wiki_output_filepath',
+                                help='absolute path to output .txt file')
+    parser_extract.add_argument('-n', '--num_threads', type=int,
+                                required=False, default=1,
+                                dest='num_threads',
+                                help='number of CPU threads to be used')
     args = parser.parse_args()
     args.func(args)

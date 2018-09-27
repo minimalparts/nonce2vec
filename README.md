@@ -21,7 +21,7 @@ please cite the following:
 ## Install nonce2vec
 Under the nonce2vec directory, run:
 ```bash
-sudo -H python3 setup.py install
+pip3 install nonce2vec
 ```
 
 ## Download and extract the required resources
@@ -35,7 +35,8 @@ wget http://129.194.21.122/~kabbach/wiki_all.model.7z
 ```
 
 ## Generate a pre-trained word2vec model
-To generate a gensim.word2vec model from scratch, with the same wikidump and the same hyperparameters as Herbelot and Baroni (2017)
+To generate a gensim.word2vec model from scratch, with the same wikidump
+and the same hyperparameters as Herbelot and Baroni (2017):
 
 ### Download the Wikipedia dump
 Lowercase UTF-8 dump:
@@ -43,7 +44,7 @@ Lowercase UTF-8 dump:
 wget http://129.194.21.122/~kabbach/wiki.all.utf8.sent.split.lower.7z
 ```
 
-### Train the model
+### Train the background model
 ```bash
 n2v train \
   --data /absolute/path/to/wikipedia/dump \
