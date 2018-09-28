@@ -16,6 +16,7 @@ import scipy
 import numpy as np
 
 import gensim
+import spacy
 
 from gensim.models import Word2Vec
 
@@ -341,9 +342,11 @@ def _extract(args):
     logger.info('Extracting content of wikipedia archive under {}'
                 .format(args.wiki_input_dirpath))
     input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
+    spacy_nlp = spacy.load('en_core_web_sm')
     with multiprocessing.Pool(args.num_threads) as pool:
         extract = functools.partial(wutils.extract,
-                                    args.wiki_output_filepath)
+                                    args.wiki_output_filepath,
+                                    spacy_nlp)
         list(pool.imap_unordered(extract, input_filepaths))
     # concatenate all .txt files into single output .txt file
     logger.info('Concatenating tmp files...')
