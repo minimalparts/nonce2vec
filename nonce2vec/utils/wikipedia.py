@@ -6,6 +6,7 @@ See: https://github.com/akb89/wikiextractor
 
 import wikiextractor
 import logging
+import spacy
 
 import nonce2vec.utils.files as futils
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ('extract')
 
-def extract(output_txt_filepath, spacy_nlp, input_xml_filepath):
+def extract(output_txt_filepath, input_xml_filepath):
     """Extract content of wikipedia XML file.
 
     Extract content of json.text as given by wikiextractor and tokenize
@@ -23,6 +24,7 @@ def extract(output_txt_filepath, spacy_nlp, input_xml_filepath):
     logger.info('Extracting content of wikipedia file {}'.format(input_xml_filepath))
     output_filepath = futils.get_output_filepath(input_xml_filepath,
                                                  output_txt_filepath)
+    spacy_nlp = spacy.load('en_core_web_sm')
     with open(output_filepath, 'w', encoding='utf-8') as output_stream:
         logger.info('Writing output to file {}'.format(output_filepath))
         for json_object in wikiextractor.extract(input_xml_filepath):
