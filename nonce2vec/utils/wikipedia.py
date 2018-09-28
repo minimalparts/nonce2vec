@@ -5,7 +5,6 @@ See: https://github.com/akb89/wikiextractor
 """
 
 import wikiextractor
-
 import logging
 
 import nonce2vec.utils.files as futils

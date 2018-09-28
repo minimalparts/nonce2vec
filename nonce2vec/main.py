@@ -342,8 +342,8 @@ def _extract(args):
     logger.info('Extracting content of wikipedia archive under {}'
                 .format(args.wiki_input_dirpath))
     input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
-    spacy_nlp = spacy.load('en_core_web_sm')
     with multiprocessing.Pool(args.num_threads) as pool:
+        spacy_nlp = spacy.load('en_core_web_sm')
         extract = functools.partial(wutils.extract,
                                     args.wiki_output_filepath,
                                     spacy_nlp)
