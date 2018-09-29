@@ -25,6 +25,7 @@ def extract(output_txt_filepath, input_xml_filepath):
     output_filepath = futils.get_output_filepath(input_xml_filepath,
                                                  output_txt_filepath)
     spacy_nlp = spacy.load('en_core_web_sm')
+    spacy_nlp.max_length = 10000000  # avoid bug with very long input
     with open(output_filepath, 'w', encoding='utf-8') as output_stream:
         logger.info('Writing output to file {}'.format(output_filepath))
         for json_object in wikiextractor.extract(input_xml_filepath):
