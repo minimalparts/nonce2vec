@@ -8,6 +8,7 @@ import os
 import argparse
 import multiprocessing
 import functools
+import shutil
 import logging
 import logging.config
 
@@ -338,13 +339,19 @@ def _test(args):
 
 
 def _extract(args):
-    # logger.info('Extracting content of wikipedia archive under {}'
-    #             .format(args.wiki_input_dirpath))
-    # input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
-    # with multiprocessing.Pool(args.num_threads) as pool:
-    #     extract = functools.partial(wutils.extract,
-    #                                 args.wiki_output_filepath)
-    #     list(pool.imap_unordered(extract, input_filepaths))
+    logger.info('Extracting content of wikipedia archive under {}'
+                .format(args.wiki_input_dirpath))
+    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
+    total_arxivs = len(input_filepaths)
+    arxiv_num = 0
+    with multiprocessing.Pool(args.num_threads) as pool:
+        extract = functools.partial(wutils.extract,
+                                    args.wiki_output_filepath)
+        for process in pool.imap_unordered(extract, input_filepaths):
+            arxiv_num += 1
+            logger.info('Done extracting content of {}'.format(process))
+            logger.info('Complete extraction of archives {}/{}'
+                        .format(arxiv_num, total_arxivs))
     # concatenate all .txt files into single output .txt file
     logger.info('Concatenating tmp files...')
     tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
@@ -353,7 +360,7 @@ def _extract(args):
             with open(tmp_filepath, 'r') as tmp_stream:
                 for line in tmp_stream:
                     print(line, file=output_stream)
-    logger.info('Done extracting content of Wikipedia archive')
+    logger.info('Done extracting content of Wikipedia archives')
     shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
 
 
@@ -456,15 +463,20 @@ def main():
     parser_test.add_argument('--window_decay', type=int,
                              help='window decay')
     parser_test.add_argument('--sum_only', action='store_true', default=False,
-                             help='sum only: no additional training after sum initialization')
+                             help='sum only: no additional training after '
+                                  'sum initialization')
     parser_test.add_argument('--replication', action='store_true', default=False,
                              help='use original n2v code')
-    parser_test.add_argument('--sum_over_set', action='store_true', default=False,
-                             help='sum over set of context items rather than list')
-    parser_test.add_argument('--train_over_set', action='store_true', default=False,
-                             help='train over set of context items rather than list')
-    parser_test.add_argument('--with_stats', action='store_true', default=False,
-                             help='display informativeness statistics alongside test results')
+    parser_test.add_argument('--sum_over_set', action='store_true',
+                             default=False, help='sum over set of context '
+                                                 'items rather than list')
+    parser_test.add_argument('--train_over_set', action='store_true',
+                             default=False, help='train over set of context '
+                                                 'items rather than list')
+    parser_test.add_argument('--with_stats', action='store_true',
+                             default=False, help='display informativeness '
+                                                 'statistics alongside test '
+                                                 'results')
 
     # extract data from Wikipedia XML dump and convert to UTF-8
     # lowercase 1 sentence-per-line format.
@@ -474,7 +486,8 @@ def main():
     parser_extract.set_defaults(func=_extract)
     parser_extract.add_argument('-i', '--input', required=True,
                                 dest='wiki_input_dirpath',
-                                help='absolute path to directory containing Wikipedia XML files')
+                                help='absolute path to directory containing '
+                                     'Wikipedia XML files')
     parser_extract.add_argument('-o', '--output', required=True,
                                 dest='wiki_output_filepath',
                                 help='absolute path to output .txt file')
