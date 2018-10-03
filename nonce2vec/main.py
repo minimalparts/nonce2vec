@@ -338,13 +338,13 @@ def _test(args):
 
 
 def _extract(args):
-    logger.info('Extracting content of wikipedia archive under {}'
-                .format(args.wiki_input_dirpath))
-    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
-    with multiprocessing.Pool(args.num_threads) as pool:
-        extract = functools.partial(wutils.extract,
-                                    args.wiki_output_filepath)
-        list(pool.imap_unordered(extract, input_filepaths))
+    # logger.info('Extracting content of wikipedia archive under {}'
+    #             .format(args.wiki_input_dirpath))
+    # input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
+    # with multiprocessing.Pool(args.num_threads) as pool:
+    #     extract = functools.partial(wutils.extract,
+    #                                 args.wiki_output_filepath)
+    #     list(pool.imap_unordered(extract, input_filepaths))
     # concatenate all .txt files into single output .txt file
     logger.info('Concatenating tmp files...')
     tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
