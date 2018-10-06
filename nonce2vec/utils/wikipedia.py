@@ -34,7 +34,6 @@ def extract(output_txt_filepath, input_xml_filepath):
         for json_object in wikiextractor.extract(input_xml_filepath):
             doc = spacy_nlp(json_object['text'])
             for sent in doc.sents:
-                #output_sent = ' '.join([token.text.lower() for token in sent])
                 output_sent = ' '.join([token.text.lower().strip() for token
                                         in sent])
                 print(output_sent, file=output_stream)

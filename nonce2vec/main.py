@@ -350,18 +350,19 @@ def _extract(args):
         for process in pool.imap_unordered(extract, input_filepaths):
             arxiv_num += 1
             logger.info('Done extracting content of {}'.format(process))
-            logger.info('Complete extraction of archives {}/{}'
+            logger.info('Completed extraction of {}/{} archives'
                         .format(arxiv_num, total_arxivs))
-    # concatenate all .txt files into single output .txt file
-    logger.info('Concatenating tmp files...')
-    tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
-    with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
-        for tmp_filepath in tmp_filepaths:
-            with open(tmp_filepath, 'r') as tmp_stream:
-                for line in tmp_stream:
-                    print(line, file=output_stream)
-    logger.info('Done extracting content of Wikipedia archives')
-    shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
+        # concatenate all .txt files into single output .txt file
+        logger.info('Concatenating tmp files...')
+        tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
+        with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
+            for tmp_filepath in tmp_filepaths:
+                with open(tmp_filepath, 'r') as tmp_stream:
+                    for line in tmp_stream:
+                        line = line.strip()
+                        print(line, file=output_stream)
+        logger.info('Done extracting content of Wikipedia archives')
+        shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
 
 
 def main():

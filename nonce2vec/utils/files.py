@@ -35,7 +35,7 @@ def get_output_filepath(input_xml_filepath, output_txt_filepath):
 
 
 def get_input_filepaths(dirpath):
-    """Return a list of absolute filepaths from a given dirpath.
+    """Return a list of absolute XML filepaths from a given dirpath.
 
     List all the files under a specific directory.
     """
