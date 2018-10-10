@@ -344,14 +344,14 @@ def _extract(args):
     input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
     total_arxivs = len(input_filepaths)
     arxiv_num = 0
-    # with multiprocessing.Pool(args.num_threads) as pool:
-    #     extract = functools.partial(wutils.extract,
-    #                                 args.wiki_output_filepath)
-    #     for process in pool.imap_unordered(extract, input_filepaths):
-    #         arxiv_num += 1
-    #         logger.info('Done extracting content of {}'.format(process))
-    #         logger.info('Completed extraction of {}/{} archives'
-    #                     .format(arxiv_num, total_arxivs))
+    with multiprocessing.Pool(args.num_threads) as pool:
+        extract = functools.partial(wutils.extract,
+                                    args.wiki_output_filepath)
+        for process in pool.imap_unordered(extract, input_filepaths):
+            arxiv_num += 1
+            logger.info('Done extracting content of {}'.format(process))
+            logger.info('Completed extraction of {}/{} archives'
+                        .format(arxiv_num, total_arxivs))
     # concatenate all .txt files into single output .txt file
     logger.info('Concatenating tmp files...')
     tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
