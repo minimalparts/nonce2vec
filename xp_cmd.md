@@ -33,7 +33,7 @@ n2v train --data /home/kabbach/nonce2vec/data/enwiki.20180920.utf8.lower.txt --o
 ```
 
 ```
-n2v check --data /home/kabbach/nonce2vec/data/MEN/MEN_dataset_natural_form_full --model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.skipgram.alpha0.010.neg10.win50.sample0.001.epochs5.mincount50.size1000.model
+n2v check --data /home/kabbach/nonce2vec/data/MEN/MEN_dataset_natural_form_full --model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.cbow.alpha0.01.neg10.win50.sample0.001.epochs5.mincount50.size1000.model
 ```
 
 ## XP009

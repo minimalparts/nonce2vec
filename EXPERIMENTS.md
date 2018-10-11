@@ -2,6 +2,8 @@
 
 ## Background
 
+### With the gensim implementation
+
 On the 'old' wikidump of Herbelot and Baroni (2017)
 
 | XP | mode | alpha | neg | window | sample | epochs | min count | size | MEN |
@@ -15,10 +17,14 @@ On the 'new' wikidump (2018.09.20)
 
 | XP | mode | alpha | neg | window | sample | epochs | min count | size | MEN |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 005 | skip | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 400 |  |
-| 006 | skip | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 700 |  |
-| 007 | cbow | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 400 |  |
-| 008 | cbow | 0.010 | 10 | 50 | 1e-3 | 5 | 50 | 1000 |  |
+| 005 | skip | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 400 | 0.75 |
+| 006 | skip | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 700 | 0.75 | (slightly better than above by 0.005 points)
+| 007 | cbow | 0.025 | 5 | 5 | 1e-3 | 5 | 50 | 400 | 0.69 |
+| 008 | cbow | 0.010 | 10 | 50 | 1e-3 | 5 | 50 | 1000 | 0.74 |
+
+### With the Tensorflow implementation
+
+
 
 ## Definitional
 
