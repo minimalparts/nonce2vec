@@ -130,6 +130,10 @@ def _test_on_chimeras(args):
         logger.info('responses = {}'.format(responses))
         model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = '___'
+        # A quick and dirty bugfix to add the nonce to the vocab
+        model.wv.vocab['___'] = Vocab(count=1,
+                                      index=len(wv.index2word))
+        model.wv.index2word.append('___')
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
         model.build_vocab(sentences, update=True)
