@@ -129,9 +129,10 @@ def _test_on_chimeras(args):
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
         model = _load_nonce2vec_model(args, info, nonce)
+        model.vocabulary.nonce = '___'
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        #model.build_vocab(sentences, update=True)
+        model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
