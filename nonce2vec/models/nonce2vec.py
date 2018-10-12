@@ -298,64 +298,64 @@ class Nonce2VecVocab(Word2VecVocab):
             retain_words = new_words + pre_exist_words
             retain_total = new_total + pre_exist_total
 
-            # Precalculate each vocabulary item's threshold for sampling
-            if not sample:
-                # no words downsampled
-                threshold_count = retain_total
-            # Only retaining one subsampling notion from original gensim implementation
+        # Precalculate each vocabulary item's threshold for sampling
+        if not sample:
+            # no words downsampled
+            threshold_count = retain_total
+        # Only retaining one subsampling notion from original gensim implementation
+        else:
+            threshold_count = sample * retain_total
+
+        downsample_total, downsample_unique = 0, 0
+        for w in retain_words:
+            v = wv.vocab[w].count
+            word_probability = (np.sqrt(v / threshold_count) + 1) \
+                * (threshold_count / v)
+            if word_probability < 1.0:
+                downsample_unique += 1
+                downsample_total += word_probability * v
             else:
-                threshold_count = sample * retain_total
+                word_probability = 1.0
+                downsample_total += v
+            if not dry_run:
+                wv.vocab[w].sample_int = int(round(word_probability * 2**32))
 
-            downsample_total, downsample_unique = 0, 0
-            for w in retain_words:
-                v = wv.vocab[w].count
-                word_probability = (np.sqrt(v / threshold_count) + 1) \
-                    * (threshold_count / v)
-                if word_probability < 1.0:
-                    downsample_unique += 1
-                    downsample_total += word_probability * v
-                else:
-                    word_probability = 1.0
-                    downsample_total += v
-                if not dry_run:
-                    wv.vocab[w].sample_int = int(round(word_probability * 2**32))
+        if not dry_run and not keep_raw_vocab:
+            logger.info('deleting the raw counts dictionary of %i items',
+                        len(self.raw_vocab))
+            self.raw_vocab = defaultdict(int)
 
-            if not dry_run and not keep_raw_vocab:
-                logger.info('deleting the raw counts dictionary of %i items',
-                            len(self.raw_vocab))
-                self.raw_vocab = defaultdict(int)
+        logger.info('sample=%g downsamples %i most-common words', sample,
+                    downsample_unique)
+        logger.info('downsampling leaves estimated %i word corpus '
+                    '(%.1f%% of prior %i)', downsample_total,
+                    downsample_total * 100.0 / max(retain_total, 1),
+                    retain_total)
 
-            logger.info('sample=%g downsamples %i most-common words', sample,
-                        downsample_unique)
-            logger.info('downsampling leaves estimated %i word corpus '
-                        '(%.1f%% of prior %i)', downsample_total,
-                        downsample_total * 100.0 / max(retain_total, 1),
-                        retain_total)
+        # return from each step: words-affected, resulting-corpus-size,
+        # extra memory estimates
+        report_values = {
+            'drop_unique': drop_unique, 'retain_total': retain_total,
+            'downsample_unique': downsample_unique,
+            'downsample_total': int(downsample_total),
+            'num_retained_words': len(retain_words)
+        }
 
-            # return from each step: words-affected, resulting-corpus-size,
-            # extra memory estimates
-            report_values = {
-                'drop_unique': drop_unique, 'retain_total': retain_total,
-                'downsample_unique': downsample_unique,
-                'downsample_total': int(downsample_total),
-                'num_retained_words': len(retain_words)
-            }
+        if self.null_word:
+            # create null pseudo-word for padding when using concatenative
+            # L1 (run-of-words)
+            # this word is only ever input – never predicted – so count,
+            # huffman-point, etc doesn't matter
+            self.add_null_word(wv)
 
-            if self.null_word:
-                # create null pseudo-word for padding when using concatenative
-                # L1 (run-of-words)
-                # this word is only ever input – never predicted – so count,
-                # huffman-point, etc doesn't matter
-                self.add_null_word(wv)
-
-            if self.sorted_vocab and not update:
-                self.sort_vocab(wv)
-            if hs:
-                # add info about each word's Huffman encoding
-                self.create_binary_tree(wv)
-            if negative:
-                # build the table for drawing random words (for negative sampling)
-                self.make_cum_table(wv)
+        if self.sorted_vocab and not update:
+            self.sort_vocab(wv)
+        if hs:
+            # add info about each word's Huffman encoding
+            self.create_binary_tree(wv)
+        if negative:
+            # build the table for drawing random words (for negative sampling)
+            self.make_cum_table(wv)
 
         return report_values, pre_exist_words
 
