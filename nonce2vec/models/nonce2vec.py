@@ -254,15 +254,15 @@ class Nonce2VecVocab(Word2VecVocab):
         # New words and pre-existing words are two separate lists
         new_words = []
         pre_exist_words = []
-        # If nonce is already in previous vocab, replace its label
-        # (copy the original to a new slot, and delete original)
-        if self.nonce is not None and self.nonce in wv.vocab:
-            gold_nonce = '{}_true'.format(self.nonce)
-            nonce_index = wv.vocab[self.nonce].index
-            wv.vocab[gold_nonce] = wv.vocab[self.nonce]
-            wv.index2word[nonce_index] = gold_nonce
-            #del wv.index2word[wv.vocab[self.nonce].index]
-            del wv.vocab[self.nonce]
+        if self.nonce is not None:
+        #if self.nonce is not None and self.nonce in wv.vocab:
+            if self.nonce in wv.vocab:
+                gold_nonce = '{}_true'.format(self.nonce)
+                nonce_index = wv.vocab[self.nonce].index
+                wv.vocab[gold_nonce] = wv.vocab[self.nonce]
+                wv.index2word[nonce_index] = gold_nonce
+                #del wv.index2word[wv.vocab[self.nonce].index]
+                del wv.vocab[self.nonce]
             for word, v in iteritems(self.raw_vocab):
                 # Update count of all words already in vocab
                 if word in wv.vocab:
