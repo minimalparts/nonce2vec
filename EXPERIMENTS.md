@@ -63,7 +63,7 @@ replication (standard skipgram model on old wikidump)
 | 015 | random | 0.02187 |
 | 016 | self | 0.02952 |
 | 017 | cwi | 0.03352 | info model is cbow with same hyperparams as skipgram
-| 117 | cwi | | info model is best cbow
+| 117 | cwi | 0.03780 | info model is best cbow
 
 Using the standard skipgram background model on latest wikidump
 
@@ -92,7 +92,7 @@ replication on old wikidump
 
 | XP  | mode | MRR |
 | --- | --- | --- |
-| XXX | cwi sum | 0.03352 |
+| 117 | cwi sum | 0.03780 |
 | 023 | n2v as-is | 0.04417 |
 | 024 | n2v cwi init | 0.04888 | with same cbow
 | 124 | n2v cwi init | 0.04369 | with best cbow
@@ -103,7 +103,7 @@ replication with skipgram on same hyperparameters trained on new wikidump
 
 | XP  | mode | MRR |
 | --- | --- | --- |
-| XXX | cwi sum | 0.03581 |
+| 121 | cwi sum | 0.03788 |
 | 027 | n2v as-is | 0.04400 |
 | 028 | n2v cwi init | 0.04526 |
 | 128 | n2v cwi init | 0.04901 |
@@ -147,35 +147,35 @@ On L2
 
 | XP  | filter | RHO |
 | --- | --- | --- |
-| 051 | no-filter | |
-| 052 | random | |
-| 053 | self | |
-| 054 | cwi | |
+| 051 | no-filter | 0.3061 |
+| 052 | random | 0.3400 |
+| 053 | self | 0.3465 |
+| 054 | cwi | 0.3162 |
 
 On L4
 
 | XP  | filter | RHO |
 | --- | --- | --- |
-| 055 | no-filter | |
-| 056 | random | |
-| 057 | self | |
-| 058 | cwi | |
+| 055 | no-filter | 0.3581 |
+| 056 | random | 0.3649 |
+| 057 | self | 0.3623 |
+| 058 | cwi | 0.3598 |
 
 On L6
 
 | XP  | filter | RHO |
 | --- | --- | --- |
-| 059 | no-filter | |
-| 060 | random | |
-| 061 | self | |
-| 062 | cwi | |
+| 059 | no-filter | 0.3445 |
+| 060 | random | 0.3549 |
+| 061 | self | 0.3637 |
+| 062 | cwi | 0.3981 |
 
 ### Training
 
 On L2
 | XP  | mode | MRR |
 | --- | --- | --- |
-| 040 | n2v as-is |  |
+| 040 | n2v as-is | 0.2982 |
 | 063 | n2v cwi init |  | with same cbow
 | 064 | n2v cwi init |  | with best cbow
 | 065 | n2v cwi alpha |  | same cbow
@@ -184,7 +184,7 @@ On L2
 On L4
 | XP  | mode | MRR |
 | --- | --- | --- |
-| 045 | n2v as-is |  |
+| 045 | n2v as-is | 0.3675 |
 | 067 | n2v cwi init |  | with same cbow
 | 068 | n2v cwi init |  | with best cbow
 | 069 | n2v cwi alpha |  | same cbow
@@ -193,7 +193,7 @@ On L4
 On L6
 | XP  | mode | MRR |
 | --- | --- | --- |
-| 050 | n2v as-is |  |
+| 050 | n2v as-is | 0.3660 |
 | 071 | n2v cwi init |  | with same cbow
 | 072 | n2v cwi init |  | with best cbow
 | 073 | n2v cwi alpha |  | same cbow
