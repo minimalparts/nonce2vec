@@ -6,9 +6,6 @@ This is the entry point of the application.
 import os
 
 import argparse
-import multiprocessing
-import functools
-import shutil
 import logging
 import logging.config
 
@@ -19,16 +16,13 @@ import numpy as np
 import gensim
 
 from gensim.models import Word2Vec
-from gensim.models.keyedvectors import Vocab
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
-import nonce2vec.utils.wikipedia as wutils
 
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
 from nonce2vec.utils.files import Samples
-from nonce2vec.models.informativeness import Informativeness
 
 
 logging.config.dictConfig(
@@ -120,7 +114,6 @@ def _test_on_chimeras(args):
                 '{} batches and {} sentences'.format(total_num_batches,
                                                      total_num_sent))
     num_batch = 1
-    info = _load_informativeness_model(args)
     for sentences, probes, responses in samples:
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
@@ -163,51 +156,6 @@ def _test_on_chimeras(args):
                 rhos.append(rho)
         count += 1
     logger.info('AVERAGE RHO = {}'.format(float(sum(rhos))/float(len(rhos))))
-
-
-def _display_stats(ranks, ctx_ents):
-    logger.info('-'*30)
-    logger.info('ranks stats:')
-    logger.info('ranks mean = {}'.format(np.mean(ranks)))
-    logger.info('ranks std = {}'.format(np.std(ranks)))
-    logger.info('ranks min = {}'.format(min(ranks)))
-    logger.info('ranks max = {}'.format(max(ranks)))
-    logger.info('context entropy stats:')
-    logger.info('ctx_ents mean = {}'.format(np.mean(ctx_ents)))
-    logger.info('ctx_ents std = {}'.format(np.std(ctx_ents)))
-    logger.info('ctx_ents min = {}'.format(min(ctx_ents)))
-    logger.info('ctx_ents max = {}'.format(max(ctx_ents)))
-    logger.info('Correlation no rounding = {}'.format(_spearman(ctx_ents,
-                                                                ranks)))
-    logger.info('Correlation round 6 = {}'.format(
-        _spearman([round(x, 6) for x in ctx_ents], ranks)))
-    logger.info('Correlation round 5 = {}'.format(
-        _spearman([round(x, 5) for x in ctx_ents], ranks)))
-    logger.info('Correlation round 4 = {}'.format(
-        _spearman([round(x, 4) for x in ctx_ents], ranks)))
-    logger.info('Correlation round 3 = {}'.format(
-        _spearman([round(x, 3) for x in ctx_ents], ranks)))
-    logger.info('Correlation round 2 = {}'.format(
-        _spearman([round(x, 2) for x in ctx_ents], ranks)))
-
-
-def _display_density_stats(ranks, sum_10, sum_25, sum_50):
-    logger.info('-'*30)
-    logger.info('density stats')
-    logger.info('d10 rho = {}'.format(_spearman(sum_10, ranks)))
-    logger.info('d25 rho = {}'.format(_spearman(sum_25, ranks)))
-    logger.info('d50 rho = {}'.format(_spearman(sum_50, ranks)))
-
-
-def _load_informativeness_model(args):
-    if not args.info_model:
-        logger.warning('Unspecified --info_model. Using background model '
-                       'to compute informativeness-related probabilities')
-        args.info_model = args.background
-    return Informativeness(
-        model_path=args.info_model, sum_filter=args.sum_filter,
-        sum_thresh=args.sum_thresh, train_filter=args.train_filter,
-        train_thresh=args.train_thresh, sort_by=args.sort_by)
 
 
 def _compute_average_sim(sims):
@@ -344,33 +292,6 @@ def _test(args):
         _test_on_nonces(args)
 
 
-def _extract(args):
-    logger.info('Extracting content of wikipedia archive under {}'
-                .format(args.wiki_input_dirpath))
-    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
-    total_arxivs = len(input_filepaths)
-    arxiv_num = 0
-    with multiprocessing.Pool(args.num_threads) as pool:
-        extract = functools.partial(wutils.extract,
-                                    args.wiki_output_filepath)
-        for process in pool.imap_unordered(extract, input_filepaths):
-            arxiv_num += 1
-            logger.info('Done extracting content of {}'.format(process))
-            logger.info('Completed extraction of {}/{} archives'
-                        .format(arxiv_num, total_arxivs))
-    # concatenate all .txt files into single output .txt file
-    logger.info('Concatenating tmp files...')
-    tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
-    with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
-        for tmp_filepath in tmp_filepaths:
-            with open(tmp_filepath, 'r') as tmp_stream:
-                for line in tmp_stream:
-                    line = line.strip()
-                    print(line, file=output_stream)
-    logger.info('Done extracting content of Wikipedia archives')
-    shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
-
-
 def main():
     """Launch Nonce2Vec."""
     parser = argparse.ArgumentParser(prog='nonce2vec')
@@ -391,26 +312,6 @@ def main():
                                help='number of epochs')
     parser_gensim.add_argument('--min-count', type=int,
                                help='min frequency count')
-
-    # a shared set of parameters when using informativeness
-    parser_info = argparse.ArgumentParser(add_help=False)
-    parser_info.add_argument('--info-model', type=str,
-                             help='informativeness model path')
-    parser_info.add_argument('--sum-filter', default=None,
-                             choices=['random', 'self', 'cwi'],
-                             help='filter for sum initialization')
-    parser_info.add_argument('--sum-threshold', type=int,
-                             dest='sum_thresh',
-                             help='sum filter threshold for self and cwi')
-    parser_info.add_argument('--train-filter', default=None,
-                             choices=['random', 'self', 'cwi'],
-                             help='filter over training context')
-    parser_info.add_argument('--train-threshold', type=int,
-                             dest='train_thresh',
-                             help='train filter threshold for self and cwi')
-    parser_info.add_argument('--sort-by', choices=['asc', 'desc'],
-                             default=None,
-                             help='cwi sorting order for context items')
 
     # train word2vec with gensim from a wikipedia dump
     parser_train = subparsers.add_parser(
@@ -484,23 +385,5 @@ def main():
                              default=False, help='display informativeness '
                                                  'statistics alongside test '
                                                  'results')
-
-    # extract data from Wikipedia XML dump and convert to UTF-8
-    # lowercase 1 sentence-per-line format.
-    parser_extract = subparsers.add_parser(
-        'extract', formatter_class=argparse.RawTextHelpFormatter,
-        help='extract content from Wikipedia XML dump')
-    parser_extract.set_defaults(func=_extract)
-    parser_extract.add_argument('-i', '--input', required=True,
-                                dest='wiki_input_dirpath',
-                                help='absolute path to directory containing '
-                                     'Wikipedia XML files')
-    parser_extract.add_argument('-o', '--output', required=True,
-                                dest='wiki_output_filepath',
-                                help='absolute path to output .txt file')
-    parser_extract.add_argument('-n', '--num-threads', type=int,
-                                required=False, default=1,
-                                dest='num_threads',
-                                help='number of CPU threads to be used')
     args = parser.parse_args()
     args.func(args)

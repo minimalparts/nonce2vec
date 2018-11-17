@@ -5,7 +5,7 @@ A modified version of gensim.Word2Vec.
 """
 
 import logging
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 
 import numpy as np
 from scipy.special import expit
@@ -19,18 +19,13 @@ __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
 
-def compute_cwi_alpha(cwi, kappa, beta, alpha, min_alpha):
-    x = np.tanh(cwi*beta)
-    decay = (np.exp(kappa*(x+1)) - 1) / (np.exp(2*kappa) - 1)
-    if decay * alpha > min_alpha:
-        return decay * alpha
-    return min_alpha
 
 def compute_exp_alpha(nonce_count, lambda_den, alpha, min_alpha):
     exp_decay = -(nonce_count-1) / lambda_den
     if alpha * np.exp(exp_decay) > min_alpha:
         return alpha * np.exp(exp_decay)
     return min_alpha
+
 
 def train_sg_pair_replication(model, word, context_index, alpha,
                               nonce_count, learn_vectors=True,
@@ -91,6 +86,7 @@ def train_sg_pair_replication(model, word, context_index, alpha,
                 # (mutates model.wv.syn0[word2.index], if that is l1)
     return neu1e
 
+
 def train_batch_sg_replication(model, sentences, alpha, work=None,
                                compute_loss=False):
     result = 0
@@ -121,106 +117,6 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
         if window - 1 >= 3:
             window = window - model.window_decay
         model.recompute_sample_ints()
-    return result
-
-def train_sg_pair(model, word, context_index, alpha,
-                  learn_vectors=True, learn_hidden=True,
-                  context_vectors=None, context_locks=None, compute_loss=False,
-                  is_ft=False):
-    if context_vectors is None:
-        #context_vectors = model.wv.syn0
-        context_vectors = model.wv.vectors
-
-    if context_locks is None:
-        #context_locks = model.syn0_lockf
-        context_locks = model.trainables.vectors_lockf
-
-    if word not in model.wv.vocab:
-        return
-    predict_word = model.wv.vocab[word]  # target word (NN output)
-
-    l1 = context_vectors[context_index]  # input word (NN input/projection layer)
-    neu1e = np.zeros(l1.shape)
-
-    # Only train the nonce
-    if model.vocabulary.nonce is not None \
-     and model.wv.index2word[context_index] == model.vocabulary.nonce \
-     and word != model.vocabulary.nonce:
-        lock_factor = context_locks[context_index]
-        if model.negative:
-            # use this word (label = 1) + `negative` other random words not
-            # from this sentence (label = 0)
-            word_indices = [predict_word.index]
-            while len(word_indices) < model.negative + 1:
-                w = model.cum_table.searchsorted(
-                    model.random.randint(model.cum_table[-1]))
-                if w != predict_word.index:
-                    word_indices.append(w)
-            l2b = model.syn1neg[word_indices]  # 2d matrix, k+1 x layer1_size
-            prod_term = np.dot(l1, l2b.T)
-            fb = expit(prod_term)  # propagate hidden -> output
-            gb = (model.neg_labels - fb) * alpha  # vector of error gradients
-            # multiplied by the learning rate
-            if learn_hidden:
-                model.syn1neg[word_indices] += np.outer(gb, l1)
-                # learn hidden -> output
-            neu1e += np.dot(gb, l2b)  # save error
-
-        if learn_vectors:
-            l1 += neu1e * lock_factor  # learn input -> hidden
-                # (mutates model.wv.syn0[word2.index], if that is l1)
-    return neu1e
-
-
-def _get_unique_ctx_ent_tuples(ctx_ent_tuples):
-    ctx_ent_dict = OrderedDict()
-    for ctx, ent in ctx_ent_tuples:
-        if ctx not in ctx_ent_dict:
-            ctx_ent_dict[ctx] = ent
-        else:
-            ctx_ent_dict[ctx] = max(ent, ctx_ent_dict[ctx])
-    return [(ctx, ent) for ctx, ent in ctx_ent_dict.items()]
-
-
-def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
-    result = 0
-    alpha = model.alpha  # re-initialize learning rate before each batch
-    ctx_ent_tuples = model.trainables.info.filter_and_sort_train_ctx_ent(
-        sentences, model.wv.vocab, model.vocabulary.nonce)
-    if model.train_over_set:
-        logger.debug('Training over set of context items')
-        ctx_ent_tuples = _get_unique_ctx_ent_tuples(ctx_ent_tuples)
-    logger.debug('Training on context = {}'.format(ctx_ent_tuples))
-    nonce_vocab = model.wv.vocab[model.vocabulary.nonce]
-    nonce_count = 0
-    for ctx_word, cwi in ctx_ent_tuples:
-        ctx_vocab = model.wv.vocab[ctx_word]
-        nonce_count += 1
-        if not model.train_with:
-            raise Exception('Unspecified learning rate decay function. '
-                            'You must specify a \'train_with\' parameter')
-        if model.train_with == 'cwi_alpha':
-            alpha = compute_cwi_alpha(cwi, model.kappa, model.beta, model.alpha,
-                                      model.min_alpha)
-            logger.debug('training on \'{}\' and \'{}\' with cwi = {}, b_cwi = {}, '
-                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
-                                             model.wv.index2word[ctx_vocab.index],
-                                             round(cwi, 5),
-                                             round(np.tanh(model.beta * cwi), 4),
-                                             round(alpha, 5)))
-        if model.train_with == 'exp_alpha':
-            alpha = compute_exp_alpha(nonce_count, model.lambda_den,
-                                      model.alpha, model.min_alpha)
-            logger.debug('training on \'{}\' and \'{}\' with cwi = {}, '
-                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
-                                             model.wv.index2word[ctx_vocab.index],
-                                             round(cwi, 5),
-                                             round(alpha, 5)))
-        if model.train_with == 'cst_alpha':
-            alpha = model.alpha
-        train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
-                      nonce_vocab.index, alpha, compute_loss=compute_loss)
-        result += len(ctx_ent_tuples) + 1
     return result
 
 
@@ -493,16 +389,12 @@ class Nonce2Vec(Word2Vec):
         """
         work, neu1 = inits
         tally = 0
-        if self.sg:
-            if self.replication:
-                logger.info('Training n2v with original code')
-                tally += train_batch_sg_replication(self, sentences, alpha,
-                                                    work)
-            else:
-                logger.info('Training n2v with refactored code')
-                tally += train_batch_sg(self, sentences, alpha, work)
-        else:
+        if not self.sg:
             raise Exception('Nonce2Vec does not support cbow mode')
+        if not self.replication:
+            raise Exception('Unsupported mode. You need to pass in the --replication argument')
+        logger.info('Training n2v with original code')
+        tally += train_batch_sg_replication(self, sentences, alpha, work)
         return tally, self._raw_word_count(sentences)
 
     def build_vocab(self, sentences, update=False, progress_per=10000,
