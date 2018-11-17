@@ -114,16 +114,16 @@ n2v test \
   --sample-decay 1.9 \
   --window-decay 5
 ```
-
+slightly
 ### Results
-Results on nonce2vec v2.x are slighly lower than those reported to in the
+Results on nonce2vec v2.x are slightly different than those reported to in the
 original EMNLP paper due to several bugfix in how gensim originally
 handled subsampling with `random.rand()`.
 
-| XP  | MRR / RHO |
+| DATASET  | MRR / RHO |
 | --- | --- |
 | Definitional | 0.04846 |
-| Chimeras L2 |  |
+| Chimeras L2 | 0.3407 |
 | Chimeras L4 |  |
 | Chimeras L6 |  |
 
