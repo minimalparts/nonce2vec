@@ -124,8 +124,8 @@ handled subsampling with `random.rand()`.
 | --- | --- |
 | Definitional | 0.04846 |
 | Chimeras L2 | 0.3407 |
-| Chimeras L4 |  |
-| Chimeras L6 |  |
+| Chimeras L4 | 0.3457 |
+| Chimeras L6 | 0.4001 |
 
 [release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
 [release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
