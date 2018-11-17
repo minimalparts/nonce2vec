@@ -24,7 +24,7 @@ please cite the following:
 }
 ```
 
-**NEW!** We have now released v2.0 of Nonce2Vec which is packaged via pip and
+**NEW!** We have now released v2 of Nonce2Vec which is packaged via pip and
 runs on gensim v3.4.0. This should make it way easier for you to replicate
 experiments.
 
@@ -34,7 +34,7 @@ pip3 install nonce2vec
 ```
 
 ## Download and extract the required resources
-To download the nonces, chimeras and MEN datasets:
+To download the definitional, chimeras and MEN datasets:
 ```bash
 wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
 ```
@@ -44,18 +44,20 @@ wget http://129.194.21.122/~kabbach/wiki_all.sent.split.model.7z
 ```
 
 ## Generate a pre-trained word2vec model
-To generate a gensim.word2vec model from scratch, with :
+If you want to generate a new gensim.word2vec model from scratch and do not want to rely on the `wiki_all.sent.split.model`:
 
-### Use a Wikipedia dump
+### Download/Generate a Wikipedia dump
 To use the same Wikipedia dump as Herbelot and Baroni (2017):
 ```bash
 wget http://129.194.21.122/~kabbach/wiki.all.utf8.sent.split.lower.7z
 ```
 
-Else, to create a new Wikipedia dump from an earlier archive, check out
+Else, to create a new Wikipedia dump from an different archive, check out
 [WiToKit](https://github.com/akb89/witokit).
 
 ### Train the background model
+You can train Word2Vec with gensim via the nonce2vec package:
+
 ```bash
 n2v train \
   --data /absolute/path/to/wikipedia/dump \
@@ -116,11 +118,11 @@ n2v test \
 ### Results
 Results on nonce2vec v2.x are slighly lower than those reported to in the
 original EMNLP paper due to several bugfix in how gensim originally
-handled subsampling with random.
+handled subsampling with `random.rand()`.
 
 | XP  | MRR / RHO |
 | --- | --- |
-| Definitional | 0.04303 |
+| Definitional | 0.04846 |
 | Chimeras L2 |  |
 | Chimeras L4 |  |
 | Chimeras L6 |  |
