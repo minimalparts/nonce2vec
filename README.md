@@ -1,6 +1,12 @@
+[![GitHub release][release-image]][release-url]
+[![PyPI release][pypi-image]][pypi-url]
+[![Build][travis-image]][travis-url]
+[![MIT License][license-image]][license-url]
 [![DOI](https://zenodo.org/badge/96074751.svg)](https://zenodo.org/badge/latestdoi/96074751)
 
 # nonce2vec
+Welcome to Nonce2Vec!
+
 This is the repo accompanying the paper "High-risk learning: acquiring new word
 vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code,
 please cite the following:
@@ -18,11 +24,15 @@ please cite the following:
 }
 ```
 
-## Install nonce2vec
-Under the nonce2vec directory, run:
+**NEW** We have now released v2.0 of Nonce2Vec which is packaged via pip and
+runs on gensim
+
+## Install
 ```bash
 pip3 install nonce2vec
 ```
+
+## What's new
 
 ## Download and extract the required resources
 To download the nonces and chimeras datasets:
@@ -107,3 +117,12 @@ n2v test \
   --sum_over_set \
   --replication
 ```
+
+[release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
+[release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
+[pypi-image]:https://img.shields.io/pypi/v/nonce2vec.svg?style=flat-square
+[pypi-url]:https://pypi.org/project/nonce2vec/
+[travis-image]:https://img.shields.io/travis/minimalparts/nonce2vec.svg?style=flat-square
+[travis-url]:https://travis-ci.org/minimalparts/nonce2vec
+[license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
+[license-url]:LICENSE.txt
