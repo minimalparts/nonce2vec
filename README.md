@@ -2,7 +2,7 @@
 [![PyPI release][pypi-image]][pypi-url]
 [![Build][travis-image]][travis-url]
 [![MIT License][license-image]][license-url]
-[![DOI](https://zenodo.org/badge/96074751.svg)](https://zenodo.org/badge/latestdoi/96074751)
+[![DOI][doi-image]][doi-url]
 
 # nonce2vec
 Welcome to Nonce2Vec!
@@ -40,7 +40,7 @@ wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
 ```
 To use the pretrained gensim model from Herbelot and Baroni (2017):
 ```bash
-wget http://129.194.21.122/~kabbach/wiki_all.model.7z
+wget http://129.194.21.122/~kabbach/wiki_all.sent.split.model.7z
 ```
 
 ## Generate a pre-trained word2vec model
@@ -78,7 +78,9 @@ n2v check \
   --model /absolute/path/to/gensim/word2vec/model
 ```
 
-## Test nonce2vec on the nonce definitional dataset
+## Replication
+
+### Test nonce2vec on the nonce definitional dataset
 ```bash
 n2v test \
   --on nonces \
@@ -89,13 +91,9 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min-count 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5 \
-  --sum-filter random \
-  --sum-over-set \
-  --replication
+  --window-decay 5
 ```
 
 
@@ -110,14 +108,22 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min-count 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5 \
-  --sum-filter random \
-  --sum-over-set \
-  --replication
+  --window-decay 5
 ```
+
+### Results
+Results on nonce2vec v2.x are slighly lower than those reported to in the
+original EMNLP paper due to several bugfix in how gensim originally
+handled subsampling with random.
+
+| XP  | MRR / RHO |
+| --- | --- |
+| Definitional | 0.04303 |
+| Chimeras L2 |  |
+| Chimeras L4 |  |
+| Chimeras L6 |  |
 
 [release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
 [release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
@@ -127,3 +133,5 @@ n2v test \
 [travis-url]:https://travis-ci.org/minimalparts/nonce2vec
 [license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
 [license-url]:LICENSE.txt
+[doi-image]:https://img.shields.io/badge/DOI-10.5281%2Fzenodo.1423290-blue.svg?style=flat-square
+[doi-url]:https://zenodo.org/badge/latestdoi/96074751

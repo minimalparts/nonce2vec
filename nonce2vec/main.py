@@ -57,46 +57,39 @@ def _update_rr_and_count(relative_ranks, count, rank):
     return relative_ranks, count
 
 
-def _load_nonce2vec_model(args, info, nonce):
+def _load_nonce2vec_model(args, nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     #model.min_count = 1  # min_count should be the same as the background model!!
-    model.replication = args.replication
-    model.sum_over_set = args.sum_over_set
-    model.train_over_set = args.train_over_set
-    if args.sum_filter == 'random' or args.train_filter == 'random':
-        model.sample = args.sample
-    if args.replication:
-        logger.info('Running original n2v code for replication...')
-        if args.sample is None:
-            raise Exception('In replication mode you need to specify the '
-                            'sample parameter')
-        if args.window_decay is None:
-            raise Exception('In replication mode you need to specify the '
-                            'window_decay parameter')
-        if args.sample_decay is None:
-            raise Exception('In replication mode you need to specify the '
-                            'sample_decay parameter')
-        model.sample_decay = args.sample_decay
-        model.window_decay = args.window_decay
-        model.sample = args.sample
+    model.sample = args.sample
+    logger.info('Running original n2v code for replication...')
+    if args.sample is None:
+        raise Exception('In replication mode you need to specify the '
+                        'sample parameter')
+    if args.window_decay is None:
+        raise Exception('In replication mode you need to specify the '
+                        'window_decay parameter')
+    if args.sample_decay is None:
+        raise Exception('In replication mode you need to specify the '
+                        'sample_decay parameter')
+    model.sample_decay = args.sample_decay
+    model.window_decay = args.window_decay
+    model.sample = args.sample
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
         model.iter = args.epochs
         model.negative = args.neg
         model.lambda_den = args.lambda_den
-        model.kappa = args.kappa
-        model.beta = args.beta
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
             model.neg_labels = np.zeros(model.negative + 1)
             model.neg_labels[0] = 1.
-    model.trainables.info = info
+    #model.trainables.info = info
     model.workers = args.num_threads
     model.vocabulary.nonce = nonce
     logger.info('Model loaded')
@@ -122,7 +115,7 @@ def _test_on_chimeras(args):
         logger.info('sentences = {}'.format(sentences))
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
-        model = _load_nonce2vec_model(args, info, nonce)
+        model = _load_nonce2vec_model(args, nonce)
         model.vocabulary.nonce = '___'
         # A quick and dirty bugfix to add the nonce to the vocab
         # model.wv.vocab['___'] = Vocab(count=1,
@@ -176,12 +169,11 @@ def _test_on_nonces(args):
     logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
-    info = _load_informativeness_model(args)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args, info, nonce)
+        model = _load_nonce2vec_model(args, nonce)
         model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
@@ -198,19 +190,10 @@ def _test_on_nonces(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
-        if args.with_stats:
-            ranks.append(rank)
-            gold_nns = model.most_similar('{}_true'.format(nonce),
-                                          topn=vocab_size)
-            sum_10.append(_compute_average_sim(gold_nns[:10]))
-            sum_25.append(_compute_average_sim(gold_nns[:25]))
-            sum_50.append(_compute_average_sim(gold_nns[:50]))
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
-    if args.with_stats:
-        _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
 
 def _get_men_pairs_and_sim(men_dataset):
@@ -332,7 +315,6 @@ def main():
     # check various metrics
     parser_check = subparsers.add_parser(
         'check', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_info],
         help='check w2v embeddings quality by calculating correlation with '
              'the similarity ratings in the MEN dataset. Also, check the '
              'distribution of context_entropy across datasets')
@@ -345,7 +327,7 @@ def main():
     # test nonce2vec in various config on the chimeras and nonces datasets
     parser_test = subparsers.add_parser(
         'test', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_gensim, parser_info],
+        parents=[parser_gensim],
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
     parser_test.add_argument('--on', required=True,
@@ -357,15 +339,11 @@ def main():
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
     parser_test.add_argument('--train-with',
-                             choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
+                             choices=['exp_alpha'],
                              help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
                              dest='lambda_den',
                              help='lambda decay')
-    parser_test.add_argument('--kappa', type=int,
-                             help='kappa')
-    parser_test.add_argument('--beta', type=int,
-                             help='beta')
     parser_test.add_argument('--sample-decay', type=float,
                              help='sample decay')
     parser_test.add_argument('--window-decay', type=int,
@@ -373,17 +351,5 @@ def main():
     parser_test.add_argument('--sum-only', action='store_true', default=False,
                              help='sum only: no additional training after '
                                   'sum initialization')
-    parser_test.add_argument('--replication', action='store_true', default=False,
-                             help='use original n2v code')
-    parser_test.add_argument('--sum_over_set', action='store_true',
-                             default=False, help='sum over set of context '
-                                                 'items rather than list')
-    parser_test.add_argument('--train-over-set', action='store_true',
-                             default=False, help='train over set of context '
-                                                 'items rather than list')
-    parser_test.add_argument('--with-stats', action='store_true',
-                             default=False, help='display informativeness '
-                                                 'statistics alongside test '
-                                                 'results')
     args = parser.parse_args()
     args.func(args)
