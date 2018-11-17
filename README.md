@@ -24,18 +24,17 @@ please cite the following:
 }
 ```
 
-**NEW** We have now released v2.0 of Nonce2Vec which is packaged via pip and
-runs on gensim
+**NEW!** We have now released v2.0 of Nonce2Vec which is packaged via pip and
+runs on gensim v3.4.0. This should make it way easier for you to replicate
+experiments.
 
 ## Install
 ```bash
 pip3 install nonce2vec
 ```
 
-## What's new
-
 ## Download and extract the required resources
-To download the nonces and chimeras datasets:
+To download the nonces, chimeras and MEN datasets:
 ```bash
 wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
 ```
@@ -45,14 +44,16 @@ wget http://129.194.21.122/~kabbach/wiki_all.model.7z
 ```
 
 ## Generate a pre-trained word2vec model
-To generate a gensim.word2vec model from scratch, with the same wikidump
-and the same hyperparameters as Herbelot and Baroni (2017):
+To generate a gensim.word2vec model from scratch, with :
 
-### Download the Wikipedia dump
-Lowercase UTF-8 dump:
+### Use a Wikipedia dump
+To use the same Wikipedia dump as Herbelot and Baroni (2017):
 ```bash
 wget http://129.194.21.122/~kabbach/wiki.all.utf8.sent.split.lower.7z
 ```
+
+Else, to create a new Wikipedia dump from an earlier archive, check out
+[WiToKit](https://github.com/akb89/witokit).
 
 ### Train the background model
 ```bash
@@ -64,10 +65,10 @@ n2v train \
   --window 5 \
   --sample 1e-3 \
   --epochs 5 \
-  --min_count 50 \
+  --min-count 50 \
   --size 400 \
-  --num_threads number_of_threads_available_in_your_env
-  --train_mode skipgram
+  --num-threads number_of_cpu_threads_to_use
+  --train-mode skipgram
 ```
 
 ### Check the correlation with the MEN dataset
@@ -88,12 +89,12 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min_count 1 \
+  --min-count 1 \
   --lambda 70 \
-  --sample_decay 1.9 \
-  --window_decay 5 \
-  --sum_filter random \
-  --sum_over_set \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --sum-filter random \
+  --sum-over-set \
   --replication
 ```
 
@@ -109,12 +110,12 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min_count 1 \
+  --min-count 1 \
   --lambda 70 \
-  --sample_decay 1.9 \
-  --window_decay 5 \
-  --sum_filter random \
-  --sum_over_set \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --sum-filter random \
+  --sum-over-set \
   --replication
 ```
 

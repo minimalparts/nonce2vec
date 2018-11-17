@@ -377,7 +377,7 @@ def main():
     subparsers = parser.add_subparsers()
     # a shared set of parameters when using gensim
     parser_gensim = argparse.ArgumentParser(add_help=False)
-    parser_gensim.add_argument('--num_threads', type=int, default=1,
+    parser_gensim.add_argument('--num-threads', type=int, default=1,
                                help='number of threads to be used by gensim')
     parser_gensim.add_argument('--alpha', type=float,
                                help='initial learning rate')
@@ -389,26 +389,26 @@ def main():
                                help='subsampling rate')
     parser_gensim.add_argument('--epochs', type=int,
                                help='number of epochs')
-    parser_gensim.add_argument('--min_count', type=int,
+    parser_gensim.add_argument('--min-count', type=int,
                                help='min frequency count')
 
     # a shared set of parameters when using informativeness
     parser_info = argparse.ArgumentParser(add_help=False)
-    parser_info.add_argument('--info_model', type=str,
+    parser_info.add_argument('--info-model', type=str,
                              help='informativeness model path')
-    parser_info.add_argument('--sum_filter', default=None,
+    parser_info.add_argument('--sum-filter', default=None,
                              choices=['random', 'self', 'cwi'],
                              help='filter for sum initialization')
-    parser_info.add_argument('--sum_threshold', type=int,
+    parser_info.add_argument('--sum-threshold', type=int,
                              dest='sum_thresh',
                              help='sum filter threshold for self and cwi')
-    parser_info.add_argument('--train_filter', default=None,
+    parser_info.add_argument('--train-filter', default=None,
                              choices=['random', 'self', 'cwi'],
                              help='filter over training context')
-    parser_info.add_argument('--train_threshold', type=int,
+    parser_info.add_argument('--train-threshold', type=int,
                              dest='train_thresh',
                              help='train filter threshold for self and cwi')
-    parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
+    parser_info.add_argument('--sort-by', choices=['asc', 'desc'],
                              default=None,
                              help='cwi sorting order for context items')
 
@@ -423,7 +423,7 @@ def main():
                               help='absolute path to training data directory')
     parser_train.add_argument('--size', type=int, default=400,
                               help='vector dimensionality')
-    parser_train.add_argument('--train_mode', choices=['cbow', 'skipgram'],
+    parser_train.add_argument('--train-mode', choices=['cbow', 'skipgram'],
                               help='how to train word2vec')
     parser_train.add_argument('--outputdir', required=True,
                               help='Absolute path to outputdir to save model')
@@ -455,7 +455,7 @@ def main():
                              help='absolute path to word2vec pretrained model')
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
-    parser_test.add_argument('--train_with',
+    parser_test.add_argument('--train-with',
                              choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
                              help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
@@ -465,11 +465,11 @@ def main():
                              help='kappa')
     parser_test.add_argument('--beta', type=int,
                              help='beta')
-    parser_test.add_argument('--sample_decay', type=float,
+    parser_test.add_argument('--sample-decay', type=float,
                              help='sample decay')
-    parser_test.add_argument('--window_decay', type=int,
+    parser_test.add_argument('--window-decay', type=int,
                              help='window decay')
-    parser_test.add_argument('--sum_only', action='store_true', default=False,
+    parser_test.add_argument('--sum-only', action='store_true', default=False,
                              help='sum only: no additional training after '
                                   'sum initialization')
     parser_test.add_argument('--replication', action='store_true', default=False,
@@ -477,10 +477,10 @@ def main():
     parser_test.add_argument('--sum_over_set', action='store_true',
                              default=False, help='sum over set of context '
                                                  'items rather than list')
-    parser_test.add_argument('--train_over_set', action='store_true',
+    parser_test.add_argument('--train-over-set', action='store_true',
                              default=False, help='train over set of context '
                                                  'items rather than list')
-    parser_test.add_argument('--with_stats', action='store_true',
+    parser_test.add_argument('--with-stats', action='store_true',
                              default=False, help='display informativeness '
                                                  'statistics alongside test '
                                                  'results')
@@ -498,7 +498,7 @@ def main():
     parser_extract.add_argument('-o', '--output', required=True,
                                 dest='wiki_output_filepath',
                                 help='absolute path to output .txt file')
-    parser_extract.add_argument('-n', '--num_threads', type=int,
+    parser_extract.add_argument('-n', '--num-threads', type=int,
                                 required=False, default=1,
                                 dest='num_threads',
                                 help='number of CPU threads to be used')
