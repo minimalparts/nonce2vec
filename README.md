@@ -7,8 +7,8 @@
 # nonce2vec
 Welcome to Nonce2Vec!
 
-This is the repo accompanying the paper "High-risk learning: acquiring new word
-vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code,
+This is the repo accompanying the paper [High-risk learning: acquiring new word
+vectors from tiny data](http://aurelieherbelot.net/resources/papers/emnlp2017_final.pdf) (Herbelot &amp; Baroni, 2017). If you use this code,
 please cite the following:
 ```tex
 @InProceedings{herbelot-baroni:2017:EMNLP2017,
@@ -114,7 +114,7 @@ n2v test \
   --sample-decay 1.9 \
   --window-decay 5
 ```
-slightly
+
 ### Results
 Results on nonce2vec v2.x are slightly different than those reported to in the
 original EMNLP paper due to several bugfix in how gensim originally
