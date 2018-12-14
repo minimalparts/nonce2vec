@@ -19,6 +19,7 @@ __all__ = ('Nonce2Vec')
 
 logger = logging.getLogger(__name__)
 
+
 def compute_cwi_alpha(cwi, kappa, beta, alpha, min_alpha):
     x = np.tanh(cwi*beta)
     decay = (np.exp(kappa*(x+1)) - 1) / (np.exp(2*kappa) - 1)
@@ -26,11 +27,13 @@ def compute_cwi_alpha(cwi, kappa, beta, alpha, min_alpha):
         return decay * alpha
     return min_alpha
 
+
 def compute_exp_alpha(nonce_count, lambda_den, alpha, min_alpha):
     exp_decay = -(nonce_count-1) / lambda_den
     if alpha * np.exp(exp_decay) > min_alpha:
         return alpha * np.exp(exp_decay)
     return min_alpha
+
 
 def train_sg_pair_replication(model, word, context_index, alpha,
                               nonce_count, learn_vectors=True,
