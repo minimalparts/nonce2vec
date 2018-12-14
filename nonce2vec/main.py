@@ -68,6 +68,8 @@ def _load_nonce2vec_model(args, info, nonce):
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
     model.weighted = args.weighted
+    if args.weighted:
+        model.beta = args.beta
     model.train_over_set = args.train_over_set
     if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample

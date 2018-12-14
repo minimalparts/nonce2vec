@@ -378,7 +378,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
 
     def prepare_weights(self, pre_exist_words, hs, negative, wv, sentences,
                         nonce, update=False, replication=False,
-                        sum_over_set=False, weighted=False):
+                        sum_over_set=False, weighted=False, beta=1000):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
@@ -386,11 +386,12 @@ class Nonce2VecTrainables(Word2VecTrainables):
                             'always be used with update=True')
         else:
             self.update_weights(pre_exist_words, hs, negative, wv, sentences,
-                                nonce, replication, sum_over_set, weighted)
+                                nonce, replication, sum_over_set, weighted,
+                                beta)
 
     def update_weights(self, pre_exist_words, hs, negative, wv, sentences,
                        nonce, replication=False, sum_over_set=False,
-                       weighted=False):
+                       weighted=False, beta=1000):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -430,8 +431,13 @@ class Nonce2VecTrainables(Word2VecTrainables):
                 for w in filtered_ctx:
                     # Initialise to sum
                     if weighted:
+                        # hacky reuse of compute_cwi_alpha to compute the
+                        # weighted sum with cwi but compensating with
+                        # beta for narrow distrib of cwi
                         newvectors[i-len(wv.vectors)] += wv.vectors[
-                            wv.vocab[w].index] * ctx_ent_map[w]
+                            wv.vocab[w].index] * compute_cwi_alpha(
+                                ctx_ent_map[w], kappa=1, beta=beta, alpha=1,
+                                min_alpha=0)
                     else:
                         newvectors[i-len(wv.vectors)] += wv.vectors[
                             wv.vocab[w].index]
@@ -533,7 +539,7 @@ class Nonce2Vec(Word2Vec):
                                         update=update,
                                         replication=self.replication,
                                         sum_over_set=self.sum_over_set,
-                                        weighted=self.weighted)
+                                        weighted=self.weighted, beta=self.beta)
 
     def recompute_sample_ints(self):
         for w, o in self.wv.vocab.items():
