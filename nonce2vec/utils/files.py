@@ -30,7 +30,8 @@ def get_output_filepath(input_xml_filepath, output_txt_filepath):
     tmp_dirpath = get_tmp_dirpath(output_txt_filepath)
     os.makedirs(tmp_dirpath, exist_ok=True)
     output_filename = os.path.basename(input_xml_filepath)
-    output_txt_filepath = os.path.join(tmp_dirpath, '{}.txt'.format(output_filename))
+    output_txt_filepath = os.path.join(
+        tmp_dirpath, '{}.txt'.format(output_filename))
     return output_txt_filepath
 
 
@@ -83,7 +84,7 @@ class Samples(object):
     """An iterable class (with generators) for gensim and n2v."""
 
     def __init__(self, input_data, source):
-        if source != 'wiki' and source != 'nonces' and source != 'chimeras':
+        if source not in ['definitions', 'chimeras']:
             raise Exception('Invalid source parameter \'{}\''.format(source))
         self._source = source
         self._datafile = input_data
@@ -93,7 +94,7 @@ class Samples(object):
             for line in input_stream:
                 yield line.strip().split()
 
-    def _iterate_over_nonces(self):
+    def _iterate_over_definitions(self):
         with open(self._datafile, 'rt') as input_stream:
             for line in input_stream:
                 fields = line.rstrip('\n').split('\t')
@@ -116,10 +117,8 @@ class Samples(object):
                 yield sentences, probes, responses
 
     def __iter__(self):
-        if self._source == 'wiki':
-            return self._iterate_over_wiki()
-        if self._source == 'nonces':
-            return self._iterate_over_nonces()
+        if self._source == 'definitions':
+            return self._iterate_over_definitions()
         if self._source == 'chimeras':
             return self._iterate_over_chimeras()
         raise Exception('Invalid source parameter \'{}\''.format(self._source))

@@ -211,24 +211,28 @@ def _compute_average_sim(sims):
 
 
 def _test_on_definitions(args):
-    """Test the definitional nonces with a one-off learning procedure."""
+    """Test the definitional nonces."""
     ranks = []
     sum_10 = []
     sum_25 = []
     sum_50 = []
     relative_ranks = 0.0
     count = 0
-    samples = Samples(args.dataset, source='nonces')
+    samples = Samples(args.dataset, source='definitions')
     total_num_sent = sum(1 for line in samples)
     logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
+    if not args.reload:
+        nonce = '___'
+        model = _load_nonce2vec_model(args, info, nonce)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args, info, nonce)
+        if args.reload:
+            model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
@@ -421,6 +425,9 @@ def main():
     parser_test.add_argument('--model', required=True,
                              dest='background',
                              help='absolute path to word2vec pretrained model')
+    parser_test.add_argument('--reload', action='store_true', default=False,
+                             help='reload the background model at each '
+                                  'iteration')
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
     parser_test.add_argument('--train-with',
