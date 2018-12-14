@@ -449,7 +449,7 @@ def main():
                                   'sum initialization')
     parser_test.add_argument('--replication', action='store_true', default=False,
                              help='use original n2v code')
-    parser_test.add_argument('--sum_over_set', action='store_true',
+    parser_test.add_argument('--sum-over-set', action='store_true',
                              default=False, help='sum over set of context '
                                                  'items rather than list')
     parser_test.add_argument('--train-over-set', action='store_true',
