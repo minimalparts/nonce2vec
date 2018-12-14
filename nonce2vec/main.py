@@ -67,6 +67,7 @@ def _load_nonce2vec_model(args, info, nonce):
     #model.min_count = 1  # min_count should be the same as the background model!!
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
+    model.weighted = args.weighted
     model.train_over_set = args.train_over_set
     if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample
@@ -196,7 +197,7 @@ def _display_density_stats(ranks, sum_10, sum_25, sum_50):
 
 def _load_informativeness_model(args):
     if not args.info_model:
-        logger.warning('Unspecified --info_model. Using background model '
+        logger.warning('Unspecified --info-model. Using background model '
                        'to compute informativeness-related probabilities')
         args.info_model = args.background
     return Informativeness(
@@ -452,6 +453,9 @@ def main():
     parser_test.add_argument('--sum-over-set', action='store_true',
                              default=False, help='sum over set of context '
                                                  'items rather than list')
+    parser_test.add_argument('--weighted', action='store_true', default=False,
+                             help='apply weighted sum over context words. '
+                                  'Weights are based on cwi')
     parser_test.add_argument('--train-over-set', action='store_true',
                              default=False, help='train over set of context '
                                                  'items rather than list')

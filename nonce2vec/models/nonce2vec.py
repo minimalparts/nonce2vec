@@ -378,7 +378,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
 
     def prepare_weights(self, pre_exist_words, hs, negative, wv, sentences,
                         nonce, update=False, replication=False,
-                        sum_over_set=False):
+                        sum_over_set=False, weighted=False):
         """Build tables and model weights based on final vocabulary settings."""
         # set initial input/projection and hidden weights
         if not update:
@@ -386,10 +386,11 @@ class Nonce2VecTrainables(Word2VecTrainables):
                             'always be used with update=True')
         else:
             self.update_weights(pre_exist_words, hs, negative, wv, sentences,
-                                nonce, replication, sum_over_set)
+                                nonce, replication, sum_over_set, weighted)
 
     def update_weights(self, pre_exist_words, hs, negative, wv, sentences,
-                       nonce, replication=False, sum_over_set=False):
+                       nonce, replication=False, sum_over_set=False,
+                       weighted=False):
         """
         Copy all the existing weights, and reset the weights for the newly
         added vocabulary.
@@ -416,16 +417,24 @@ class Nonce2VecTrainables(Word2VecTrainables):
             # Initialise to sum
             raw_ctx, filtered_ctx = self.info.filter_sum_context(
                 sentences, pre_exist_words, nonce)
-            if sum_over_set:
+            if sum_over_set or replication:
                 raw_ctx = set(raw_ctx)
                 filtered_ctx = set(filtered_ctx)
                 logger.debug('Summing over set of context items: {}'
                              .format(filtered_ctx))
+            if weighted:
+                logger.debug('Applying weighted sum') # Sum over positive cwi words only
+                ctx_ent_map = self.info.get_ctx_ent_for_weighted_sum(
+                    sentences, pre_exist_words, nonce)
             if filtered_ctx:
                 for w in filtered_ctx:
                     # Initialise to sum
-                    newvectors[i-len(wv.vectors)] += wv.vectors[
-                        wv.vocab[w].index]
+                    if weighted:
+                        newvectors[i-len(wv.vectors)] += wv.vectors[
+                            wv.vocab[w].index] * ctx_ent_map[w]
+                    else:
+                        newvectors[i-len(wv.vectors)] += wv.vectors[
+                            wv.vocab[w].index]
             # If no filtered word remains, sum over everything to get 'some'
             # information
             else:
@@ -523,7 +532,8 @@ class Nonce2Vec(Word2Vec):
                                         sentences, self.vocabulary.nonce,
                                         update=update,
                                         replication=self.replication,
-                                        sum_over_set=self.sum_over_set)
+                                        sum_over_set=self.sum_over_set,
+                                        weighted=self.weighted)
 
     def recompute_sample_ints(self):
         for w, o in self.wv.vocab.items():
