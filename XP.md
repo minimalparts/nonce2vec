@@ -106,6 +106,7 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/enwiki.20180920.ut
 ```
 
 XP with summing over the context of all sentences
+
 | #XP | L | RHO |
 | --- | --- | --- |
 | 007 | L2 | 0.29816 |
@@ -113,6 +114,7 @@ XP with summing over the context of all sentences
 | 009 | L6 | 0.36600 |
 
 XP with summing over the context of the first sentence only
+
 | #XP | L | RHO |
 | --- | --- | --- |
 | 010 | L2 | 0.28157 |
