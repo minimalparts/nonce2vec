@@ -56,7 +56,7 @@ class Samples(object):
     """An iterable class (with generators) for gensim and n2v."""
 
     def __init__(self, input_data, source):
-        if source not in ['definitions', 'chimeras']:
+        if source not in ['wiki', 'definitions', 'chimeras']:
             raise Exception('Invalid source parameter \'{}\''.format(source))
         self._source = source
         self._datafile = input_data
@@ -89,6 +89,8 @@ class Samples(object):
                 yield sentences, probes, responses
 
     def __iter__(self):
+        if self._source == 'wiki':
+            return self._iterate_over_wiki()
         if self._source == 'definitions':
             return self._iterate_over_definitions()
         if self._source == 'chimeras':
