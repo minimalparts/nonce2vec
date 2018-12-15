@@ -81,3 +81,35 @@ XP005
 n2v test --on definitions --model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model --info-model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --alpha 1.0 --neg 3 --window 15 --epochs 1 --lambda 70 --sample-decay 1.9 --window-decay 5 --replication --sample 10000 --sum-filter cwi --sum-threshold 0 --weighted --beta 1000
 ```
 MRR = 0.02007
+
+XP006
+```
+n2v test --on definitions --model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model --info-model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test --alpha 1.0 --neg 3 --window 15 --epochs 1 --lambda 70 --sample-decay 1.9 --window-decay 5 --replication --sample 10000 --sum-filter cwi --sum-threshold 0 --reload
+```
+
+Conclusions:
+Without reloading the background model at each iteration, we observe a
+decrease in performance (from 0.04400 to 0.01793).
+With filtering, results improve from 0.01793 to 0.02229 and 0.02650 (with cwi)
+
+## Chimeras
+
+```
+n2v test --on chimeras --model /home/kabbach/nonce2vec/models/enwiki.20180920.utf8.lower.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt --sum-filter random --sample 10000 --alpha 1.0 --neg 3 --window 15 --epochs 1 --lambda 70 --sample-decay 1.9 --window-decay 5 --replication
+```
+
+Replication RHO (on wiki_all L2) = 
+
+XP with summing over the context of all sentences
+| #XP | L | RHO |
+| --- | --- | --- |
+| 007 | L2 |  |
+| 008 | L4 |  |
+| 009 | L6 |  |
+
+XP with summing over the context of the first sentence only
+| #XP | L | RHO |
+| --- | --- | --- |
+| 010 | L2 |  |
+| 011 | L4 |  |
+| 012 | L6 |  |

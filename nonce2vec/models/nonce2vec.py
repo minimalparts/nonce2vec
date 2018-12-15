@@ -444,6 +444,9 @@ class Nonce2VecTrainables(Word2VecTrainables):
             # If no filtered word remains, sum over everything to get 'some'
             # information
             else:
+                logger.warning(
+                    'No words left to sum over given filter settings. '
+                    'Backtracking to sum over all raw context words')
                 for w in raw_ctx:
                     # Initialise to sum
                     newvectors[i-len(wv.vectors)] += wv.vectors[

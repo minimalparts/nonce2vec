@@ -135,7 +135,11 @@ def _test_on_chimeras(args):
         # model.wv.index2word.append('___')
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        model.build_vocab(sentences, update=True)
+        if args.reduced:
+            # Hack to sum over the first sentence context words only
+            model.build_vocab([sentences[0]], update=True)
+        else:
+            model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
@@ -450,8 +454,11 @@ def main():
     parser_test.add_argument('--sum-only', action='store_true', default=False,
                              help='sum only: no additional training after '
                                   'sum initialization')
-    parser_test.add_argument('--replication', action='store_true', default=False,
-                             help='use original n2v code')
+    parser_test.add_argument('--replication', action='store_true',
+                             default=False, help='use original n2v code')
+    parser_test.add_argument('--reduced', action='store_true', default=False,
+                             help='sum over the first sentence context words '
+                                  'in the chimeras dataset')
     parser_test.add_argument('--sum-over-set', action='store_true',
                              default=False, help='sum over set of context '
                                                  'items rather than list')
