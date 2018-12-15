@@ -292,6 +292,24 @@ def _cosine_similarity(peer_v, query_v):
     return num / (math.sqrt(den_a) * math.sqrt(den_b))
 
 
+def _check_def(args):
+    relative_ranks = 0.0
+    count = 0
+    logger.info('Checking MRR on definition dataset of two background models')
+    samples = Samples(args.def_dataset, source='definitions')
+    model1 = Nonce2Vec.load(args.model_1)
+    model2 = Nonce2Vec.load(args.model_2)
+    vocab_size1 = len(model1.wv.vocab)
+    for _, nonce, _ in samples:
+        nns = model1.similar_by_vector(model2.wv.get_vector(nonce),
+                                       topn=vocab_size1)
+        logger.info('10 most similar words: {}'.format(nns[:10]))
+        rank = _get_rank(nonce, nns)
+        relative_ranks, count = _update_rr_and_count(relative_ranks, count,
+                                                     rank)
+    logger.info('Final MRR =  {}'.format(relative_ranks/count))
+
+
 def _check_men(args):
     """Check embeddings quality.
 
@@ -408,17 +426,31 @@ def main():
                               help='Absolute path to outputdir to save model')
 
     # check various metrics
-    parser_check = subparsers.add_parser(
-        'check', formatter_class=argparse.RawTextHelpFormatter,
+    parser_check_men = subparsers.add_parser(
+        'check-men', formatter_class=argparse.RawTextHelpFormatter,
         parents=[parser_info],
         help='check w2v embeddings quality by calculating correlation with '
-             'the similarity ratings in the MEN dataset. Also, check the '
-             'distribution of context_entropy across datasets')
-    parser_check.set_defaults(func=_check_men)
-    parser_check.add_argument('--data', required=True, dest='men_dataset',
-                              help='absolute path to dataset')
-    parser_check.add_argument('--model', required=True, dest='w2v_model',
-                              help='absolute path to the word2vec model')
+             'the similarity ratings in the MEN dataset.')
+    parser_check_men.set_defaults(func=_check_men)
+    parser_check_men.add_argument('--data', required=True, dest='men_dataset',
+                                  help='absolute path to the MEN dataset')
+    parser_check_men.add_argument('--model', required=True, dest='w2v_model',
+                                  help='absolute path to the word2vec model')
+
+    # check correlation between two background models on definitions
+    parser_check_def = subparsers.add_parser(
+        'check-def', formatter_class=argparse.RawTextHelpFormatter,
+        parents=[parser_info],
+        help='check the MRR between two w2v background models on the '
+             'definitional dataset')
+    parser_check_def.set_defaults(func=_check_def)
+    parser_check_def.add_argument('--data', required=True, dest='def_dataset',
+                                  help='absolute path to definition dataset')
+    parser_check_def.add_argument('--model-1', required=True,
+                                  help='absolute path to the word2vec model1')
+    parser_check_def.add_argument('--model-2', required=True,
+                                  help='absolute path to the word2vec model2')
+
 
     # test nonce2vec in various config on the chimeras and nonces datasets
     parser_test = subparsers.add_parser(
