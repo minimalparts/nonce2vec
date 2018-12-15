@@ -301,6 +301,7 @@ def _check_def(args):
     model2 = Nonce2Vec.load(args.model_2)
     vocab_size1 = len(model1.wv.vocab)
     for _, nonce, _ in samples:
+        logger.info('Nonce = {}'.format(nonce))
         nns = model1.similar_by_vector(model2.wv.get_vector(nonce),
                                        topn=vocab_size1)
         logger.info('10 most similar words: {}'.format(nns[:10]))

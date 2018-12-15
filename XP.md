@@ -129,7 +129,7 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/enwiki.20180920.ut
 | --- | --- | --- |
 | 013 | L2 | 0.317142 |
 | 014 | L4 | 0.3586048 |
-| 015 | L6 |  |
+| 015 | L6 | 0.40376 |
 
 XP with summing over the context of the first sentence with cwi
 ```
@@ -144,9 +144,14 @@ n2v test --on chimeras --model /home/kabbach/nonce2vec/models/enwiki.20180920.ut
 
 ## Testing MRR on definitions between "gold" background models
 
+MEN correlations:
+- SG1: 0.75
+- SG2:
+- CBOW: 0.70
+
 | #XP | MODEL-1 | MODEL-2 | MRR |
 | --- | --- | --- | --- |
-| 019 | SG1 | CBOW | |
-| 020 | CBOW | SG1 | |
+| 019 | SG1 | CBOW | 2.4e-5 |
+| 020 | CBOW | SG1 | 1.7e-5 |
 | 021 | SG1 | SG2 | |
 | 022 | SG2 | SG1 | |
