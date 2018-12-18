@@ -4,7 +4,16 @@ import os
 import smart_open
 
 __all__ = ('Samples', 'get_zipped_sentences', 'get_sentences',
-           'get_model_path')
+           'get_model_path', 'get_input_filepaths')
+
+
+def get_input_filepaths(dirpath):
+    """Return a list of absolute XML filepaths from a given dirpath.
+
+    List all the files under a specific directory.
+    """
+    return [os.path.join(dirpath, filename) for filename in
+            os.listdir(dirpath) if '.xml' in filename]
 
 
 def get_model_path(datadir, outputdir, train_mode, alpha, neg, window_size,

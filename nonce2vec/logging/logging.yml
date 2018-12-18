@@ -7,17 +7,17 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    formatter: brief
+    formatter: simple
 loggers:
   gensim:
-    level: INFO
+    level: WARNING
     handlers: [console]
   nonce2vec.main:
     level: INFO
     handlers: [console]
-  nonce2vec.models.informativeness:
-    level: DEBUG
+  nonce2vec.utils:
+    level: INFO
     handlers: [console]
   nonce2vec.models.nonce2vec:
-    level: DEBUG
+    level: INFO
     handlers: [console]
