@@ -76,6 +76,7 @@ def _load_nonce2vec_model(args, nonce):
         raise Exception('In replication mode you need to specify the '
                         'sample_decay parameter')
     model.sample_decay = args.sample_decay
+    model.window = args.window
     model.window_decay = args.window_decay
     model.sample = args.sample
     if not args.sum_only:
