@@ -32,6 +32,9 @@ logging.config.dictConfig(
 
 logger = logging.getLogger(__name__)
 
+MEN_FILEPATH = os.path.join(os.path.dirname(__file__),
+                            'resources', 'MEN_dataset_natural_form_full')
+
 
 # Note: this is scipy's spearman, without tie adjustment
 def _spearman(x, y):
@@ -277,7 +280,7 @@ def _test_on_definitions(args):
 def _get_men_pairs_and_sim(men_dataset):
     pairs = []
     humans = []
-    with open(men_dataset, 'r') as men_stream:
+    with open(men_dataset, 'r', encoding='utf-8') as men_stream:
         for line in men_stream:
             line = line.rstrip('\n')
             items = line.split()
@@ -301,7 +304,7 @@ def _check_men(args):
     Calculate correlation with the similarity ratings in the MEN dataset.
     """
     logger.info('Checking embeddings quality against MEN similarity ratings')
-    pairs, humans = _get_men_pairs_and_sim(args.men_dataset)
+    pairs, humans = _get_men_pairs_and_sim(MEN_FILEPATH)
     logger.info('Loading word2vec model...')
     model = Word2Vec.load(args.w2v_model)
     logger.info('Model loaded')
@@ -413,12 +416,9 @@ def main():
     # check various metrics
     parser_check_men = subparsers.add_parser(
         'check-men', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_info],
         help='check w2v embeddings quality by calculating correlation with '
              'the similarity ratings in the MEN dataset.')
     parser_check_men.set_defaults(func=_check_men)
-    parser_check_men.add_argument('--data', required=True, dest='men_dataset',
-                                  help='absolute path to the MEN dataset')
     parser_check_men.add_argument('--model', required=True, dest='w2v_model',
                                   help='absolute path to the word2vec model')
 
