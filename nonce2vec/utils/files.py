@@ -37,7 +37,7 @@ def get_zipped_sentences(datazip):
     datazip should be the absolute path to the wikidump.gzip file.
     """
     for filename in os.listdir(smart_open.smart_open(datazip)):
-        with open(filename, 'r') as input_stream:
+        with open(filename, 'r', encoding='utf-8') as input_stream:
             for line in input_stream:
                 yield line.strip().split()
 
@@ -47,7 +47,7 @@ def get_sentences(data):
     for filename in os.listdir(data):
         if filename.startswith('.'):
             continue
-        with open(os.path.join(data, filename), 'r') as input_stream:
+        with open(os.path.join(data, filename), 'r', encoding='utf-8') as input_stream:
             for line in input_stream:
                 yield line.strip().split()
 
@@ -62,12 +62,12 @@ class Samples(object):
         self._datafile = input_data
 
     def _iterate_over_wiki(self):
-        with open(self._datafile, 'rt') as input_stream:
+        with open(self._datafile, 'rt', encoding='utf-8') as input_stream:
             for line in input_stream:
                 yield line.strip().split()
 
     def _iterate_over_definitions(self):
-        with open(self._datafile, 'rt') as input_stream:
+        with open(self._datafile, 'rt', encoding='utf-8') as input_stream:
             for line in input_stream:
                 fields = line.rstrip('\n').split('\t')
                 nonce = fields[0]
@@ -76,7 +76,7 @@ class Samples(object):
                 yield [sentence], nonce, probe
 
     def _iterate_over_chimeras(self):
-        with open(self._datafile, 'rt') as input_stream:
+        with open(self._datafile, 'rt', encoding='utf-8') as input_stream:
             for line in input_stream:
                 fields = line.rstrip('\n').split('\t')
                 sentences = []
