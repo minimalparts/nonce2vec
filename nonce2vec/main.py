@@ -87,6 +87,7 @@ def _load_nonce2vec_model(args, info, nonce):
         model.sample_decay = args.sample_decay
         model.window_decay = args.window_decay
         model.sample = args.sample
+        model.window = args.window
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
