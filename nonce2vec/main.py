@@ -257,8 +257,8 @@ def _test_on_definitions(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
+        ranks.append(rank)
         if args.with_stats:
-            ranks.append(rank)
             gold_nns = model.most_similar('{}_true'.format(nonce),
                                           topn=vocab_size)
             sum_10.append(_compute_average_sim(gold_nns[:10]))
@@ -267,7 +267,9 @@ def _test_on_definitions(args):
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
+        median = np.median(ranks)
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
+    logger.info('Median Rank = {}'.format(median))
     if args.with_stats:
         _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
