@@ -23,7 +23,7 @@
 
 ## Replication
 
-MEN = .
+MEN = .74
 
 ### Definitional
 
