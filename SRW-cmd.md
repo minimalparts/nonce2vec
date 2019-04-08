@@ -34,9 +34,9 @@ Training informativeness background model with same hyperparameters as backgroun
 
 XP001 -- with reload (original)
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on definitions \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test \
   --sum-filter random \
   --sample 10000 \
@@ -53,9 +53,9 @@ XP001 -- with reload (original)
 
 XP101 -- no reload
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on definitions \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/definitions/nonce.definitions.299.test \
   --sum-filter random \
   --sample 10000 \
@@ -71,9 +71,9 @@ XP101 -- no reload
 
 XP002
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -90,9 +90,9 @@ XP002
 
 XP102:
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -108,9 +108,9 @@ XP102:
 
 XP003
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -127,9 +127,9 @@ XP003
 
 XP103:
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -145,9 +145,9 @@ XP103:
 
 XP004
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -164,9 +164,9 @@ XP004
 
 XP104:
 ```
-/home/kabbach/venv/bin/n2v test
+/home/kabbach/venv/bin/n2v test \
   --on chimeras \
-  --model /home/kabbach/nonce2vec/models/ \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
   --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt \
   --sum-filter random \
   --sample 10000 \
@@ -181,20 +181,84 @@ XP104:
 ```
 
 XP005
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --reload
+```
 
 XP105
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only
+```
 
 XP006
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter random \
+  --sample 10000 \
+  --reload
+```
 
 XP106
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter random \
+  --sample 10000
+```
 
 XP007
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter self \
+  --sum-threshold 22 \
+  --reload
+```
 
 XP107
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter self \
+  --sum-threshold 22
+```
 
 XP008
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --reload
+```
 
 XP108
+```
+/home/kabbach/venv/bin/n2v test \
+  --on definitions \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-only \
+  --sum-filter cwi \
+  --sum-threshold 0
+```
 
 XP009
 
