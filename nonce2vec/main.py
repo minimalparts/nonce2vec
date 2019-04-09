@@ -91,6 +91,7 @@ def _load_nonce2vec_model(args, info, nonce):
         model.window_decay = args.window_decay
         model.sample = args.sample
         model.window = args.window
+    model.beta = args.beta  # for CWI filter even in sum only
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
@@ -98,7 +99,6 @@ def _load_nonce2vec_model(args, info, nonce):
         model.negative = args.neg
         model.lambda_den = args.lambda_den
         model.kappa = args.kappa
-        model.beta = args.beta
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
