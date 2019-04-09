@@ -28,23 +28,25 @@ MEN = .74
 ### Definitional
 
 XP001 -- with reload (original)
-MRR =
-Median Rank =
+MRR = 0.048
+Median Rank = 955
 
 XP101 -- no reload
-MRR =
-Median Rank =
+MRR = 0.003
+Median Rank = 78504
+
+| #XP | Median Rank | MRR |
+| --- | --- | --- |
+| 001 | 955 | 0.048 |
+| 101 | 78504 | 0.003 |
 
 ### Chimeras
 
 | #XP | L | RHO |
 | --- | --- | --- |
-| 002 | L2 |  |
-| 102 | L2 |  |
-| 003 | L4 |  |
-| 103 | L4 |  |
-| 004 | L6 |  |
-| 104 | L6 |  |
+| 002 | L2 | 0.3409 |
+| 003 | L4 | 0.3471 |
+| 004 | L6 | 0.3300 |
 
 ## Informativeness
 
@@ -52,50 +54,38 @@ Median Rank =
 
 | #XP | Filter | Median Rank | MRR |
 | --- | --- | --- | --- |
-| 005 | no filter |  | |
-| 105 | no filter |  | |
-| 006 | random |  | |
-| 106 | random |  | |
-| 007 | self |  | |
-| 107 | self |  | |
-| 008 | cwi |  | |
-| 108 | cwi |  | |
+| 005 | no filter | 5969 | 0.0087 |
+| 105 | no filter | 6110 | 0.0018 |
+| 006 | random | 3047 | 0.0221 |
+| 106 | random | 3212 | 0.0065 |
+| 007 | self | 1769 | 0.0242 |
+| 107 | self | 1923 | 0.0120 |
+| 008 | cwi |  |  |
+| 108 | cwi | 1430 | 0.0241 |
 
 | #XP | Filter | L | RHO |
 | --- | --- | --- |
 | 009 | no filter | L2 |  |
-| 109 | no filter | L2 |  |
 | 010 | random | L2 |  |
-| 110 | random | L2 |  |
 | 011 | self | L2 |  |
-| 111 | self | L2 |  |
 | 012 | cwi | L2 |  |
-| 112 | cwi | L2 |  |
 | 013 | no filter | L4 |  |
-| 113 | no filter | L4 |  |
 | 014 | random | L4 |  |
-| 114 | random | L4 |  |
 | 015 | self | L4 |  |
-| 115 | self | L4 |  |
 | 016 | cwi | L4 |  |
-| 116 | cwi | L4 |  |
 | 017 | no filter | L6 |  |
-| 117 | no filter | L6 |  |
 | 018 | random | L6 |  |
-| 118 | random | L6 |  |
 | 019 | self | L6 |  |
-| 119 | self | L6 |  |
 | 020 | cwi | L6 |  |
-| 120 | cwi | L6 |  |
 
 ### Adaptative learning rate
 
 | #XP | Filter | Median Rank | MRR |
 | --- | --- | --- | --- |
 | 008 | cwi sum |  | |
-| 108 | cwi sum |  | |
-| 001 | n2v as-is |  | |
-| 101 | n2v as-is |  | |
+| 108 | cwi sum | 1430 | 0.0241 |
+| 001 | n2v as-is | 955 | 0.048 |
+| 101 | n2v as-is | 78504 | 0.003 |
 | 021 | n2v cwi init |  | |
 | 121 | n2v cwi init |  | |
 | 022 | n2v cwi alpha |  | |
@@ -104,26 +94,14 @@ Median Rank =
 | #XP | Model | L | RHO |
 | --- | --- | --- |
 | 012 | cwi sum | L2 |  |
-| 112 | cwi sum | L2 |  |
 | 002 | n2v as-is | L2 |  |
-| 102 | n2v as-is | L2 |  |
 | 023 | n2v cwi init | L2 |  |
-| 123 | n2v cwi init | L2 |  |
 | 024 | n2v cwi alpha | L2 |  |
-| 124 | n2v cwi alpha | L2 |  |
 | 016 | cwi sum | L4 |  |
-| 116 | cwi sum | L4 |  |
 | 003 | n2v as-is | L4 |  |
-| 103 | n2v as-is | L4 |  |
 | 025 | n2v cwi init | L4 |  |
-| 125 | n2v cwi init | L4 |  |
 | 026 | n2v cwi alpha | L4 |  |
-| 126 | n2v cwi alpha | L4 |  |
 | 020 | cwi sum | L6 |  |
-| 120 | cwi sum | L6 |  |
 | 004 | n2v as-is | L6 |  |
-| 104 | n2v as-is | L6 |  |
 | 027 | n2v cwi init | L6 |  |
-| 127 | n2v cwi init | L6 |  |
 | 028 | n2v cwi alpha | L6 |  |
-| 128 | n2v cwi alpha | L6 |  |
