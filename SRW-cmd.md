@@ -426,25 +426,113 @@ XP122
 ```
 
 XP023
-
-XP123
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --sample 10000 \
+  --alpha 1.0 \
+  --neg 3 \
+  --window 15 \
+  --epochs 1 \
+  --lambda 70 \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --replication
+  ```
 
 XP024
-
-XP124
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l2.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --train-with cwi_alpha \
+  --alpha 1.0 \
+  --beta 1000 \
+  --kappa 1 \
+  --neg 3 \
+  --epochs 1
+```
 
 XP025
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --sample 10000 \
+  --alpha 1.0 \
+  --neg 3 \
+  --window 15 \
+  --epochs 1 \
+  --lambda 70 \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --replication
+  ```
 
-XP125
 
 XP026
-
-XP126
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l4.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --train-with cwi_alpha \
+  --alpha 1.0 \
+  --beta 1000 \
+  --kappa 1 \
+  --neg 3 \
+  --epochs 1
+```
 
 XP027
-
-XP127
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --sample 10000 \
+  --alpha 1.0 \
+  --neg 3 \
+  --window 15 \
+  --epochs 1 \
+  --lambda 70 \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --replication
+  ```
 
 XP028
-
-XP128
+```
+/home/kabbach/venv/bin/n2v test \
+  --on chimeras \
+  --data /home/kabbach/nonce2vec/data/chimeras/chimeras.dataset.l6.tokenised.test.txt \
+  --model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.skipgram.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --info-model /home/kabbach/nonce2vec/models/enwiki.20190120.txt.cbow.alpha0.025.neg5.win5.sample0.001.epochs5.mincount50.size400.model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --train-with cwi_alpha \
+  --alpha 1.0 \
+  --beta 1000 \
+  --kappa 1 \
+  --neg 3 \
+  --epochs 1
+```
