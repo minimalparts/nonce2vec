@@ -43,13 +43,10 @@ def _spearman(x, y):
 
 def _get_rank(probe, nns):
     for idx, nonce_similar_word in enumerate(nns):
-        word = nonce_similar_word[0]
-        if word == probe:
-            rank = idx + 1  # rank starts at 1
-    if not rank:
-        raise Exception('Could not find probe {} in nonce most similar words '
-                        '{}'.format(probe, nns))
-    return rank
+        if nonce_similar_word[0] == probe:
+            return idx + 1  # rank starts at 1
+    raise Exception('Could not find probe {} in nonce most similar words '
+                    '{}'.format(probe, nns))
 
 
 def _update_rr_and_count(relative_ranks, count, rank):
