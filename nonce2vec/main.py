@@ -6,8 +6,6 @@ This is the entry point of the application.
 import os
 
 import argparse
-import multiprocessing
-import functools
 import logging
 import logging.config
 
@@ -21,7 +19,6 @@ from gensim.models import Word2Vec
 
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
-import nonce2vec.utils.wikipedia as wutils
 
 from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
                                        Nonce2VecTrainables
@@ -35,6 +32,9 @@ logging.config.dictConfig(
 
 logger = logging.getLogger(__name__)
 
+MEN_FILEPATH = os.path.join(os.path.dirname(__file__),
+                            'resources', 'MEN_dataset_natural_form_full')
+
 
 # Note: this is scipy's spearman, without tie adjustment
 def _spearman(x, y):
@@ -43,13 +43,10 @@ def _spearman(x, y):
 
 def _get_rank(probe, nns):
     for idx, nonce_similar_word in enumerate(nns):
-        word = nonce_similar_word[0]
-        if word == probe:
-            rank = idx + 1  # rank starts at 1
-    if not rank:
-        raise Exception('Could not find probe {} in nonce most similar words '
-                        '{}'.format(probe, nns))
-    return rank
+        if nonce_similar_word[0] == probe:
+            return idx + 1  # rank starts at 1
+    raise Exception('Could not find probe {} in nonce most similar words '
+                    '{}'.format(probe, nns))
 
 
 def _update_rr_and_count(relative_ranks, count, rank):
@@ -70,6 +67,9 @@ def _load_nonce2vec_model(args, info, nonce):
     #model.min_count = 1  # min_count should be the same as the background model!!
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
+    model.weighted = args.weighted
+    if args.weighted:
+        model.beta = args.beta
     model.train_over_set = args.train_over_set
     if args.sum_filter == 'random' or args.train_filter == 'random':
         model.sample = args.sample
@@ -87,6 +87,8 @@ def _load_nonce2vec_model(args, info, nonce):
         model.sample_decay = args.sample_decay
         model.window_decay = args.window_decay
         model.sample = args.sample
+        model.window = args.window
+    model.beta = args.beta  # for CWI filter even in sum only
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
@@ -94,7 +96,6 @@ def _load_nonce2vec_model(args, info, nonce):
         model.negative = args.neg
         model.lambda_den = args.lambda_den
         model.kappa = args.kappa
-        model.beta = args.beta
         model.neg_labels = []
         if model.negative > 0:
             # precompute negative labels optimization for pure-python training
@@ -128,9 +129,18 @@ def _test_on_chimeras(args):
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
         model = _load_nonce2vec_model(args, info, nonce)
+        model.vocabulary.nonce = '___'
+        # A quick and dirty bugfix to add the nonce to the vocab
+        # model.wv.vocab['___'] = Vocab(count=1,
+        #                               index=len(model.wv.index2word))
+        # model.wv.index2word.append('___')
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
-        model.build_vocab(sentences, update=True)
+        if args.reduced:
+            # Hack to sum over the first sentence context words only
+            model.build_vocab([sentences[0]], update=True)
+        else:
+            model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
@@ -194,7 +204,7 @@ def _display_density_stats(ranks, sum_10, sum_25, sum_50):
 
 def _load_informativeness_model(args):
     if not args.info_model:
-        logger.warning('Unspecified --info_model. Using background model '
+        logger.warning('Unspecified --info-model. Using background model '
                        'to compute informativeness-related probabilities')
         args.info_model = args.background
     return Informativeness(
@@ -208,25 +218,29 @@ def _compute_average_sim(sims):
     return sim_sum / len(sims)
 
 
-def _test_on_nonces(args):
-    """Test the definitional nonces with a one-off learning procedure."""
+def _test_on_definitions(args):
+    """Test the definitional nonces."""
     ranks = []
     sum_10 = []
     sum_25 = []
     sum_50 = []
     relative_ranks = 0.0
     count = 0
-    samples = Samples(args.dataset, source='nonces')
+    samples = Samples(args.dataset, source='definitions')
     total_num_sent = sum(1 for line in samples)
     logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
     num_sent = 1
     info = _load_informativeness_model(args)
+    if not args.reload:
+        nonce = '___'
+        model = _load_nonce2vec_model(args, info, nonce)
     for sentences, nonce, probe in samples:
         logger.info('-' * 30)
         logger.info('Processing sentence {}/{}'.format(num_sent,
                                                        total_num_sent))
-        model = _load_nonce2vec_model(args, info, nonce)
+        if args.reload:
+            model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('vocab size = {}'.format(vocab_size))
@@ -243,8 +257,8 @@ def _test_on_nonces(args):
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
+        ranks.append(rank)
         if args.with_stats:
-            ranks.append(rank)
             gold_nns = model.most_similar('{}_true'.format(nonce),
                                           topn=vocab_size)
             sum_10.append(_compute_average_sim(gold_nns[:10]))
@@ -253,7 +267,9 @@ def _test_on_nonces(args):
         relative_ranks, count = _update_rr_and_count(relative_ranks, count,
                                                      rank)
         num_sent += 1
+        median = np.median(ranks)
     logger.info('Final MRR =  {}'.format(relative_ranks/count))
+    logger.info('Median Rank = {}'.format(median))
     if args.with_stats:
         _display_density_stats(ranks, sum_10, sum_25, sum_50)
 
@@ -261,7 +277,7 @@ def _test_on_nonces(args):
 def _get_men_pairs_and_sim(men_dataset):
     pairs = []
     humans = []
-    with open(men_dataset, 'r') as men_stream:
+    with open(men_dataset, 'r', encoding='utf-8') as men_stream:
         for line in men_stream:
             line = line.rstrip('\n')
             items = line.split()
@@ -285,7 +301,7 @@ def _check_men(args):
     Calculate correlation with the similarity ratings in the MEN dataset.
     """
     logger.info('Checking embeddings quality against MEN similarity ratings')
-    pairs, humans = _get_men_pairs_and_sim(args.men_dataset)
+    pairs, humans = _get_men_pairs_and_sim(MEN_FILEPATH)
     logger.info('Loading word2vec model...')
     model = Word2Vec.load(args.w2v_model)
     logger.info('Model loaded')
@@ -333,28 +349,8 @@ def _train(args):
 def _test(args):
     if args.on == 'chimeras':
         _test_on_chimeras(args)
-    elif args.on == 'nonces':
-        _test_on_nonces(args)
-
-
-def _extract(args):
-    logger.info('Extracting content of wikipedia archive under {}'
-                .format(args.wiki_input_dirpath))
-    input_filepaths = futils.get_input_filepaths(args.wiki_input_dirpath)
-    with multiprocessing.Pool(args.num_threads) as pool:
-        extract = functools.partial(wutils.extract,
-                                    args.wiki_output_filepath)
-        list(pool.imap_unordered(extract, input_filepaths))
-    # concatenate all .txt files into single output .txt file
-    logger.info('Concatenating tmp files...')
-    tmp_filepaths = futils.get_tmp_filepaths(args.wiki_output_filepath)
-    with open(args.wiki_output_filepath, 'w', encoding='utf-8') as output_stream:
-        for tmp_filepath in tmp_filepaths:
-            with open(tmp_filepath, 'r') as tmp_stream:
-                for line in tmp_stream:
-                    print(line, file=output_stream)
-    logger.info('Done extracting content of Wikipedia archive')
-    shutil.rmtree(futils.get_tmp_dirpath(args.wiki_output_filepath))
+    elif args.on == 'definitions':
+        _test_on_definitions(args)
 
 
 def main():
@@ -363,7 +359,7 @@ def main():
     subparsers = parser.add_subparsers()
     # a shared set of parameters when using gensim
     parser_gensim = argparse.ArgumentParser(add_help=False)
-    parser_gensim.add_argument('--num_threads', type=int, default=1,
+    parser_gensim.add_argument('--num-threads', type=int, default=1,
                                help='number of threads to be used by gensim')
     parser_gensim.add_argument('--alpha', type=float,
                                help='initial learning rate')
@@ -375,26 +371,26 @@ def main():
                                help='subsampling rate')
     parser_gensim.add_argument('--epochs', type=int,
                                help='number of epochs')
-    parser_gensim.add_argument('--min_count', type=int,
+    parser_gensim.add_argument('--min-count', type=int,
                                help='min frequency count')
 
     # a shared set of parameters when using informativeness
     parser_info = argparse.ArgumentParser(add_help=False)
-    parser_info.add_argument('--info_model', type=str,
+    parser_info.add_argument('--info-model', type=str,
                              help='informativeness model path')
-    parser_info.add_argument('--sum_filter', default=None,
+    parser_info.add_argument('--sum-filter', default=None,
                              choices=['random', 'self', 'cwi'],
                              help='filter for sum initialization')
-    parser_info.add_argument('--sum_threshold', type=int,
+    parser_info.add_argument('--sum-threshold', type=int,
                              dest='sum_thresh',
                              help='sum filter threshold for self and cwi')
-    parser_info.add_argument('--train_filter', default=None,
+    parser_info.add_argument('--train-filter', default=None,
                              choices=['random', 'self', 'cwi'],
                              help='filter over training context')
-    parser_info.add_argument('--train_threshold', type=int,
+    parser_info.add_argument('--train-threshold', type=int,
                              dest='train_thresh',
                              help='train filter threshold for self and cwi')
-    parser_info.add_argument('--sort_by', choices=['asc', 'desc'],
+    parser_info.add_argument('--sort-by', choices=['asc', 'desc'],
                              default=None,
                              help='cwi sorting order for context items')
 
@@ -409,23 +405,19 @@ def main():
                               help='absolute path to training data directory')
     parser_train.add_argument('--size', type=int, default=400,
                               help='vector dimensionality')
-    parser_train.add_argument('--train_mode', choices=['cbow', 'skipgram'],
+    parser_train.add_argument('--train-mode', choices=['cbow', 'skipgram'],
                               help='how to train word2vec')
     parser_train.add_argument('--outputdir', required=True,
                               help='Absolute path to outputdir to save model')
 
     # check various metrics
-    parser_check = subparsers.add_parser(
-        'check', formatter_class=argparse.RawTextHelpFormatter,
-        parents=[parser_info],
+    parser_check_men = subparsers.add_parser(
+        'check-men', formatter_class=argparse.RawTextHelpFormatter,
         help='check w2v embeddings quality by calculating correlation with '
-             'the similarity ratings in the MEN dataset. Also, check the '
-             'distribution of context_entropy across datasets')
-    parser_check.set_defaults(func=_check_men)
-    parser_check.add_argument('--data', required=True, dest='men_dataset',
-                              help='absolute path to dataset')
-    parser_check.add_argument('--model', required=True, dest='w2v_model',
-                              help='absolute path to the word2vec model')
+             'the similarity ratings in the MEN dataset.')
+    parser_check_men.set_defaults(func=_check_men)
+    parser_check_men.add_argument('--model', required=True, dest='w2v_model',
+                                  help='absolute path to the word2vec model')
 
     # test nonce2vec in various config on the chimeras and nonces datasets
     parser_test = subparsers.add_parser(
@@ -434,14 +426,17 @@ def main():
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
     parser_test.add_argument('--on', required=True,
-                             choices=['nonces', 'chimeras'],
+                             choices=['definitions', 'chimeras'],
                              help='type of test data to be used')
     parser_test.add_argument('--model', required=True,
                              dest='background',
                              help='absolute path to word2vec pretrained model')
+    parser_test.add_argument('--reload', action='store_true', default=False,
+                             help='reload the background model at each '
+                                  'iteration')
     parser_test.add_argument('--data', required=True, dest='dataset',
                              help='absolute path to test dataset')
-    parser_test.add_argument('--train_with',
+    parser_test.add_argument('--train-with',
                              choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
                              help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
@@ -451,36 +446,30 @@ def main():
                              help='kappa')
     parser_test.add_argument('--beta', type=int,
                              help='beta')
-    parser_test.add_argument('--sample_decay', type=float,
+    parser_test.add_argument('--sample-decay', type=float,
                              help='sample decay')
-    parser_test.add_argument('--window_decay', type=int,
+    parser_test.add_argument('--window-decay', type=int,
                              help='window decay')
-    parser_test.add_argument('--sum_only', action='store_true', default=False,
-                             help='sum only: no additional training after sum initialization')
-    parser_test.add_argument('--replication', action='store_true', default=False,
-                             help='use original n2v code')
-    parser_test.add_argument('--sum_over_set', action='store_true', default=False,
-                             help='sum over set of context items rather than list')
-    parser_test.add_argument('--train_over_set', action='store_true', default=False,
-                             help='train over set of context items rather than list')
-    parser_test.add_argument('--with_stats', action='store_true', default=False,
-                             help='display informativeness statistics alongside test results')
-
-    # extract data from Wikipedia XML dump and convert to UTF-8
-    # lowercase 1 sentence-per-line format.
-    parser_extract = subparsers.add_parser(
-        'extract', formatter_class=argparse.RawTextHelpFormatter,
-        help='extract content from Wikipedia XML dump')
-    parser_extract.set_defaults(func=_extract)
-    parser_extract.add_argument('-i', '--input', required=True,
-                                dest='wiki_input_dirpath',
-                                help='absolute path to directory containing Wikipedia XML files')
-    parser_extract.add_argument('-o', '--output', required=True,
-                                dest='wiki_output_filepath',
-                                help='absolute path to output .txt file')
-    parser_extract.add_argument('-n', '--num_threads', type=int,
-                                required=False, default=1,
-                                dest='num_threads',
-                                help='number of CPU threads to be used')
+    parser_test.add_argument('--sum-only', action='store_true', default=False,
+                             help='sum only: no additional training after '
+                                  'sum initialization')
+    parser_test.add_argument('--replication', action='store_true',
+                             default=False, help='use original n2v code')
+    parser_test.add_argument('--reduced', action='store_true', default=False,
+                             help='sum over the first sentence context words '
+                                  'in the chimeras dataset')
+    parser_test.add_argument('--sum-over-set', action='store_true',
+                             default=False, help='sum over set of context '
+                                                 'items rather than list')
+    parser_test.add_argument('--weighted', action='store_true', default=False,
+                             help='apply weighted sum over context words. '
+                                  'Weights are based on cwi')
+    parser_test.add_argument('--train-over-set', action='store_true',
+                             default=False, help='train over set of context '
+                                                 'items rather than list')
+    parser_test.add_argument('--with-stats', action='store_true',
+                             default=False, help='display informativeness '
+                                                 'statistics alongside test '
+                                                 'results')
     args = parser.parse_args()
     args.func(args)

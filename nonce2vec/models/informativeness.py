@@ -78,9 +78,9 @@ class Informativeness():
     @lru_cache(maxsize=50)
     def _get_context_word_entropy(self, context, word_index):
         ctx_ent_with_word = self._get_context_entropy(context)
-        ctx_without_words = tuple(x for idx, x in enumerate(context) if
-                                  idx != word_index)
-        ctx_ent_without_word = self._get_context_entropy(ctx_without_words)
+        ctx_without_word = tuple(x for idx, x in enumerate(context) if
+                                 idx != word_index)
+        ctx_ent_without_word = self._get_context_entropy(ctx_without_word)
         cwi = ctx_ent_with_word - ctx_ent_without_word
         return cwi
 
@@ -111,6 +111,17 @@ class Informativeness():
 
     def _get_in_vocab_context(self, sentence, vocab, nonce):
         return tuple([w for w in sentence if w in vocab and w != nonce])
+
+    def get_ctx_ent_for_weighted_sum(self, sentences, vocab, nonce):
+        ctx_ent_map = {}
+        ctx_ent = self._get_filtered_train_ctx_ent(sentences, vocab, nonce)
+        for ctx, cwi in ctx_ent:
+            if ctx not in ctx_ent_map:
+                ctx_ent_map[ctx] = cwi
+            else:
+                if cwi > ctx_ent_map[ctx]:
+                    ctx_ent_map[ctx] = cwi
+        return ctx_ent_map
 
     def _get_filtered_train_ctx_ent(self, sentences, vocab, nonce):
         ctx_ent = []

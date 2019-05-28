@@ -7,7 +7,7 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    formatter: brief
+    formatter: simple
 loggers:
   gensim:
     level: INFO
