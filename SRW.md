@@ -28,11 +28,11 @@ MEN = 0.74
 ### Definitional
 
 XP001 -- with reload (original)
-MRR = 0.048
+MRR = 0.0477
 Median Rank = 955
 
 XP101 -- no reload
-MRR = 0.003
+MRR = 0.0032
 Median Rank = 78504
 
 | #XP | Median Rank | MRR |
@@ -95,13 +95,19 @@ Median Rank = 78504
 | --- | --- | --- |
 | 011 | self sum | L2 | 0.3442 |
 | 002 | n2v as-is | L2 | 0.3409 |
-| 023 | n2v cwi init | L2 |  |
-| 024 | n2v cwi alpha | L2 |  |
+| 023 | n2v cwi init | L2 | 0.3009 |
+| 024 | n2v cwi alpha | L2 | 0.3084 |
 | 016 | cwi sum | L4 | 0.3837 |
 | 003 | n2v as-is | L4 | 0.3471 |
-| 025 | n2v cwi init | L4 |  |
-| 026 | n2v cwi alpha | L4 |  |
+| 025 | n2v cwi init | L4 | 0.3432 |
+| 026 | n2v cwi alpha | L4 | 0.3919 |
 | 020 | cwi sum | L6 | 0.4128 |
 | 004 | n2v as-is | L6 | 0.3300 |
-| 027 | n2v cwi init | L6 |  |
-| 028 | n2v cwi alpha | L6 |  |
+| 027 | n2v cwi init | L6 | 0.3585 |
+| 028 | n2v cwi alpha | L6 | 0.4077 |
+
+### Incremental learning on the chimera dataset
+
+### Shuffling test set in incremental learning
+
+### Sampling alpha and beta parameters 
