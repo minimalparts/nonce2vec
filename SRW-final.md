@@ -27,29 +27,21 @@ MEN = 0.74
 
 ### Definitional
 
-XP001 -- with reload (original)
-MRR =
-Median Rank =
-
-XP101 -- no reload
-MRR =
-Median Rank =
-
 | #XP | Median Rank | MRR |
 | --- | --- | --- |
-| 001 |  |  |
-| 101 |  |  |
+| 001 | 955 | 0.0477 |
+| 101 | 73960 | 0.0031 |
 
 ### Chimeras
 
 | #XP | L | RHO |
 | --- | --- | --- |
-| 002 | L2 |  |
-| 102 | L2 |  |
-| 003 | L4 |  |
-| 103 | L4 |  |
-| 004 | L6 |  |
-| 104 | L6 |  |
+| 002 | L2 | 0.3409 |
+| 102 | L2 | 0.1163 |
+| 003 | L4 | 0.3471 |
+| 103 | L4 | 0.1091 |
+| 004 | L6 | 0.3300 |
+| 104 | L6 | 0.1675 |
 
 ## Informativeness
 
@@ -57,23 +49,23 @@ Median Rank =
 
 | #XP | Filter | Median Rank | MRR |
 | --- | --- | --- | --- |
-| 005 | no filter |  |  |
-| 105 | no filter |  |  |
-| 006 | random |  |  |
-| 106 | random |  |  |
-| 007 | self |  |  |
-| 107 | self |  |  |
+| 005 | no filter | 5969 | 0.0087 |
+| 105 | no filter | 6110 | 0.0018 |
+| 006 | random | 3047 | 0.02211 |
+| 106 | random | 3212 | 0.0065 |
+| 007 | self | 1769 | 0.0242 |
+| 107 | self | 1923 | 0.0120 |
 | 008 | cwi |  |  |
 | 108 | cwi |  |  |
 
 | #XP | Filter | L | RHO |
 | --- | --- | --- |
-| 009 | no filter | L2 |  |
-| 109 | no filter | L2 |  |
-| 010 | random | L2 |  |
-| 110 | random | L2 |  |
-| 011 | self | L2 |  |
-| 111 | self | L2 |  |
+| 009 | no filter | L2 | 0.3076 |
+| 109 | no filter | L2 | 0.3076 |
+| 010 | random | L2 | 0.3411 |
+| 110 | random | L2 | 0.3411 |
+| 011 | self | L2 | 0.3442 |
+| 111 | self | L2 | 0.3442 |
 | 012 | cwi | L2 |  |
 | 112 | cwi | L2 |  |
 | 013 | no filter | L4 |  |
@@ -133,6 +125,38 @@ Median Rank =
 | 028 | n2v cwi alpha | L6 |  |
 | 128 | n2v cwi alpha | L6 |  |
 
-### Shuffling test set in incremental learning
+## Shuffling test set in incremental learning
 
-### Sampling alpha and beta parameters
+### Definitional
+
+| #XP | Filter | MR | MRR | MR | MRR | MR | MRR | MR | MRR | MR | MRR |
+| --- | --- | --- | --- |
+| 105 | no filter |  |  |  |  |  |  |  |  |  |  |
+| 106 | random |  |  |  |  |  |  |  |  |  |  |
+| 107 | self |  |  |  |  |  |  |  |  |  |  |
+| 108 | cwi |  |  |  |  |  |  |  |  |  |  |
+| 101 | n2v as-is |  |  |  |  |  |  |  |  |  |  |
+| 121 | n2v cwi init |  |  |  |  |  |  |  |  |  |  |
+| 122 | n2v cwi alpha |  |  |  |  |  |  |  |  |  |  |
+
+| #XP | Filter | MRMIN | MRRMIN | MRMAX | MRRMAX | MRAVG | MRRAVG |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 105 | no filter |  |  |  |  |  |  |
+| 106 | random |  |  |  |  |  |  |
+| 107 | self |  |  |  |  |  |  |
+| 108 | cwi |  |  |  |  |  |  |
+| 101 | n2v as-is |  |  |  |  |  |  |
+| 121 | n2v cwi init |  |  |  |  |  |  |
+| 122 | n2v cwi alpha |  |  |  |  |  |  |
+
+### Chimeras
+
+## Sampling alpha and beta parameters
+
+### alpha
+| model | mode | alpha | MR | MRR | L2 | L4 | L6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| n2v cwi alpha | one-shot | 1.0 |  |  |  |  |  |
+| n2v cwi alpha | incremental | 1.0 |  |  |  |  |  |
+
+### beta
