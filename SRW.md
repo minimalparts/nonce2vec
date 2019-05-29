@@ -105,9 +105,3 @@ Median Rank = 78504
 | 004 | n2v as-is | L6 | 0.3300 |
 | 027 | n2v cwi init | L6 | 0.3585 |
 | 028 | n2v cwi alpha | L6 | 0.4077 |
-
-### Incremental learning on the chimera dataset
-
-### Shuffling test set in incremental learning
-
-### Sampling alpha and beta parameters 

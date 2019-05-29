@@ -94,6 +94,7 @@ def train_sg_pair_replication(model, word, context_index, alpha,
                 # (mutates model.wv.syn0[word2.index], if that is l1)
     return neu1e
 
+
 def train_batch_sg_replication(model, sentences, alpha, work=None,
                                compute_loss=False):
     result = 0
@@ -126,16 +127,17 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
         model.recompute_sample_ints()
     return result
 
+
 def train_sg_pair(model, word, context_index, alpha,
                   learn_vectors=True, learn_hidden=True,
                   context_vectors=None, context_locks=None, compute_loss=False,
                   is_ft=False):
     if context_vectors is None:
-        #context_vectors = model.wv.syn0
+        # context_vectors = model.wv.syn0
         context_vectors = model.wv.vectors
 
     if context_locks is None:
-        #context_locks = model.syn0_lockf
+        # context_locks = model.syn0_lockf
         context_locks = model.trainables.vectors_lockf
 
     if word not in model.wv.vocab:
@@ -258,13 +260,13 @@ class Nonce2VecVocab(Word2VecVocab):
         new_words = []
         pre_exist_words = []
         if self.nonce is not None:
-        #if self.nonce is not None and self.nonce in wv.vocab:
+        # if self.nonce is not None and self.nonce in wv.vocab:
             if self.nonce in wv.vocab:
                 gold_nonce = '{}_true'.format(self.nonce)
                 nonce_index = wv.vocab[self.nonce].index
                 wv.vocab[gold_nonce] = wv.vocab[self.nonce]
                 wv.index2word[nonce_index] = gold_nonce
-                #del wv.index2word[wv.vocab[self.nonce].index]
+                # del wv.index2word[wv.vocab[self.nonce].index]
                 del wv.vocab[self.nonce]
             for word, v in iteritems(self.raw_vocab):
                 # Update count of all words already in vocab
@@ -424,7 +426,7 @@ class Nonce2VecTrainables(Word2VecTrainables):
                 logger.debug('Summing over set of context items: {}'
                              .format(filtered_ctx))
             if weighted:
-                logger.debug('Applying weighted sum') # Sum over positive cwi words only
+                logger.debug('Applying weighted sum')  # Sum over positive cwi words only
                 ctx_ent_map = self.info.get_ctx_ent_for_weighted_sum(
                     sentences, pre_exist_words, nonce)
             if filtered_ctx:
@@ -452,7 +454,6 @@ class Nonce2VecTrainables(Word2VecTrainables):
                     newvectors[i-len(wv.vectors)] += wv.vectors[
                         wv.vocab[w].index]
 
-
         # Raise an error if an online update is run before initial training on
         # a corpus
         if not len(wv.vectors):
@@ -464,9 +465,9 @@ class Nonce2VecTrainables(Word2VecTrainables):
         wv.vectors = np.vstack([wv.vectors, newvectors])
         if negative:
             self.syn1neg = np.vstack([self.syn1neg,
-                                         np.zeros((gained_vocab,
-                                                      self.layer1_size),
-                                                     dtype=np.float32)])
+                                      np.zeros((gained_vocab,
+                                                self.layer1_size),
+                                                dtype=np.float32)])
         wv.vectors_norm = None
 
         # do not suppress learning for already learned words
