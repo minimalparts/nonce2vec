@@ -109,7 +109,6 @@ def _load_nonce2vec_model(args, info, nonce):
 
 
 def _test_on_chimeras(args):
-    nonce = '___'
     rhos = []
     samples = Samples(args.dataset, source='chimeras', shuffle=args.shuffle)
     total_num_batches = sum(1 for x in samples)
@@ -145,9 +144,6 @@ def _test_on_chimeras(args):
         human_responses = []
         probe_count = 0
         for probe in probes:
-            # cos = model.similarity(nonce, probe)
-            # system_responses.append(cos)
-            # human_responses.append(responses[probe_count])
             try:
                 cos = model.similarity(nonce, probe)
                 system_responses.append(cos)
