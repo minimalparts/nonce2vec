@@ -55,8 +55,8 @@ MEN = 0.74
 | 106 | random | 3212 | 0.0065 |
 | 007 | self | 1769 | 0.0242 |
 | 107 | self | 1923 | 0.0120 |
-| 008 | cwi |  |  |
-| 108 | cwi |  |  |
+| 008 | cwi | 935 | 0.0374 |
+| 108 | cwi | 935 | 0.0321 |
 
 | #XP | Filter | L | RHO |
 | --- | --- | --- |
@@ -66,14 +66,14 @@ MEN = 0.74
 | 110 | random | L2 | 0.3411 |
 | 011 | self | L2 | 0.3442 |
 | 111 | self | L2 | 0.3442 |
-| 012 | cwi | L2 |  |
-| 112 | cwi | L2 |  |
-| 013 | no filter | L4 |  |
-| 113 | no filter | L4 |  |
-| 014 | random | L4 |  |
-| 114 | random | L4 |  |
-| 015 | self | L4 |  |
-| 115 | self | L4 |  |
+| 012 | cwi | L2 | 0.3016 |
+| 112 | cwi | L2 | 0.3016 |
+| 013 | no filter | L4 | 0.3208 |
+| 113 | no filter | L4 | 0.3208 |
+| 014 | random | L4 | 0.3651 |
+| 114 | random | L4 | 0.3651 |
+| 015 | self | L4 | 0.3635 |
+| 115 | self | L4 | 0.3635 |
 | 016 | cwi | L4 |  |
 | 116 | cwi | L4 |  |
 | 017 | no filter | L6 |  |
@@ -105,15 +105,15 @@ MEN = 0.74
 | 002 | n2v as-is | L2 |  |
 | 102 | n2v as-is | L2 |  |
 | 023 | n2v cwi init | L2 |  |
-| 123 | n2v cwi init | L2 |  |
+| 123 | n2v cwi init | L2 | 0.1071 |
 | 024 | n2v cwi alpha | L2 |  |
-| 124 | n2v cwi alpha | L2 |  |
+| 124 | n2v cwi alpha | L2 | 0.2739 |
 | 016 | cwi sum | L4 |  |
 | 116 | cwi sum | L4 |  |
 | 003 | n2v as-is | L4 |  |
 | 103 | n2v as-is | L4 |  |
-| 025 | n2v cwi init | L4 |  |
-| 125 | n2v cwi init | L4 |  |
+| 025 | n2v cwi init | L4 | 0.3432 |
+| 125 | n2v cwi init | L4 | 0.1264 |
 | 026 | n2v cwi alpha | L4 |  |
 | 126 | n2v cwi alpha | L4 |  |
 | 020 | cwi sum | L6 |  |
@@ -154,6 +154,7 @@ MEN = 0.74
 ## Sampling alpha and beta parameters
 
 ### alpha
+
 | model | mode | alpha | MR | MRR | L2 | L4 | L6 |
 | --- | --- | --- | --- | --- | --- | --- |
 | n2v cwi alpha | one-shot | 1.0 |  |  |  |  |  |
