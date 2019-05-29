@@ -107,7 +107,9 @@ Median Rank = 78504
 | 028 | n2v cwi alpha | L6 | 0.4077 |
 
 ### Incremental learning on the chimera dataset
+XP009 original RHO = 0.3075
+RHO = 0.3155
 
 ### Shuffling test set in incremental learning
 
-### Sampling alpha and beta parameters 
+### Sampling alpha and beta parameters
