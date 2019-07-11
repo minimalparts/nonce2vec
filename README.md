@@ -131,8 +131,8 @@ handled subsampling with `random.rand()`.
 [release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
 [pypi-image]:https://img.shields.io/pypi/v/nonce2vec.svg?style=flat-square
 [pypi-url]:https://pypi.org/project/nonce2vec/
-[travis-image]:https://img.shields.io/travis/minimalparts/nonce2vec.svg?style=flat-square
-[travis-url]:https://travis-ci.org/minimalparts/nonce2vec
+[travis-image]:https://img.shields.io/travis/akb89/nonce2vec.svg?style=flat-square
+[travis-url]:https://travis-ci.org/akb89/nonce2vec
 [license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
 [license-url]:LICENSE.txt
 [doi-image]:https://img.shields.io/badge/DOI-10.5281%2Fzenodo.1423290-blue.svg?style=flat-square
