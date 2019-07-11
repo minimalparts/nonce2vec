@@ -16,7 +16,7 @@ setup(
     author_email='akb@3azouz.net',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    version='2.0.0rc4',
+    version='2.0.0rc6',
     url='https://github.com/minimalparts/nonce2vec',
     download_url='https://github.com/minimalparts/nonce2vec/#files',
     license='MIT',
@@ -31,7 +31,7 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['PyYAML==3.13', 'gensim==3.4.0', 'numpy==1.15.2',
+    install_requires=['PyYAML==3.13', 'gensim==3.4.0', 'numpy==1.15.4',
                       'scipy==1.1.0'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
                  'Environment :: Web Environment',
