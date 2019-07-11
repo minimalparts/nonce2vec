@@ -109,9 +109,8 @@ def _load_nonce2vec_model(args, info, nonce):
 
 
 def _test_on_chimeras(args):
-    nonce = '___'
     rhos = []
-    samples = Samples(args.dataset, source='chimeras')
+    samples = Samples(args.dataset, source='chimeras', shuffle=args.shuffle)
     total_num_batches = sum(1 for x in samples)
     total_num_sent = sum(1 for x in [sent for batch in samples for sent in batch])
     logger.info('Testing Nonce2Vec on the chimeras dataset containing '
@@ -119,42 +118,32 @@ def _test_on_chimeras(args):
                                                      total_num_sent))
     num_batch = 1
     info = _load_informativeness_model(args)
-    for sentences, probes, responses in samples:
-        if args.reload:
-            nonce = '___'
-            post_sentences = sentences
+    for sentences, nonce, probes, responses in samples:
+        if num_batch == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
-        else:
-            nonce = 'chimera_nonce_{}'.format(num_batch)
-            if num_batch == 1:
-                model = _load_nonce2vec_model(args, info, nonce)
-            post_sentences = [[token if token != '___' else nonce for token in sentence] for sentence in sentences]
         model.vocabulary.nonce = nonce
         vocab_size = len(model.wv.vocab)
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
                                                     total_num_batches))
-        logger.info('sentences = {}'.format(post_sentences))
+        logger.info('sentences = {}'.format(sentences))
         logger.info('probes = {}'.format(probes))
         logger.info('responses = {}'.format(responses))
         logger.info('nonce = {}'.format(nonce))
         logger.info('vocab size = {}'.format(vocab_size))
         if args.reduced:
             # Hack to sum over the first sentence context words only
-            model.build_vocab([post_sentences[0]], update=True)
+            model.build_vocab([sentences[0]], update=True)
         else:
-            model.build_vocab(post_sentences, update=True)
+            model.build_vocab(sentences, update=True)
         if not args.sum_only:
-            model.train(post_sentences, total_examples=model.corpus_count,
+            model.train(sentences, total_examples=model.corpus_count,
                         epochs=model.iter)
         num_batch += 1
         system_responses = []
         human_responses = []
         probe_count = 0
         for probe in probes:
-            # cos = model.similarity(nonce, probe)
-            # system_responses.append(cos)
-            # human_responses.append(responses[probe_count])
             try:
                 cos = model.similarity(nonce, probe)
                 system_responses.append(cos)
@@ -232,7 +221,7 @@ def _test_on_definitions(args):
     sum_50 = []
     relative_ranks = 0.0
     count = 0
-    samples = Samples(args.dataset, source='definitions')
+    samples = Samples(args.dataset, source='definitions', shuffle=args.shuffle)
     total_num_sent = sum(1 for line in samples)
     logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
@@ -326,7 +315,7 @@ def _check_men(args):
 
 
 def _train(args):
-    sentences = Samples(args.datadir, source='wiki')
+    sentences = Samples(args.datadir, source='wiki', shuffle=False)
     if not args.train_mode:
         raise Exception('Unspecified train mode')
     output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
@@ -474,5 +463,7 @@ def main():
                              default=False, help='display informativeness '
                                                  'statistics alongside test '
                                                  'results')
+    parser_test.add_argument('--shuffle', action='store_true',
+                             default=False, help='shuffle the test set')
     args = parser.parse_args()
     args.func(args)
