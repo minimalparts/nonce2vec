@@ -2,13 +2,13 @@
 [![PyPI release][pypi-image]][pypi-url]
 [![Build][travis-image]][travis-url]
 [![MIT License][license-image]][license-url]
-[![DOI](https://zenodo.org/badge/96074751.svg)](https://zenodo.org/badge/latestdoi/96074751)
+[![DOI][doi-image]][doi-url]
 
 # nonce2vec
 Welcome to Nonce2Vec!
 
-This is the repo accompanying the paper "High-risk learning: acquiring new word
-vectors from tiny data" (Herbelot &amp; Baroni, 2017). If you use this code,
+This is the repo accompanying the paper [High-risk learning: acquiring new word
+vectors from tiny data](http://aurelieherbelot.net/resources/papers/emnlp2017_final.pdf) (Herbelot &amp; Baroni, 2017). If you use this code,
 please cite the following:
 ```tex
 @InProceedings{herbelot-baroni:2017:EMNLP2017,
@@ -24,7 +24,7 @@ please cite the following:
 }
 ```
 
-**NEW!** We have now released v2.0 of Nonce2Vec which is packaged via pip and
+**NEW!** We have now released v2 of Nonce2Vec which is packaged via pip and
 runs on gensim v3.4.0. This should make it way easier for you to replicate
 experiments.
 
@@ -34,28 +34,30 @@ pip3 install nonce2vec
 ```
 
 ## Download and extract the required resources
-To download the nonces, chimeras and MEN datasets:
+To download the definitional, chimeras and MEN datasets:
 ```bash
 wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
 ```
 To use the pretrained gensim model from Herbelot and Baroni (2017):
 ```bash
-wget http://129.194.21.122/~kabbach/wiki_all.model.7z
+wget http://129.194.21.122/~kabbach/wiki_all.sent.split.model.7z
 ```
 
 ## Generate a pre-trained word2vec model
-To generate a gensim.word2vec model from scratch, with :
+If you want to generate a new gensim.word2vec model from scratch and do not want to rely on the `wiki_all.sent.split.model`:
 
-### Use a Wikipedia dump
+### Download/Generate a Wikipedia dump
 To use the same Wikipedia dump as Herbelot and Baroni (2017):
 ```bash
 wget http://129.194.21.122/~kabbach/wiki.all.utf8.sent.split.lower.7z
 ```
 
-Else, to create a new Wikipedia dump from an earlier archive, check out
+Else, to create a new Wikipedia dump from an different archive, check out
 [WiToKit](https://github.com/akb89/witokit).
 
 ### Train the background model
+You can train Word2Vec with gensim via the nonce2vec package:
+
 ```bash
 n2v train \
   --data /absolute/path/to/wikipedia/dump \
@@ -78,7 +80,9 @@ n2v check \
   --model /absolute/path/to/gensim/word2vec/model
 ```
 
-## Test nonce2vec on the nonce definitional dataset
+## Replication
+
+### Test nonce2vec on the nonce definitional dataset
 ```bash
 n2v test \
   --on nonces \
@@ -89,13 +93,9 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min-count 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5 \
-  --sum-filter random \
-  --sum-over-set \
-  --replication
+  --window-decay 5
 ```
 
 
@@ -110,14 +110,22 @@ n2v test \
   --window 15 \
   --sample 10000 \
   --epochs 1 \
-  --min-count 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5 \
-  --sum-filter random \
-  --sum-over-set \
-  --replication
+  --window-decay 5
 ```
+
+### Results
+Results on nonce2vec v2.x are slightly different than those reported to in the
+original EMNLP paper due to several bugfix in how gensim originally
+handled subsampling with `random.rand()`.
+
+| DATASET  | MRR / RHO |
+| --- | --- |
+| Definitional | 0.04846 |
+| Chimeras L2 | 0.3407 |
+| Chimeras L4 | 0.3457 |
+| Chimeras L6 | 0.4001 |
 
 [release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
 [release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
@@ -127,3 +135,5 @@ n2v test \
 [travis-url]:https://travis-ci.org/minimalparts/nonce2vec
 [license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
 [license-url]:LICENSE.txt
+[doi-image]:https://img.shields.io/badge/DOI-10.5281%2Fzenodo.1423290-blue.svg?style=flat-square
+[doi-url]:https://zenodo.org/badge/latestdoi/96074751

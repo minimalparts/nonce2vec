@@ -18,9 +18,6 @@ loggers:
   nonce2vec.utils:
     level: INFO
     handlers: [console]
-  nonce2vec.models.informativeness:
-    level: DEBUG
-    handlers: [console]
   nonce2vec.models.nonce2vec:
     level: INFO
     handlers: [console]
