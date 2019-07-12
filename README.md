@@ -88,6 +88,12 @@ n2v train \
   --train-mode cbow
 ```
 
+To check the correlation of your word2vec model(s) with the MEN dataset, run:
+```bash
+n2v check-men \
+  ---model /absolute/path/to/gensim/w2v/model
+```
+
 ## Running the code
 
 

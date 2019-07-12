@@ -298,8 +298,9 @@ def _check_men(args):
     model = Word2Vec.load(args.w2v_model)
     logger.info('Model loaded')
     system_actual = []
-    human_actual = []  # This is needed because we may not be able to
-                       # calculate cosine for all pairs
+    # This is needed because we may not be able to calculate cosine for
+    # all pairs
+    human_actual = []
     count = 0
     for (first, second), human in zip(pairs, humans):
         if first not in model.wv.vocab or second not in model.wv.vocab:
@@ -424,52 +425,45 @@ def main():
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
     parser_test.add_argument('--on', required=True,
-                             choices=['definitions', 'chimeras'],
+                             choices=['def', 'l2', 'l4', 'l6'],
                              help='type of test data to be used')
     parser_test.add_argument('--model', required=True,
                              dest='background',
                              help='absolute path to word2vec pretrained model')
-    parser_test.add_argument('--reload', action='store_true', default=False,
+    parser_test.add_argument('--reload', action='store_true',
                              help='reload the background model at each '
                                   'iteration')
-    parser_test.add_argument('--data', required=True, dest='dataset',
-                             help='absolute path to test dataset')
     parser_test.add_argument('--train-with',
                              choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
                              help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
-                             dest='lambda_den',
-                             help='lambda decay')
-    parser_test.add_argument('--kappa', type=int,
-                             help='kappa')
-    parser_test.add_argument('--beta', type=int,
-                             help='beta')
-    parser_test.add_argument('--sample-decay', type=float,
-                             help='sample decay')
-    parser_test.add_argument('--window-decay', type=int,
-                             help='window decay')
+                             dest='lambda_den', help='lambda decay')
+    parser_test.add_argument('--kappa', type=int, help='kappa')
+    parser_test.add_argument('--beta', type=int, help='beta')
+    parser_test.add_argument('--sample-decay', type=float, help='sample decay')
+    parser_test.add_argument('--window-decay', type=int, help='window decay')
     parser_test.add_argument('--sum-only', action='store_true', default=False,
                              help='sum only: no additional training after '
                                   'sum initialization')
     parser_test.add_argument('--replication', action='store_true',
-                             default=False, help='use original n2v code')
-    parser_test.add_argument('--reduced', action='store_true', default=False,
+                             help='use original n2v code of Herbelot and '
+                                  'Baroni as per the EMNLP2017 paper')
+    parser_test.add_argument('--reduced', action='store_true',
                              help='sum over the first sentence context words '
                                   'in the chimeras dataset')
     parser_test.add_argument('--sum-over-set', action='store_true',
-                             default=False, help='sum over set of context '
-                                                 'items rather than list')
-    parser_test.add_argument('--weighted', action='store_true', default=False,
+                             help='sum over set of context items rather than '
+                                  'list')
+    parser_test.add_argument('--weighted', action='store_true',
                              help='apply weighted sum over context words. '
                                   'Weights are based on cwi')
     parser_test.add_argument('--train-over-set', action='store_true',
-                             default=False, help='train over set of context '
-                                                 'items rather than list')
+                             help='train over set of context items rather '
+                                  'than list')
     parser_test.add_argument('--with-stats', action='store_true',
-                             default=False, help='display informativeness '
-                                                 'statistics alongside test '
-                                                 'results')
+                             help='display informativeness statistics '
+                                  'alongside test results')
     parser_test.add_argument('--shuffle', action='store_true',
-                             default=False, help='shuffle the test set')
+                             help='shuffle the test set')
     args = parser.parse_args()
     args.func(args)
