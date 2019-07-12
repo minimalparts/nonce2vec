@@ -12,9 +12,7 @@ matrix:
 
 install:
   - python setup.py -q install
-  - pip install pylint pydocstyle pycodestyle
+  - pip install pylint
 
 script:
   - pylint nonce2vec
-  - pydocstyle nonce2vec
-  - pycodestyle nonce2vec

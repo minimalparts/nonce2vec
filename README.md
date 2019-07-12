@@ -8,7 +8,7 @@ Welcome to Nonce2Vec!
 
 The main branch of this repository now refers to the Kabbach et al. (2019) ACL SRW 2019 paper *Towards incremental learning of word embeddings using context informativeness*.
 
-**If you are looking for the Herbelot and Baroni (2017) repository, check out the [emnlp2017 branch](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017)**
+**If you are looking for the Herbelot and Baroni (2017) repository, check out the [emnlp2017](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) branch.**
 
 If you use this code, please cite:
 ```tex
@@ -95,6 +95,72 @@ n2v check-men \
 ```
 
 ## Running the code
+Running Nonce2Vec on the definitional of chimeras datasets is done via the `n2v test` command. You can pass in the `--reload` parameter to run in `one-shot` mode, without it the code runs in incremental model by default. You can further pass in the `--shuffle` parameter to shuffle the test set before running n2v.
+
+You will find below a list of commands corresponding to the experiments reported in the SRW 2019 paper. For example, to test the SUM CWI model (a basic sum model with context-word-informativeness-based filtering), which provides a rather robust baseline on all datasets in incremental setup, run, for the definitional dataset:
+```bash
+n2v test \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-only \
+  --sum-filter cwi \
+  --sum-threshold 0
+```
+
+To run the N2V CWI alpha model on the chimera L4 test set, with shuffling and in
+one-shot evaluation setup (which provides SOTA performance), do:
+```bash
+n2v test \
+  --on l4 \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --train-with cwi_alpha \
+  --alpha 1.0 \
+  --beta 1000 \
+  --kappa 1 \
+  --neg 3 \
+  --epochs 1 \
+  --reload
+```
+
+To test N2V as-is (the original N2V code without background freezing), in incremental setup on the definitional dataset, do:
+```bash
+n2v test \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --sum-filter random \
+  --sample 10000 \
+  --alpha 1.0 \
+  --neg 3 \
+  --window 15 \
+  --epochs 1 \
+  --lambda 70 \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --replication
+```
+
+To test N2V CWI init (the original N2V with CWI-based sum initialization) on the definitional dataset in one-shot evaluation setup, do:
+```bash
+n2v test \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --alpha 1.0 \
+  --neg 3 \
+  --window 15 \
+  --epochs 1 \
+  --lambda 70 \
+  --sample-decay 1.9 \
+  --window-decay 5 \
+  --replication \
+  --reload
+```
 
 
 [release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
