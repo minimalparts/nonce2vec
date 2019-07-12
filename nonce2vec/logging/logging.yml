@@ -10,7 +10,7 @@ handlers:
     formatter: simple
 loggers:
   gensim:
-    level: WARNING
+    level: WARN
     handlers: [console]
   nonce2vec.main:
     level: INFO

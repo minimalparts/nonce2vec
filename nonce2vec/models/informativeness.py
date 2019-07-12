@@ -109,10 +109,12 @@ class Informativeness():
         return tuple(ctx for idx, ctx in enumerate(context) if
                      self._keep_item(idx, context, filter_type, threshold))
 
-    def _get_in_vocab_context(self, sentence, vocab, nonce):
+    @classmethod
+    def _get_in_vocab_context(cls, sentence, vocab, nonce):
         return tuple([w for w in sentence if w in vocab and w != nonce])
 
     def get_ctx_ent_for_weighted_sum(self, sentences, vocab, nonce):
+        """Return context entropy."""
         ctx_ent_map = {}
         ctx_ent = self._get_filtered_train_ctx_ent(sentences, vocab, nonce)
         for ctx, cwi in ctx_ent:

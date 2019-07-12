@@ -32,12 +32,9 @@ logging.config.dictConfig(
 
 logger = logging.getLogger(__name__)
 
-MEN_FILEPATH = os.path.join(os.path.dirname(__file__),
-                            'resources', 'MEN_dataset_natural_form_full')
-
 
 # Note: this is scipy's spearman, without tie adjustment
-def _spearman(x, y):
+def _spearman(x, y):  # pylint:disable=C0103
     return scipy.stats.spearmanr(x, y)[0]
 
 
@@ -64,7 +61,6 @@ def _load_nonce2vec_model(args, info, nonce):
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
     model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
-    #model.min_count = 1  # min_count should be the same as the background model!!
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
     model.weighted = args.weighted
@@ -108,14 +104,15 @@ def _load_nonce2vec_model(args, info, nonce):
     return model
 
 
-def _test_on_chimeras(args):
+def _test_on_chimeras(args):  # pylint:disable=R0914
     rhos = []
-    samples = Samples(args.dataset, source='chimeras', shuffle=args.shuffle)
+    samples = Samples(source=args.on, shuffle=args.shuffle)
     total_num_batches = sum(1 for x in samples)
-    total_num_sent = sum(1 for x in [sent for batch in samples for sent in batch])
-    logger.info('Testing Nonce2Vec on the chimeras dataset containing '
-                '{} batches and {} sentences'.format(total_num_batches,
-                                                     total_num_sent))
+    total_num_sent = sum(1 for x in [sent for batch in samples for sent in
+                                     batch])
+    logger.info('Testing Nonce2Vec on the chimeras {} dataset containing '
+                '{} batches and {} sentences'.format(
+                    args.on, total_num_batches, total_num_sent))
     num_batch = 1
     info = _load_informativeness_model(args)
     for sentences, nonce, probes, responses in samples:
@@ -148,7 +145,7 @@ def _test_on_chimeras(args):
                 cos = model.similarity(nonce, probe)
                 system_responses.append(cos)
                 human_responses.append(responses[probe_count])
-            except:
+            except:  # pylint:disable=W0702
                 logger.error('ERROR processing probe {}'.format(probe))
             probe_count += 1
         if len(system_responses) > 1:
@@ -213,7 +210,7 @@ def _compute_average_sim(sims):
     return sim_sum / len(sims)
 
 
-def _test_on_definitions(args):
+def _test_on_definitions(args):  # pylint:disable=R0914
     """Test the definitional nonces."""
     ranks = []
     sum_10 = []
@@ -221,7 +218,7 @@ def _test_on_definitions(args):
     sum_50 = []
     relative_ranks = 0.0
     count = 0
-    samples = Samples(args.dataset, source='definitions', shuffle=args.shuffle)
+    samples = Samples(source='def', shuffle=args.shuffle)
     total_num_sent = sum(1 for line in samples)
     logger.info('Testing Nonce2Vec on the nonces dataset containing '
                 '{} sentences'.format(total_num_sent))
@@ -293,15 +290,15 @@ def _check_men(args):
     Calculate correlation with the similarity ratings in the MEN dataset.
     """
     logger.info('Checking embeddings quality against MEN similarity ratings')
-    pairs, humans = _get_men_pairs_and_sim(MEN_FILEPATH)
     logger.info('Loading word2vec model...')
     model = Word2Vec.load(args.w2v_model)
     logger.info('Model loaded')
     system_actual = []
-    human_actual = []  # This is needed because we may not be able to
-                       # calculate cosine for all pairs
+    # This is needed because we may not be able to calculate cosine for
+    # all pairs
+    human_actual = []
     count = 0
-    for (first, second), human in zip(pairs, humans):
+    for (first, second), human in Samples(source='men', shuffle=False):
         if first not in model.wv.vocab or second not in model.wv.vocab:
             logger.error('Could not find one of more pair item in model '
                          'vocabulary: {}, {}'.format(first, second))
@@ -315,7 +312,8 @@ def _check_men(args):
 
 
 def _train(args):
-    sentences = Samples(args.datadir, source='wiki', shuffle=False)
+    logger.info('Training word2vec model with gensim')
+    sentences = Samples(source='wiki', shuffle=False, input_data=args.datadir)
     if not args.train_mode:
         raise Exception('Unspecified train mode')
     output_model_filepath = futils.get_model_path(args.datadir, args.outputdir,
@@ -324,6 +322,7 @@ def _train(args):
                                                   args.window, args.sample,
                                                   args.epochs,
                                                   args.min_count, args.size)
+    logger.info('Saving output w2v model to {}'.format(output_model_filepath))
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,
@@ -332,17 +331,21 @@ def _train(args):
         model.sg = 0
     if args.train_mode == 'skipgram':
         model.sg = 1
+    logger.info('Building vocabulary...')
     model.build_vocab(sentences)
+    logger.info('Training model...')
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
+    logger.info('Training complete. Saving model...')
     model.save(output_model_filepath)
+    logger.info('Done.')
 
 
 def _test(args):
-    if args.on == 'chimeras':
-        _test_on_chimeras(args)
-    elif args.on == 'definitions':
+    if args.on == 'def':
         _test_on_definitions(args)
+    else:
+        _test_on_chimeras(args)
 
 
 def main():
@@ -418,52 +421,45 @@ def main():
         help='test nonce2vec')
     parser_test.set_defaults(func=_test)
     parser_test.add_argument('--on', required=True,
-                             choices=['definitions', 'chimeras'],
+                             choices=['def', 'l2', 'l4', 'l6'],
                              help='type of test data to be used')
     parser_test.add_argument('--model', required=True,
                              dest='background',
                              help='absolute path to word2vec pretrained model')
-    parser_test.add_argument('--reload', action='store_true', default=False,
+    parser_test.add_argument('--reload', action='store_true',
                              help='reload the background model at each '
                                   'iteration')
-    parser_test.add_argument('--data', required=True, dest='dataset',
-                             help='absolute path to test dataset')
     parser_test.add_argument('--train-with',
                              choices=['exp_alpha', 'cwi_alpha', 'cst_alpha'],
                              help='learning rate computation function')
     parser_test.add_argument('--lambda', type=float,
-                             dest='lambda_den',
-                             help='lambda decay')
-    parser_test.add_argument('--kappa', type=int,
-                             help='kappa')
-    parser_test.add_argument('--beta', type=int,
-                             help='beta')
-    parser_test.add_argument('--sample-decay', type=float,
-                             help='sample decay')
-    parser_test.add_argument('--window-decay', type=int,
-                             help='window decay')
+                             dest='lambda_den', help='lambda decay')
+    parser_test.add_argument('--kappa', type=int, help='kappa')
+    parser_test.add_argument('--beta', type=int, help='beta')
+    parser_test.add_argument('--sample-decay', type=float, help='sample decay')
+    parser_test.add_argument('--window-decay', type=int, help='window decay')
     parser_test.add_argument('--sum-only', action='store_true', default=False,
                              help='sum only: no additional training after '
                                   'sum initialization')
     parser_test.add_argument('--replication', action='store_true',
-                             default=False, help='use original n2v code')
-    parser_test.add_argument('--reduced', action='store_true', default=False,
+                             help='use original n2v code of Herbelot and '
+                                  'Baroni as per the EMNLP2017 paper')
+    parser_test.add_argument('--reduced', action='store_true',
                              help='sum over the first sentence context words '
                                   'in the chimeras dataset')
     parser_test.add_argument('--sum-over-set', action='store_true',
-                             default=False, help='sum over set of context '
-                                                 'items rather than list')
-    parser_test.add_argument('--weighted', action='store_true', default=False,
+                             help='sum over set of context items rather than '
+                                  'list')
+    parser_test.add_argument('--weighted', action='store_true',
                              help='apply weighted sum over context words. '
                                   'Weights are based on cwi')
     parser_test.add_argument('--train-over-set', action='store_true',
-                             default=False, help='train over set of context '
-                                                 'items rather than list')
+                             help='train over set of context items rather '
+                                  'than list')
     parser_test.add_argument('--with-stats', action='store_true',
-                             default=False, help='display informativeness '
-                                                 'statistics alongside test '
-                                                 'results')
+                             help='display informativeness statistics '
+                                  'alongside test results')
     parser_test.add_argument('--shuffle', action='store_true',
-                             default=False, help='shuffle the test set')
+                             help='shuffle the test set')
     args = parser.parse_args()
     args.func(args)

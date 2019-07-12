@@ -20,11 +20,12 @@ setup(
     url='https://github.com/minimalparts/nonce2vec',
     download_url='https://github.com/minimalparts/nonce2vec/#files',
     license='MIT',
-    keywords=['word2vec', 'embeddings', 'nonce', 'one-shot'],
+    keywords=['word2vec', 'word-embeddings', 'incremental-learning'],
     platforms=['any'],
     packages=['nonce2vec', 'nonce2vec.utils', 'nonce2vec.models',
-              'nonce2vec.exceptions', 'nonce2vec.logging'],
-    package_data={'nonce2vec': ['logging/*.yml']},
+              'nonce2vec.exceptions', 'nonce2vec.logging',
+              'nonce2vec.resources'],
+    package_data={'nonce2vec': ['logging/*.yml', 'resources/*']},
     include_package_data=True,
     entry_points={
         'console_scripts': [
@@ -43,8 +44,8 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python :: 3.5',
                  'Programming Language :: Python :: 3.6',
+                 'Programming Language :: Python :: 3.7',
                  'Topic :: Scientific/Engineering :: Artificial Intelligence',
-                 'Topic :: Software Development :: Libraries :: Python Modules',
                  'Topic :: Text Processing :: Linguistic'],
     zip_safe=False,
 )
