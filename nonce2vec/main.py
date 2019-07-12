@@ -315,6 +315,7 @@ def _check_men(args):
 
 
 def _train(args):
+    logger.info('Training word2vec model with gensim')
     sentences = Samples(args.datadir, source='wiki', shuffle=False)
     if not args.train_mode:
         raise Exception('Unspecified train mode')
@@ -324,6 +325,7 @@ def _train(args):
                                                   args.window, args.sample,
                                                   args.epochs,
                                                   args.min_count, args.size)
+    logger.info('Saving output w2v model to {}'.format(output_model_filepath))
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
         window=args.window, sample=args.sample, iter=args.epochs,
@@ -332,10 +334,14 @@ def _train(args):
         model.sg = 0
     if args.train_mode == 'skipgram':
         model.sg = 1
+    logger.info('Building vocabulary...')
     model.build_vocab(sentences)
+    logger.info('Training model...')
     model.train(sentences, total_examples=model.corpus_count,
                 epochs=model.epochs)
+    logger.info('Training complete. Saving model...')
     model.save(output_model_filepath)
+    logger.info('Done.')
 
 
 def _test(args):

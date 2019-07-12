@@ -1,9 +1,9 @@
 """Files utils."""
 
 import os
-import smart_open
 import random
 import logging
+import smart_open
 
 __all__ = ('Samples', 'get_zipped_sentences', 'get_sentences',
            'get_model_path', 'get_input_filepaths')
@@ -56,10 +56,11 @@ def get_sentences(data):
                 yield line.strip().split()
 
 
-class Samples(object):
+class Samples():
     """An iterable class (with generators) for gensim and n2v."""
 
     def __init__(self, input_data, source, shuffle):
+        logger.info('Loading {} samples...'.format(source))
         if source not in ['wiki', 'definitions', 'chimeras']:
             raise Exception('Invalid source parameter \'{}\''.format(source))
         self._source = source
@@ -93,7 +94,9 @@ class Samples(object):
             for num, line in enumerate(input_stream):
                 nonce = 'chimera_nonce_{}'.format(num+1)
                 fields = line.rstrip('\n').split('\t')
-                sentences = [[token if token != '___' else nonce for token in sent.strip().split(' ')] for sent in fields[1].split('@@')]
+                sentences = [[token if token != '___' else nonce for token in
+                              sent.strip().split(' ')] for sent in
+                             fields[1].split('@@')]
                 probes = fields[2].split(',')
                 responses = fields[3].split(',')
                 yield sentences, nonce, probes, responses
