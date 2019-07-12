@@ -2,65 +2,65 @@
 [![PyPI release][pypi-image]][pypi-url]
 [![Build][travis-image]][travis-url]
 [![MIT License][license-image]][license-url]
-[![DOI][doi-image]][doi-url]
 
 # nonce2vec
 Welcome to Nonce2Vec!
 
-This is the repo accompanying the paper [High-risk learning: acquiring new word
-vectors from tiny data](http://aurelieherbelot.net/resources/papers/emnlp2017_final.pdf) (Herbelot &amp; Baroni, 2017). If you use this code,
-please cite the following:
+The main branch of this repository now refers to the Kabbach et al. (2019) ACL SRW 2019 paper *Towards incremental learning of word embeddings using context informativeness*.
+
+**If you are looking for the Herbelot and Baroni (2017) repository, check out the [emnlp2017](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) branch.**
+
+If you use this code, please cite:
 ```tex
-@InProceedings{herbelot-baroni:2017:EMNLP2017,
-  author    = {Herbelot, Aur\'{e}lie  and  Baroni, Marco},
-  title     = {High-risk learning: acquiring new word vectors from tiny data},
-  booktitle = {Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing},
-  month     = {September},
-  year      = {2017},
-  address   = {Copenhagen, Denmark},
+@InProceedings{kabbachetal2019,
+  author    = {Kabbach, Alexandre and Gulordava, Kristina and Herbelot, Aur\'{e}lie},
+  title     = {Towards incremental learning of word embeddings using context informativeness},
+  booktitle = {},
+  month     = {August},
+  year      = {2019},
+  address   = {Florence, Italy},
   publisher = {Association for Computational Linguistics},
-  pages     = {304--309},
-  url       = {https://www.aclweb.org/anthology/D17-1030}
+  pages     = {},
+  url       = {}
 }
 ```
 
-**NEW!** We have now released v2 of Nonce2Vec which is packaged via pip and
-runs on gensim v3.4.0. This should make it way easier for you to replicate
-experiments.
+**Abstract**
+
+*In this paper, we investigate the task of learning word embeddings from very sparse data in an incremental, cognitively-plausible way. We focus on the notion of informativeness, that is, the idea that some content is more valuable to the learning process than other. We further highlight the challenges of online learning and argue that previous systems fall short of implementing incrementality. Concretely, we incorporate informativeness in a previously proposed model of nonce learning, using it for context selection and learning rate modulation. We test our system on the task of learning new words from definitions, as well as on the task of learning new words from potentially uninformative contexts. We demonstrate that infor- mativeness is crucial to obtaining state-of-the-art performance in a truly incremental setup.*
+
+## A note on the code
+We have significantly refactored the original Nonce2Vec code in order to make replication easier and to make it work with gensim v3.x. You can use Nonce2Vec v2.x to replicate the results of the SRW paper. However, to replicate results of the original ENMLP paper, refer to Nonce2Vec v1.x found under the [emnlp2017 branch](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) as we **cannot** guarantee fair replication between v1.x and v2.x.
 
 ## Install
+You can install Nonce2Vec via:
 ```bash
 pip3 install nonce2vec
 ```
 
-## Download and extract the required resources
-To download the definitional, chimeras and MEN datasets:
+## Pre-requisites
+To run Nonce2Vec, you need two gensim Word2Vec models (a skipgram model and a cbow model to compute informativeness-metrics). You can download the skipgram model from:
 ```bash
-wget http://129.194.21.122/~kabbach/noncedef.chimeras.men.7z
+wget http://129.194.21.122/~kabbach/gensim.w2v.skipgram.model.7z
 ```
-To use the pretrained gensim model from Herbelot and Baroni (2017):
+and the cbow model from:
+```sh
+wget http://129.194.21.122/~kabbach/gensim.w2v.cbow.model.7z
+```
+or generate both yourself following the instructions below.
+
+### Generating a Word2Vec model from a Wikipedia dump
+You can download our English Wikipedia dump of January 2019 here:
 ```bash
-wget http://129.194.21.122/~kabbach/wiki_all.sent.split.model.7z
+wget http://129.194.21.122/~kabbach/enwiki.20190120.7z
 ```
+If you want to generate a completely new (tokenized-one-sentence-per-line) dump
+of Wikipedia, for English or any other language, check out [WiToKit](https://github.com/akb89/witokit).
 
-## Generate a pre-trained word2vec model
-If you want to generate a new gensim.word2vec model from scratch and do not want to rely on the `wiki_all.sent.split.model`:
-
-### Download/Generate a Wikipedia dump
-To use the same Wikipedia dump as Herbelot and Baroni (2017):
-```bash
-wget http://129.194.21.122/~kabbach/wiki.all.utf8.sent.split.lower.7z
-```
-
-Else, to create a new Wikipedia dump from an different archive, check out
-[WiToKit](https://github.com/akb89/witokit).
-
-### Train the background model
-You can train Word2Vec with gensim via the nonce2vec package:
-
+Once you have a Wikipedia txt dump, you can generate a gensim Word2Vec skipgram model via:
 ```bash
 n2v train \
-  --data /absolute/path/to/wikipedia/dump \
+  --data /absolute/path/to/wikipedia/tokenized/text/dump \
   --outputdir /absolute/path/to/dir/where/to/store/w2v/model \
   --alpha 0.025 \
   --neg 5 \
@@ -69,63 +69,99 @@ n2v train \
   --epochs 5 \
   --min-count 50 \
   --size 400 \
-  --num-threads number_of_cpu_threads_to_use
+  --num-threads number_of_cpu_threads_to_use \
   --train-mode skipgram
 ```
-
-### Check the correlation with the MEN dataset
+and a gensim Word2Vec cbow model via:
 ```bash
-n2v check \
-  --data /absolute/path/to/MEN/MEN_dataset_natural_form_full
-  --model /absolute/path/to/gensim/word2vec/model
+n2v train \
+  --data /absolute/path/to/wikipedia/tokenized/text/dump \
+  --outputdir /absolute/path/to/dir/where/to/store/w2v/model \
+  --alpha 0.025 \
+  --neg 5 \
+  --window 5 \
+  --sample 1e-3 \
+  --epochs 5 \
+  --min-count 50 \
+  --size 400 \
+  --num-threads number_of_cpu_threads_to_use \
+  --train-mode cbow
 ```
 
-## Replication
+To check the correlation of your word2vec model(s) with the MEN dataset, run:
+```bash
+n2v check-men \
+  ---model /absolute/path/to/gensim/w2v/model
+```
 
-### Test nonce2vec on the nonce definitional dataset
+## Running the code
+Running Nonce2Vec on the definitional of chimeras datasets is done via the `n2v test` command. You can pass in the `--reload` parameter to run in `one-shot` mode, without it the code runs in incremental model by default. You can further pass in the `--shuffle` parameter to shuffle the test set before running n2v.
+
+You will find below a list of commands corresponding to the experiments reported in the SRW 2019 paper. For example, to test the SUM CWI model (a basic sum model with context-word-informativeness-based filtering), which provides a rather robust baseline on all datasets in incremental setup, run, for the definitional dataset:
 ```bash
 n2v test \
-  --on nonces \
-  --model /absolute/path/to/pretrained/w2v/model \
-  --data /absolute/path/to/nonce.definitions.299.test \
-  --alpha 1 \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-only \
+  --sum-filter cwi \
+  --sum-threshold 0
+```
+
+To run the N2V CWI alpha model on the chimera L4 test set, with shuffling and in
+one-shot evaluation setup (which provides SOTA performance), do:
+```bash
+n2v test \
+  --on l4 \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --train-with cwi_alpha \
+  --alpha 1.0 \
+  --beta 1000 \
+  --kappa 1 \
+  --neg 3 \
+  --epochs 1 \
+  --reload
+```
+
+To test N2V as-is (the original N2V code without background freezing), in incremental setup on the definitional dataset, do:
+```bash
+n2v test \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --sum-filter random \
+  --sample 10000 \
+  --alpha 1.0 \
   --neg 3 \
   --window 15 \
-  --sample 10000 \
   --epochs 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5
+  --window-decay 5 \
+  --replication
 ```
 
-
-### Test nonce2vec on the chimeras dataset
+To test N2V CWI init (the original N2V with CWI-based sum initialization) on the definitional dataset in one-shot evaluation setup, do:
 ```bash
 n2v test \
-  --on chimeras \
-  --model /absolute/path/to/pretrained/w2v/model \
-  --data /absolute/path/to/chimeras.dataset.lx.tokenised.test.txt \
-  --alpha 1 \
+  --on def \
+  --model /absolute/path/to/gensim/w2v/skipgram/model \
+  --info-model /absolute/path/to/gensim/w2v/cbow/model \
+  --sum-filter cwi \
+  --sum-threshold 0 \
+  --alpha 1.0 \
   --neg 3 \
   --window 15 \
-  --sample 10000 \
   --epochs 1 \
   --lambda 70 \
   --sample-decay 1.9 \
-  --window-decay 5
+  --window-decay 5 \
+  --replication \
+  --reload
 ```
 
-### Results
-Results on nonce2vec v2.x are slightly different than those reported to in the
-original EMNLP paper due to several bugfix in how gensim originally
-handled subsampling with `random.rand()`.
-
-| DATASET  | MRR / RHO |
-| --- | --- |
-| Definitional | 0.04846 |
-| Chimeras L2 | 0.3407 |
-| Chimeras L4 | 0.3457 |
-| Chimeras L6 | 0.4001 |
 
 [release-image]:https://img.shields.io/github/release/minimalparts/nonce2vec.svg?style=flat-square
 [release-url]:https://github.com/minimalparts/nonce2vec/releases/latest
@@ -135,5 +171,3 @@ handled subsampling with `random.rand()`.
 [travis-url]:https://travis-ci.org/akb89/nonce2vec
 [license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
 [license-url]:LICENSE.txt
-[doi-image]:https://img.shields.io/badge/DOI-10.5281%2Fzenodo.1423290-blue.svg?style=flat-square
-[doi-url]:https://zenodo.org/badge/latestdoi/96074751

@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# pylint: skip-file
 """Nonce2Vec model.
 
 A modified version of gensim.Word2Vec.
@@ -41,18 +42,18 @@ def train_sg_pair_replication(model, word, context_index, alpha,
                               context_locks=None, compute_loss=False,
                               is_ft=False):
     if context_vectors is None:
-        #context_vectors = model.wv.syn0
+        # context_vectors = model.wv.syn0
         context_vectors = model.wv.vectors
 
     if context_locks is None:
-        #context_locks = model.syn0_lockf
+        # context_locks = model.syn0_lockf
         context_locks = model.trainables.vectors_lockf
 
     if word not in model.wv.vocab:
         return
-    predict_word = model.wv.vocab[word]  # target word (NN output)
+    predict_word = model.wv.vocab[word]
 
-    l1 = context_vectors[context_index]  # input word (NN input/projection layer)
+    l1 = context_vectors[context_index]
     neu1e = np.zeros(l1.shape)
 
     # Only train the nonce
@@ -467,12 +468,12 @@ class Nonce2VecTrainables(Word2VecTrainables):
             self.syn1neg = np.vstack([self.syn1neg,
                                       np.zeros((gained_vocab,
                                                 self.layer1_size),
-                                                dtype=np.float32)])
+                                               dtype=np.float32)])
         wv.vectors_norm = None
 
         # do not suppress learning for already learned words
         self.vectors_lockf = np.ones(len(wv.vocab),
-                                        dtype=np.float32)  # zeros suppress learning
+                                     dtype=np.float32)
 
 
 class Nonce2Vec(Word2Vec):
