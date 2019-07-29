@@ -1,0 +1,23 @@
+version: 1
+formatters:
+  brief:
+    format: '%(levelname)s - %(message)s'
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: simple
+loggers:
+  gensim:
+    level: WARN
+    handlers: [console]
+  nonce2vec.main:
+    level: INFO
+    handlers: [console]
+  nonce2vec.utils:
+    level: INFO
+    handlers: [console]
+  nonce2vec.models.nonce2vec:
+    level: INFO
+    handlers: [console]
