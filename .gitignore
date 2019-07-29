@@ -3,6 +3,7 @@
 .eggs
 *.egg-info
 /models
+build/
 __pycache__
 *.pyc
 data

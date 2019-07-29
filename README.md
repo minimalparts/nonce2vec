@@ -33,9 +33,13 @@ If you use this code, please cite:
 We have significantly refactored the original Nonce2Vec code in order to make replication easier and to make it work with gensim v3.x. You can use Nonce2Vec v2.x to replicate the results of the SRW paper. However, to replicate results of the original ENMLP paper, refer to Nonce2Vec v1.x found under the [emnlp2017 branch](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) as we **cannot** guarantee fair replication between v1.x and v2.x.
 
 ## Install
-You can install Nonce2Vec via:
+You can install Nonce2Vec via pip:
 ```bash
 pip3 install nonce2vec
+```
+or, after a git clone, via:
+```bash
+python3 setup.py install
 ```
 
 ## Pre-requisites

@@ -32,8 +32,8 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['PyYAML==3.13', 'gensim==3.4.0', 'numpy==1.15.4',
-                      'scipy==1.1.0'],
+    install_requires=['pyyaml>=4.2b1', 'gensim==3.4.0', 'numpy==1.15.4',
+                      'scipy==1.2.0'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
                  'Environment :: Web Environment',
                  'Intended Audience :: Developers',
