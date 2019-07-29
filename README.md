@@ -12,22 +12,24 @@ The main branch of this repository now refers to the Kabbach et al. (2019) ACL S
 
 If you use this code, please cite:
 ```tex
-@InProceedings{kabbachetal2019,
-  author    = {Kabbach, Alexandre and Gulordava, Kristina and Herbelot, Aur\'{e}lie},
-  title     = {Towards incremental learning of word embeddings using context informativeness},
-  booktitle = {},
-  month     = {August},
-  year      = {2019},
-  address   = {Florence, Italy},
-  publisher = {Association for Computational Linguistics},
-  pages     = {},
-  url       = {}
+@inproceedings{kabbach-etal-2019-towards,
+    title = "Towards Incremental Learning of Word Embeddings Using Context Informativeness",
+    author = "Kabbach, Alexandre  and
+      Gulordava, Kristina  and
+      Herbelot, Aur{\'e}lie",
+    booktitle = "Proceedings of the 57th Conference of the Association for Computational Linguistics: Student Research Workshop",
+    month = jul,
+    year = "2019",
+    address = "Florence, Italy",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/P19-2022",
+    pages = "162--168"
 }
 ```
 
 **Abstract**
 
-*In this paper, we investigate the task of learning word embeddings from very sparse data in an incremental, cognitively-plausible way. We focus on the notion of informativeness, that is, the idea that some content is more valuable to the learning process than other. We further highlight the challenges of online learning and argue that previous systems fall short of implementing incrementality. Concretely, we incorporate informativeness in a previously proposed model of nonce learning, using it for context selection and learning rate modulation. We test our system on the task of learning new words from definitions, as well as on the task of learning new words from potentially uninformative contexts. We demonstrate that infor- mativeness is crucial to obtaining state-of-the-art performance in a truly incremental setup.*
+*In this paper, we investigate the task of learning word embeddings from very sparse data in an incremental, cognitively-plausible way. We focus on the notion of informativeness, that is, the idea that some content is more valuable to the learning process than other. We further highlight the challenges of online learning and argue that previous systems fall short of implementing incrementality. Concretely, we incorporate informativeness in a previously proposed model of nonce learning, using it for context selection and learning rate modulation. We test our system on the task of learning new words from definitions, as well as on the task of learning new words from potentially uninformative contexts. We demonstrate that informativeness is crucial to obtaining state-of-the-art performance in a truly incremental setup.*
 
 ## A note on the code
 We have significantly refactored the original Nonce2Vec code in order to make replication easier and to make it work with gensim v3.x. You can use Nonce2Vec v2.x to replicate the results of the SRW paper. However, to replicate results of the original ENMLP paper, refer to Nonce2Vec v1.x found under the [emnlp2017 branch](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) as we **cannot** guarantee fair replication between v1.x and v2.x.
