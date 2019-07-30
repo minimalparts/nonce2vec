@@ -6,7 +6,7 @@
 # nonce2vec
 Welcome to Nonce2Vec!
 
-The main branch of this repository now refers to the Kabbach et al. (2019) ACL SRW 2019 paper *Towards incremental learning of word embeddings using context informativeness*.
+The main branch of this repository now refers to the Kabbach et al. (2019) ACL SRW 2019 paper [*Towards incremental learning of word embeddings using context informativeness*](https://www.aclweb.org/anthology/P19-2022).
 
 **If you are looking for the Herbelot and Baroni (2017) repository, check out the [emnlp2017](https://github.com/minimalparts/nonce2vec/tree/release/emnlp2017) branch.**
 
