@@ -1,9 +1,9 @@
+# nonce2vec
 [![GitHub release][release-image]][release-url]
 [![PyPI release][pypi-image]][pypi-url]
 [![Build][travis-image]][travis-url]
 [![MIT License][license-image]][license-url]
 
-# nonce2vec
 Welcome to Nonce2Vec!
 
 The main branch of this repository now refers to the Kabbach et al. (2019) ACL SRW 2019 paper [*Towards incremental learning of word embeddings using context informativeness*](https://www.aclweb.org/anthology/P19-2022).
