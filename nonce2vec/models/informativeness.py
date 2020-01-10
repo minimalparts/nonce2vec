@@ -71,6 +71,8 @@ class Informativeness():
         if not context:
             return 0
         probs = self._get_prob_distribution(context)
+        if not probs:
+            return 0
         shannon_entropy = scipy.stats.entropy(probs)
         ctx_ent = 1 - (shannon_entropy / np.log(len(probs)))
         return ctx_ent
