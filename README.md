@@ -47,18 +47,18 @@ python3 setup.py install
 ## Pre-requisites
 To run Nonce2Vec, you need two gensim Word2Vec models (a skipgram model and a cbow model to compute informativeness-metrics). You can download the skipgram model from:
 ```bash
-wget http://129.194.21.122/~kabbach/gensim.w2v.skipgram.model.7z
+wget backup.3azouz.net/gensim.w2v.skipgram.model.7z
 ```
 and the cbow model from:
 ```sh
-wget http://129.194.21.122/~kabbach/gensim.w2v.cbow.model.7z
+wget backup.3azouz.net/gensim.w2v.cbow.model.7z
 ```
 or generate both yourself following the instructions below.
 
 ### Generating a Word2Vec model from a Wikipedia dump
 You can download our English Wikipedia dump of January 2019 here:
 ```bash
-wget http://129.194.21.122/~kabbach/enwiki.20190120.7z
+wget backup.3azouz.net/enwiki.20190120.7z
 ```
 If you want to generate a completely new (tokenized-one-sentence-per-line) dump
 of Wikipedia, for English or any other language, check out [WiToKit](https://github.com/akb89/witokit).
