@@ -22,6 +22,16 @@ logger = logging.getLogger(__name__)
 
 
 def compute_cwi_alpha(cwi, kappa, beta, alpha, min_alpha):
+    """
+    R computes the alpha.
+
+    Args:
+        cwi: (todo): write your description
+        kappa: (todo): write your description
+        beta: (float): write your description
+        alpha: (float): write your description
+        min_alpha: (float): write your description
+    """
     x = np.tanh(cwi*beta)
     decay = (np.exp(kappa*(x+1)) - 1) / (np.exp(2*kappa) - 1)
     if decay * alpha > min_alpha:
@@ -30,6 +40,15 @@ def compute_cwi_alpha(cwi, kappa, beta, alpha, min_alpha):
 
 
 def compute_exp_alpha(nonce_count, lambda_den, alpha, min_alpha):
+    """
+    Compute the exp_count ).
+
+    Args:
+        nonce_count: (todo): write your description
+        lambda_den: (float): write your description
+        alpha: (float): write your description
+        min_alpha: (float): write your description
+    """
     exp_decay = -(nonce_count-1) / lambda_den
     if alpha * np.exp(exp_decay) > min_alpha:
         return alpha * np.exp(exp_decay)
@@ -41,6 +60,22 @@ def train_sg_pair_replication(model, word, context_index, alpha,
                               learn_hidden=True, context_vectors=None,
                               context_locks=None, compute_loss=False,
                               is_ft=False):
+    """
+    Train a model.
+
+    Args:
+        model: (todo): write your description
+        word: (str): write your description
+        context_index: (str): write your description
+        alpha: (float): write your description
+        nonce_count: (todo): write your description
+        learn_vectors: (bool): write your description
+        learn_hidden: (int): write your description
+        context_vectors: (str): write your description
+        context_locks: (todo): write your description
+        compute_loss: (bool): write your description
+        is_ft: (bool): write your description
+    """
     if context_vectors is None:
         # context_vectors = model.wv.syn0
         context_vectors = model.wv.vectors
@@ -98,6 +133,16 @@ def train_sg_pair_replication(model, word, context_index, alpha,
 
 def train_batch_sg_replication(model, sentences, alpha, work=None,
                                compute_loss=False):
+    """
+    Train a batch of sentences.
+
+    Args:
+        model: (todo): write your description
+        sentences: (todo): write your description
+        alpha: (float): write your description
+        work: (int): write your description
+        compute_loss: (bool): write your description
+    """
     result = 0
     window = model.window
     # Count the number of times that we see the nonce
@@ -133,6 +178,21 @@ def train_sg_pair(model, word, context_index, alpha,
                   learn_vectors=True, learn_hidden=True,
                   context_vectors=None, context_locks=None, compute_loss=False,
                   is_ft=False):
+    """
+    Train pairwise model.
+
+    Args:
+        model: (todo): write your description
+        word: (str): write your description
+        context_index: (str): write your description
+        alpha: (float): write your description
+        learn_vectors: (bool): write your description
+        learn_hidden: (int): write your description
+        context_vectors: (todo): write your description
+        context_locks: (todo): write your description
+        compute_loss: (bool): write your description
+        is_ft: (bool): write your description
+    """
     if context_vectors is None:
         # context_vectors = model.wv.syn0
         context_vectors = model.wv.vectors
@@ -179,6 +239,12 @@ def train_sg_pair(model, word, context_index, alpha,
 
 
 def _get_unique_ctx_ent_tuples(ctx_ent_tuples):
+    """
+    Returns a dictionary of unique entries.
+
+    Args:
+        ctx_ent_tuples: (str): write your description
+    """
     ctx_ent_dict = OrderedDict()
     for ctx, ent in ctx_ent_tuples:
         if ctx not in ctx_ent_dict:
@@ -189,6 +255,16 @@ def _get_unique_ctx_ent_tuples(ctx_ent_tuples):
 
 
 def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
+    """
+    Train model.
+
+    Args:
+        model: (todo): write your description
+        sentences: (todo): write your description
+        alpha: (float): write your description
+        work: (int): write your description
+        compute_loss: (bool): write your description
+    """
     result = 0
     alpha = model.alpha  # re-initialize learning rate before each batch
     ctx_ent_tuples = model.trainables.info.filter_and_sort_train_ctx_ent(
@@ -233,6 +309,17 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
 class Nonce2VecVocab(Word2VecVocab):
     def __init__(self, max_vocab_size=None, min_count=5, sample=1e-3,
                  sorted_vocab=True, null_word=0):
+        """
+        Initialize vocab.
+
+        Args:
+            self: (todo): write your description
+            max_vocab_size: (int): write your description
+            min_count: (int): write your description
+            sample: (todo): write your description
+            sorted_vocab: (todo): write your description
+            null_word: (todo): write your description
+        """
         super(Nonce2VecVocab, self).__init__(max_vocab_size, min_count, sample,
                                              sorted_vocab, null_word)
         self.nonce = None
@@ -248,6 +335,21 @@ class Nonce2VecVocab(Word2VecVocab):
     def prepare_vocab(self, hs, negative, wv, update=False,
                       keep_raw_vocab=False, trim_rule=None,
                       min_count=None, sample=None, dry_run=False):
+        """
+        Prepare vocab for vocab.
+
+        Args:
+            self: (todo): write your description
+            hs: (todo): write your description
+            negative: (todo): write your description
+            wv: (todo): write your description
+            update: (todo): write your description
+            keep_raw_vocab: (bool): write your description
+            trim_rule: (todo): write your description
+            min_count: (int): write your description
+            sample: (int): write your description
+            dry_run: (todo): write your description
+        """
         min_count = min_count or self.min_count
         sample = sample or self.sample
         drop_total = drop_unique = 0
@@ -369,11 +471,28 @@ class Nonce2VecVocab(Word2VecVocab):
 class Nonce2VecTrainables(Word2VecTrainables):
 
     def __init__(self, vector_size=100, seed=1, hashfxn=hash):
+        """
+        Initialize hashfxables.
+
+        Args:
+            self: (todo): write your description
+            vector_size: (int): write your description
+            seed: (int): write your description
+            hashfxn: (todo): write your description
+            hash: (todo): write your description
+        """
         super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
         self.info = None
 
     @classmethod
     def load(cls, w2v_trainables):
+        """
+        Loads all of - like object with the given w2v_trainables.
+
+        Args:
+            cls: (todo): write your description
+            w2v_trainables: (str): write your description
+        """
         n2v_trainables = cls()
         for key, value in w2v_trainables.__dict__.items():
             setattr(n2v_trainables, key, value)
@@ -488,6 +607,39 @@ class Nonce2Vec(Word2Vec):
                  batch_words=MAX_WORDS_IN_BATCH, compute_loss=False,
                  callbacks=(), max_final_vocab=None, window_decay=0,
                  sample_decay=1.0):
+        """
+        Initialize sentences.
+
+        Args:
+            self: (todo): write your description
+            sentences: (str): write your description
+            size: (int): write your description
+            alpha: (float): write your description
+            window: (int): write your description
+            min_count: (int): write your description
+            max_vocab_size: (int): write your description
+            sample: (todo): write your description
+            seed: (int): write your description
+            workers: (int): write your description
+            min_alpha: (float): write your description
+            sg: (str): write your description
+            hs: (int): write your description
+            negative: (bool): write your description
+            cbow_mean: (todo): write your description
+            hashfxn: (todo): write your description
+            hash: (todo): write your description
+            iter: (todo): write your description
+            null_word: (todo): write your description
+            trim_rule: (int): write your description
+            sorted_vocab: (todo): write your description
+            batch_words: (todo): write your description
+            MAX_WORDS_IN_BATCH: (int): write your description
+            compute_loss: (bool): write your description
+            callbacks: (list): write your description
+            max_final_vocab: (int): write your description
+            window_decay: (int): write your description
+            sample_decay: (float): write your description
+        """
         super(Nonce2Vec, self).__init__(sentences, size, alpha, window,
                                         min_count, max_vocab_size, sample,
                                         seed, workers, min_alpha, sg, hs,
@@ -502,6 +654,12 @@ class Nonce2Vec(Word2Vec):
 
     @classmethod
     def load(cls, *args, **kwargs):
+        """
+        Load a model from a n2vec.
+
+        Args:
+            cls: (todo): write your description
+        """
         w2vec_model = super(Nonce2Vec, cls).load(*args, **kwargs)
         n2vec_model = cls()
         for key, value in w2vec_model.__dict__.items():
@@ -530,6 +688,17 @@ class Nonce2Vec(Word2Vec):
 
     def build_vocab(self, sentences, update=False, progress_per=10000,
                     keep_raw_vocab=False, trim_rule=None, **kwargs):
+        """
+        Builds the vocab
+
+        Args:
+            self: (todo): write your description
+            sentences: (todo): write your description
+            update: (todo): write your description
+            progress_per: (todo): write your description
+            keep_raw_vocab: (bool): write your description
+            trim_rule: (todo): write your description
+        """
         total_words, corpus_count = self.vocabulary.scan_vocab(
             sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.corpus_count = corpus_count
@@ -547,5 +716,11 @@ class Nonce2Vec(Word2Vec):
                                         weighted=self.weighted, beta=self.beta)
 
     def recompute_sample_ints(self):
+        """
+        Re - calculate the number of samples.
+
+        Args:
+            self: (todo): write your description
+        """
         for w, o in self.wv.vocab.items():
             o.sample_int = int(round(float(o.sample_int) / float(self.sample_decay)))
