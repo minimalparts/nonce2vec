@@ -58,16 +58,37 @@ class Informativeness():
 
     @sum_filter.setter
     def sum_filter(self, sum_filter):
+        """
+        Summarize the sum.
+
+        Args:
+            self: (todo): write your description
+            sum_filter: (int): write your description
+        """
         self._sum_filter = sum_filter
 
     @lru_cache(maxsize=10)
     def _get_prob_distribution(self, context):
+        """
+        Return the probability distribution of words.
+
+        Args:
+            self: (todo): write your description
+            context: (todo): write your description
+        """
         words_and_probs = self._model.predict_output_word(
             context, topn=len(self._model.wv.vocab))
         return [item[1] for item in words_and_probs]
 
     @lru_cache(maxsize=10)
     def _get_context_entropy(self, context):
+        """
+        Calculate the entropy.
+
+        Args:
+            self: (todo): write your description
+            context: (todo): write your description
+        """
         if not context:
             return 0
         probs = self._get_prob_distribution(context)
@@ -79,6 +100,14 @@ class Informativeness():
 
     @lru_cache(maxsize=50)
     def _get_context_word_entropy(self, context, word_index):
+        """
+        Returns the context of the given context.
+
+        Args:
+            self: (todo): write your description
+            context: (todo): write your description
+            word_index: (int): write your description
+        """
         ctx_ent_with_word = self._get_context_entropy(context)
         ctx_without_word = tuple(x for idx, x in enumerate(context) if
                                  idx != word_index)
@@ -88,6 +117,16 @@ class Informativeness():
 
     @lru_cache(maxsize=50)
     def _keep_item(self, idx, context, filter_type, threshold):
+        """
+        Check if the item is_context.
+
+        Args:
+            self: (todo): write your description
+            idx: (int): write your description
+            context: (todo): write your description
+            filter_type: (str): write your description
+            threshold: (float): write your description
+        """
         if not filter_type:
             return True
         if filter_type == 'random':
@@ -101,6 +140,15 @@ class Informativeness():
         raise Exception('Invalid ctx_filter parameter: {}'.format(filter_type))
 
     def _filter_context(self, context, filter_type, threshold):
+        """
+        Filters for context.
+
+        Args:
+            self: (todo): write your description
+            context: (dict): write your description
+            filter_type: (todo): write your description
+            threshold: (float): write your description
+        """
         if not filter_type:
             logger.warning('Applying no filters to context selection: '
                            'this should negatively, and significantly, '
@@ -113,6 +161,15 @@ class Informativeness():
 
     @classmethod
     def _get_in_vocab_context(cls, sentence, vocab, nonce):
+        """
+        Get the vocab of the given sentence.
+
+        Args:
+            cls: (callable): write your description
+            sentence: (todo): write your description
+            vocab: (todo): write your description
+            nonce: (todo): write your description
+        """
         return tuple([w for w in sentence if w in vocab and w != nonce])
 
     def get_ctx_ent_for_weighted_sum(self, sentences, vocab, nonce):
@@ -128,6 +185,15 @@ class Informativeness():
         return ctx_ent_map
 
     def _get_filtered_train_ctx_ent(self, sentences, vocab, nonce):
+        """
+        Parameters ---------- sentence.
+
+        Args:
+            self: (todo): write your description
+            sentences: (todo): write your description
+            vocab: (todo): write your description
+            nonce: (todo): write your description
+        """
         ctx_ent = []
         for sentence in sentences:
             context = self._get_in_vocab_context(sentence, vocab, nonce)

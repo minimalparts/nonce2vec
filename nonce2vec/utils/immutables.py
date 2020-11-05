@@ -28,6 +28,13 @@ class ImmutableConfig(FrozenDict):
         super().__init__(self._freeze(config))
 
     def _get_frozen_value(self, input_value):
+        """
+        Get value from input_value.
+
+        Args:
+            self: (todo): write your description
+            input_value: (dict): write your description
+        """
         if isinstance(input_value, dict):
             for key, value in input_value.items():
                 if isinstance(value, dict):

@@ -53,12 +53,24 @@ class Samples():  # pylint:disable=R0903
         self._shuffle = shuffle
 
     def _iterate_over_wiki(self):
+        """
+        Iterate over file contents of wiki file.
+
+        Args:
+            self: (todo): write your description
+        """
         with open(self._datafile, 'rt', encoding='utf-8') as input_stream:
             for line in input_stream:
                 yield line.strip().split()
 
     @classmethod
     def _iterate_over_men(cls):
+        """
+        Iterate over all file.
+
+        Args:
+            cls: (todo): write your description
+        """
         with open(DATASETS['men'], 'r', encoding='utf-8') as men_stream:
             for line in men_stream:
                 line = line.rstrip('\n')
@@ -66,6 +78,12 @@ class Samples():  # pylint:disable=R0903
                 yield (items[0], items[1]), float(items[2])
 
     def _iterate_over_definitions(self):
+        """
+        Iterate over the files.
+
+        Args:
+            self: (todo): write your description
+        """
         with open(DATASETS['def'], 'rt', encoding='utf-8') as input_stream:
             if self._shuffle:
                 logger.info('Iterating over test set in shuffled order')
@@ -79,6 +97,12 @@ class Samples():  # pylint:disable=R0903
                 yield [sentence], nonce, probe
 
     def _iterate_over_chimeras(self):
+        """
+        Iterate over sentences.
+
+        Args:
+            self: (todo): write your description
+        """
         with open(DATASETS[self._source], 'rt', encoding='utf-8') as istream:
             if self._shuffle:
                 logger.info('Iterating over test set in shuffled order')

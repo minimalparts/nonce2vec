@@ -35,10 +35,24 @@ logger = logging.getLogger(__name__)
 
 # Note: this is scipy's spearman, without tie adjustment
 def _spearman(x, y):  # pylint:disable=C0103
+    """
+    Return the scalarmanman projection.
+
+    Args:
+        x: (array): write your description
+        y: (array): write your description
+    """
     return scipy.stats.spearmanr(x, y)[0]
 
 
 def _get_rank(probe, nns):
+    """
+    Returns the rank of the first nns.
+
+    Args:
+        probe: (todo): write your description
+        nns: (todo): write your description
+    """
     for idx, nonce_similar_word in enumerate(nns):
         if nonce_similar_word[0] == probe:
             return idx + 1  # rank starts at 1
@@ -47,6 +61,14 @@ def _get_rank(probe, nns):
 
 
 def _update_rr_and_count(relative_ranks, count, rank):
+    """
+    Calculate the number of radii.
+
+    Args:
+        relative_ranks: (bool): write your description
+        count: (int): write your description
+        rank: (int): write your description
+    """
     relative_rank = 1.0 / float(rank)
     relative_ranks += relative_rank
     count += 1
@@ -56,6 +78,13 @@ def _update_rr_and_count(relative_ranks, count, rank):
 
 
 def _load_nonce2vec_model(args, info, nonce):
+    """
+    Loads a nonce from the given arguments.
+
+    Args:
+        info: (todo): write your description
+        nonce: (todo): write your description
+    """
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
     model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
@@ -105,6 +134,11 @@ def _load_nonce2vec_model(args, info, nonce):
 
 
 def _test_on_chimeras(args):  # pylint:disable=R0914
+    """
+    Parameters ---------- args : : classifier.
+
+    Args:
+    """
     rhos = []
     samples = Samples(source=args.on, shuffle=args.shuffle)
     total_num_batches = sum(1 for x in samples)
@@ -161,6 +195,13 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
 
 
 def _display_stats(ranks, ctx_ents):
+    """
+    Prints statistics of the number of columns
+
+    Args:
+        ranks: (int): write your description
+        ctx_ents: (todo): write your description
+    """
     logger.info('-'*30)
     logger.info('ranks stats:')
     logger.info('ranks mean = {}'.format(np.mean(ranks)))
@@ -187,6 +228,15 @@ def _display_stats(ranks, ctx_ents):
 
 
 def _display_density_stats(ranks, sum_10, sum_25, sum_50):
+    """
+    Display the sum of the density
+
+    Args:
+        ranks: (int): write your description
+        sum_10: (int): write your description
+        sum_25: (int): write your description
+        sum_50: (int): write your description
+    """
     logger.info('-'*30)
     logger.info('density stats')
     logger.info('d10 rho = {}'.format(_spearman(sum_10, ranks)))
@@ -195,6 +245,11 @@ def _display_density_stats(ranks, sum_10, sum_25, sum_50):
 
 
 def _load_informativeness_model(args):
+    """
+    Load informativenessmodel.
+
+    Args:
+    """
     if not args.info_model:
         logger.warning('Unspecified --info-model. Using background model '
                        'to compute informativeness-related probabilities')
@@ -206,6 +261,12 @@ def _load_informativeness_model(args):
 
 
 def _compute_average_sim(sims):
+    """
+    Calculate the sum of a set of the sum.
+
+    Args:
+        sims: (todo): write your description
+    """
     sim_sum = sum(sim[1] for sim in sims)
     return sim_sum / len(sims)
 
@@ -264,6 +325,12 @@ def _test_on_definitions(args):  # pylint:disable=R0914
 
 
 def _get_men_pairs_and_sim(men_dataset):
+    """
+    Parse pairs of pairs.
+
+    Args:
+        men_dataset: (todo): write your description
+    """
     pairs = []
     humans = []
     with open(men_dataset, 'r', encoding='utf-8') as men_stream:
@@ -276,6 +343,13 @@ def _get_men_pairs_and_sim(men_dataset):
 
 
 def _cosine_similarity(peer_v, query_v):
+    """
+    Calculate cosine cosine cosine vectors.
+
+    Args:
+        peer_v: (todo): write your description
+        query_v: (str): write your description
+    """
     if len(peer_v) != len(query_v):
         raise ValueError('Vectors must be of same length')
     num = np.dot(peer_v, query_v)
@@ -312,6 +386,11 @@ def _check_men(args):
 
 
 def _train(args):
+    """
+    Training function.
+
+    Args:
+    """
     logger.info('Training word2vec model with gensim')
     sentences = Samples(source='wiki', shuffle=False, input_data=args.datadir)
     if not args.train_mode:
@@ -342,6 +421,11 @@ def _train(args):
 
 
 def _test(args):
+    """
+    Test if arguments.
+
+    Args:
+    """
     if args.on == 'def':
         _test_on_definitions(args)
     else:
