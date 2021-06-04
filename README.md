@@ -17,7 +17,7 @@ We have had queries about *where* exactly the Nonce2Vec code resides. Since it i
 ## Pre-requisites
 You will need a pre-trained gensim model. You can go and train one yourself, using the gensim repo at [https://github.com/rare-technologies/gensim](https://github.com/rare-technologies/gensim), or simply download ours, pre-trained on Wikipedia: 
 
-`wget http://clic.cimec.unitn.it/~aurelie.herbelot/wiki_all.model.tar.gz`
+`wget https://aurelieherbelot.net/resources/data/wiki_all.model.tar.gz`
 
 If you use our tar file, the content should be unpacked into the models/ directory of the repo.
 
