@@ -32,7 +32,7 @@ setup(
             'n2v = nonce2vec.main:main'
         ],
     },
-    install_requires=['pyyaml>=4.2b1', 'gensim==3.4.0', 'numpy==1.15.4',
+    install_requires=['pyyaml>=4.2b1', 'gensim==3.4.0', 'numpy==1.22.0',
                       'scipy==1.2.0'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Environment :: Web Environment',
