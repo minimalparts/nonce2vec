@@ -88,7 +88,7 @@ def _load_nonce2vec_model(args, info, nonce):
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
-        model.iter = args.epochs
+        model.epochs = args.epochs
         model.negative = args.neg
         model.lambda_den = args.lambda_den
         model.kappa = args.kappa
@@ -119,7 +119,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
         if num_batch == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
-        vocab_size = len(model.wv.vocab)
+        vocab_size = len(model.wv)
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
                                                     total_num_batches))
@@ -135,7 +135,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
             model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
-                        epochs=model.iter)
+                        epochs=model.epochs)
         num_batch += 1
         system_responses = []
         human_responses = []
@@ -242,7 +242,7 @@ def _test_on_definitions(args):  # pylint:disable=R0914
         model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
-                        epochs=model.iter)
+                        epochs=model.epochs)
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
@@ -325,8 +325,8 @@ def _train(args):
     logger.info('Saving output w2v model to {}'.format(output_model_filepath))
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
-        window=args.window, sample=args.sample, iter=args.epochs,
-        size=args.size, workers=args.num_threads)
+        window=args.window, sample=args.sample, epochs=args.epochs,
+        vector_size=args.size, workers=args.num_threads)
     if args.train_mode == 'cbow':
         model.sg = 0
     if args.train_mode == 'skipgram':

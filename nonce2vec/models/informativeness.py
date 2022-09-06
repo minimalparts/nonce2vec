@@ -63,7 +63,7 @@ class Informativeness():
     @lru_cache(maxsize=10)
     def _get_prob_distribution(self, context):
         words_and_probs = self._model.predict_output_word(
-            context, topn=len(self._model.wv.vocab))
+            context, topn=len(self._model.wv))
         return [item[1] for item in words_and_probs]
 
     @lru_cache(maxsize=10)
@@ -91,10 +91,10 @@ class Informativeness():
         if not filter_type:
             return True
         if filter_type == 'random':
-            return self._model.wv.vocab[context[idx]].sample_int \
+            return self._model.wv.get_vecattr(context[idx], "sample_int") \
              > self._model.random.rand() * 2 ** 32
         if filter_type == 'self':
-            return np.log(self._model.wv.vocab[context[idx]].sample_int) \
+            return np.log(self._model.wv.get_vecattr(context[idx], "sample_int")) \
              > threshold
         if filter_type == 'cwi':
             return self._get_context_word_entropy(context, idx) > threshold

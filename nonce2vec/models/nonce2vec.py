@@ -58,7 +58,7 @@ def train_sg_pair_replication(model, word, context_index, alpha,
 
     # Only train the nonce
     if model.vocabulary.nonce is not None \
-     and model.wv.index2word[context_index] == model.vocabulary.nonce \
+     and model.wv.index_to_key[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
         lock_factor = context_locks[context_index]
         lambda_den = model.lambda_den
@@ -114,11 +114,11 @@ def train_batch_sg_replication(model, sentences, alpha, work=None,
                 # don't train on the `word` itself
                 if pos2 != pos:
                     # If training context nonce, increment its count
-                    if model.wv.index2word[word2.index] == \
+                    if model.wv.index_to_key[word2.index] == \
                      model.vocabulary.nonce:
                         nonce_count += 1
                         train_sg_pair_replication(
-                            model, model.wv.index2word[word.index],
+                            model, model.wv.index_to_key[word.index],
                             word2.index, alpha, nonce_count,
                             compute_loss=compute_loss)
 
@@ -150,7 +150,7 @@ def train_sg_pair(model, word, context_index, alpha,
 
     # Only train the nonce
     if model.vocabulary.nonce is not None \
-     and model.wv.index2word[context_index] == model.vocabulary.nonce \
+     and model.wv.index_to_key[context_index] == model.vocabulary.nonce \
      and word != model.vocabulary.nonce:
         lock_factor = context_locks[context_index]
         if model.negative:
@@ -209,8 +209,8 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
             alpha = compute_cwi_alpha(cwi, model.kappa, model.beta, model.alpha,
                                       model.min_alpha)
             logger.debug('training on \'{}\' and \'{}\' with cwi = {}, b_cwi = {}, '
-                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
-                                             model.wv.index2word[ctx_vocab.index],
+                         'alpha = {}'.format(model.wv.index_to_key[nonce_vocab.index],
+                                             model.wv.index_to_key[ctx_vocab.index],
                                              round(cwi, 5),
                                              round(np.tanh(model.beta * cwi), 4),
                                              round(alpha, 5)))
@@ -218,13 +218,13 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
             alpha = compute_exp_alpha(nonce_count, model.lambda_den,
                                       model.alpha, model.min_alpha)
             logger.debug('training on \'{}\' and \'{}\' with cwi = {}, '
-                         'alpha = {}'.format(model.wv.index2word[nonce_vocab.index],
-                                             model.wv.index2word[ctx_vocab.index],
+                         'alpha = {}'.format(model.wv.index_to_key[nonce_vocab.index],
+                                             model.wv.index_to_key[ctx_vocab.index],
                                              round(cwi, 5),
                                              round(alpha, 5)))
         if model.train_with == 'cst_alpha':
             alpha = model.alpha
-        train_sg_pair(model, model.wv.index2word[ctx_vocab.index],
+        train_sg_pair(model, model.wv.index_to_key[ctx_vocab.index],
                       nonce_vocab.index, alpha, compute_loss=compute_loss)
         result += len(ctx_ent_tuples) + 1
     return result
@@ -266,8 +266,8 @@ class Nonce2VecVocab(Word2VecVocab):
                 gold_nonce = '{}_true'.format(self.nonce)
                 nonce_index = wv.vocab[self.nonce].index
                 wv.vocab[gold_nonce] = wv.vocab[self.nonce]
-                wv.index2word[nonce_index] = gold_nonce
-                # del wv.index2word[wv.vocab[self.nonce].index]
+                wv.index_to_key[nonce_index] = gold_nonce
+                # del wv.index_to_key[wv.vocab[self.nonce].index]
                 del wv.vocab[self.nonce]
             for word, v in iteritems(self.raw_vocab):
                 # Update count of all words already in vocab
@@ -285,8 +285,8 @@ class Nonce2VecVocab(Word2VecVocab):
                         new_total += v
                         if not dry_run:
                             wv.vocab[word] = Vocab(count=v,
-                                                   index=len(wv.index2word))
-                            wv.index2word.append(word)
+                                                   index=len(wv.index_to_key))
+                            wv.index_to_key.append(word)
                     else:
                         drop_unique += 1
                         drop_total += v
@@ -480,21 +480,21 @@ class Nonce2Vec(Word2Vec):
 
     MAX_WORDS_IN_BATCH = 10000
 
-    def __init__(self, sentences=None, size=100, alpha=0.025, window=5,
+    def __init__(self, sentences=None, vector_size=100, alpha=0.025, window=5,
                  min_count=5, max_vocab_size=None, sample=1e-3, seed=1,
                  workers=3, min_alpha=0.0001, sg=1, hs=0, negative=5,
-                 cbow_mean=1, hashfxn=hash, iter=5, null_word=0,
+                 cbow_mean=1, hashfxn=hash, epochs=5, null_word=0,
                  trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, compute_loss=False,
                  callbacks=(), max_final_vocab=None, window_decay=0,
                  sample_decay=1.0):
-        super(Nonce2Vec, self).__init__(sentences, size, alpha, window,
+        super(Nonce2Vec, self).__init__(sentences, vector_size, alpha, window,
                                         min_count, max_vocab_size, sample,
                                         seed, workers, min_alpha, sg, hs,
-                                        negative, cbow_mean, hashfxn, iter,
+                                        negative, cbow_mean, hashfxn, epochs,
                                         null_word, trim_rule, sorted_vocab,
                                         batch_words, compute_loss, callbacks)
-        self.trainables = Nonce2VecTrainables(seed=seed, vector_size=size,
+        self.trainables = Nonce2VecTrainables(seed=seed, vector_size=vector_size,
                                               hashfxn=hashfxn)
         self.lambda_den = 0.0
         self.sample_decay = float(sample_decay)
