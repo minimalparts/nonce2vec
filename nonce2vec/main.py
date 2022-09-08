@@ -231,11 +231,11 @@ def _test_on_definitions(args):  # pylint:disable=R0914
         if num_sent == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
-        vocab_size = len(model.wv.vocab)
+        vocab_size = len(model.wv)
         logger.info('vocab size = {}'.format(vocab_size))
         logger.info('nonce: {}'.format(nonce))
         logger.info('sentence: {}'.format(sentences))
-        if nonce not in model.wv.vocab:
+        if nonce not in model.wv:
             logger.error('Nonce \'{}\' not in gensim.word2vec.model '
                          'vocabulary'.format(nonce))
             continue
@@ -299,7 +299,7 @@ def _check_men(args):
     human_actual = []
     count = 0
     for (first, second), human in Samples(source='men', shuffle=False):
-        if first not in model.wv.vocab or second not in model.wv.vocab:
+        if first not in model.wv or second not in model.wv:
             logger.error('Could not find one of more pair item in model '
                          'vocabulary: {}, {}'.format(first, second))
             continue

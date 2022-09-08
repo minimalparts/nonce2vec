@@ -112,13 +112,13 @@ class Informativeness():
                      self._keep_item(idx, context, filter_type, threshold))
 
     @classmethod
-    def _get_in_vocab_context(cls, sentence, vocab, nonce):
-        return tuple([w for w in sentence if w in vocab and w != nonce])
+    def _get_in_vocab_context(cls, sentence, keyed_vectors, nonce):
+        return tuple([w for w in sentence if w in keyed_vectors and w != nonce])
 
-    def get_ctx_ent_for_weighted_sum(self, sentences, vocab, nonce):
+    def get_ctx_ent_for_weighted_sum(self, sentences, keyed_vectors, nonce):
         """Return context entropy."""
         ctx_ent_map = {}
-        ctx_ent = self._get_filtered_train_ctx_ent(sentences, vocab, nonce)
+        ctx_ent = self._get_filtered_train_ctx_ent(sentences, keyed_vectors, nonce)
         for ctx, cwi in ctx_ent:
             if ctx not in ctx_ent_map:
                 ctx_ent_map[ctx] = cwi
@@ -127,10 +127,10 @@ class Informativeness():
                     ctx_ent_map[ctx] = cwi
         return ctx_ent_map
 
-    def _get_filtered_train_ctx_ent(self, sentences, vocab, nonce):
+    def _get_filtered_train_ctx_ent(self, sentences, keyed_vectors, nonce):
         ctx_ent = []
         for sentence in sentences:
-            context = self._get_in_vocab_context(sentence, vocab, nonce)
+            context = self._get_in_vocab_context(sentence, keyed_vectors, nonce)
             for idx, ctx in enumerate(context):
                 if self._keep_item(idx, context, self._train_filter,
                                    self._train_thresh):
@@ -140,10 +140,10 @@ class Informativeness():
                     ctx_ent.append((ctx, cwi))
         return ctx_ent
 
-    def filter_and_sort_train_ctx_ent(self, sentences, vocab, nonce):
+    def filter_and_sort_train_ctx_ent(self, sentences, keyed_vectors, nonce):
         """Sort context and return a list of (ctx_word, ctx_word_entropy)."""
         logger.debug('Filtering and sorting train context...')
-        ctx_ent = self._get_filtered_train_ctx_ent(sentences, vocab, nonce)
+        ctx_ent = self._get_filtered_train_ctx_ent(sentences, keyed_vectors, nonce)
         if not self._sort_by:
             return ctx_ent
         if self._sort_by == 'desc':
@@ -152,13 +152,13 @@ class Informativeness():
             return sorted(ctx_ent, key=lambda x: x[1])
         raise Exception('Invalid sort_by value: {}'.format(self._sort_by))
 
-    def filter_sum_context(self, sentences, vocab, nonce):
+    def filter_sum_context(self, sentences, keyed_vectors, nonce):
         """Filter the context to be summed over."""
         logger.debug('Filtering sum context...')
         filtered_ctx = []
         raw_ctx = []
         for sentence in sentences:
-            _ctx = self._get_in_vocab_context(sentence, vocab, nonce)
+            _ctx = self._get_in_vocab_context(sentence, keyed_vectors, nonce)
             _filtered_ctx = self._filter_context(_ctx, self._sum_filter,
                                                  self._sum_thresh)
             raw_ctx.extend(list(_ctx))
