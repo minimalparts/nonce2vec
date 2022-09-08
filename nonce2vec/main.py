@@ -28,7 +28,7 @@ from nonce2vec.models.informativeness import Informativeness
 
 logging.config.dictConfig(
     cutils.load(
-        os.path.join(os.path.dirname(__file__), 'logging', 'logging.yml')))
+        os.path.join(os.path.dirname(__file__), 'logging.yml')))
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +58,8 @@ def _update_rr_and_count(relative_ranks, count, rank):
 def _load_nonce2vec_model(args, info, nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
-    model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
-    model.trainables = Nonce2VecTrainables.load(model.trainables)
+    # model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
+    # model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
@@ -97,9 +97,9 @@ def _load_nonce2vec_model(args, info, nonce):
             # precompute negative labels optimization for pure-python training
             model.neg_labels = np.zeros(model.negative + 1)
             model.neg_labels[0] = 1.
-    model.trainables.info = info
+    model.trainables_info = info
     model.workers = args.num_threads
-    model.vocabulary.nonce = nonce
+    model.current_nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -118,7 +118,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
     for sentences, nonce, probes, responses in samples:
         if num_batch == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
-        model.vocabulary.nonce = nonce
+        model.current_nonce = nonce
         vocab_size = len(model.wv)
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
@@ -142,7 +142,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
         probe_count = 0
         for probe in probes:
             try:
-                cos = model.similarity(nonce, probe)
+                cos = model.wv.similarity(nonce, probe)
                 system_responses.append(cos)
                 human_responses.append(responses[probe_count])
             except:  # pylint:disable=W0702
@@ -152,7 +152,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
             logger.info('system_responses = {}'.format(system_responses))
             logger.info('human_responses = {}'.format(human_responses))
             logger.info('10 most similar words = {}'.format(
-                model.most_similar(nonce, topn=10)))
+                model.wv.similar_by_word(nonce, topn=10)))
             rho = _spearman(human_responses, system_responses)
             logger.info('RHO = {}'.format(rho))
             if not math.isnan(rho):
@@ -463,3 +463,7 @@ def main():
                              help='shuffle the test set')
     args = parser.parse_args()
     args.func(args)
+
+
+if __name__ == '__main__':
+    main()
