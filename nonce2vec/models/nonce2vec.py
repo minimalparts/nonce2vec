@@ -13,7 +13,7 @@ import numpy as np
 from scipy.special import expit
 from six import iteritems
 from six.moves import xrange
-from gensim.models.word2vec import Word2Vec, Word2VecVocab, Word2VecTrainables
+from gensim.models.word2vec import Word2Vec
 from gensim.utils import keep_vocab_item
 
 
@@ -231,38 +231,6 @@ def train_batch_sg(model, sentences, alpha, work=None, compute_loss=False):
                       nonce_vocab_idx, alpha, compute_loss=compute_loss)
         result += len(ctx_ent_tuples) + 1
     return result
-
-
-class Nonce2VecVocab(Word2VecVocab):
-    def __init__(self, max_vocab_size=None, min_count=5, sample=1e-3,
-                 sorted_vocab=True, null_word=0):
-        super(Nonce2VecVocab, self).__init__(max_vocab_size, min_count, sample,
-                                             sorted_vocab, null_word)
-        self.nonce = None
-
-    # @classmethod
-    # def load(cls, w2v_vocab):
-    #     """Load a Nonce2VecVocab instance from a Word2VecVocab instance."""
-    #     n2v_vocab = cls()
-    #     for key, value in w2v_vocab.__dict__.items():
-    #         setattr(n2v_vocab, key, value)
-    #     return n2v_vocab
-
-
-
-
-class Nonce2VecTrainables(Word2VecTrainables):
-
-    def __init__(self, vector_size=100, seed=1, hashfxn=hash):
-        super(Nonce2VecTrainables, self).__init__(vector_size, seed, hashfxn)
-        self.info = None
-
-    # @classmethod
-    # def load(cls, w2v_trainables):
-    #     n2v_trainables = cls()
-    #     for key, value in w2v_trainables.__dict__.items():
-    #         setattr(n2v_trainables, key, value)
-    #     return n2v_trainables
 
 
 class Nonce2Vec(Word2Vec):

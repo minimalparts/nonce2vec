@@ -20,8 +20,7 @@ from gensim.models import Word2Vec
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
 
-from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
-                                       Nonce2VecTrainables
+from nonce2vec.models.nonce2vec import Nonce2Vec
 from nonce2vec.utils.files import Samples
 from nonce2vec.models.informativeness import Informativeness
 
@@ -58,8 +57,6 @@ def _update_rr_and_count(relative_ranks, count, rank):
 def _load_nonce2vec_model(args, info, nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
-    # model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
-    # model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
