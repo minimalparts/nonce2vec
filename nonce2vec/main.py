@@ -20,15 +20,14 @@ from gensim.models import Word2Vec
 import nonce2vec.utils.config as cutils
 import nonce2vec.utils.files as futils
 
-from nonce2vec.models.nonce2vec import Nonce2Vec, Nonce2VecVocab, \
-                                       Nonce2VecTrainables
+from nonce2vec.models.nonce2vec import Nonce2Vec
 from nonce2vec.utils.files import Samples
 from nonce2vec.models.informativeness import Informativeness
 
 
 logging.config.dictConfig(
     cutils.load(
-        os.path.join(os.path.dirname(__file__), 'logging', 'logging.yml')))
+        os.path.join(os.path.dirname(__file__), 'logging.yml')))
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +57,6 @@ def _update_rr_and_count(relative_ranks, count, rank):
 def _load_nonce2vec_model(args, info, nonce):
     logger.info('Loading Nonce2Vec model...')
     model = Nonce2Vec.load(args.background)
-    model.vocabulary = Nonce2VecVocab.load(model.vocabulary)
-    model.trainables = Nonce2VecTrainables.load(model.trainables)
     model.sg = 1
     model.replication = args.replication
     model.sum_over_set = args.sum_over_set
@@ -88,7 +85,7 @@ def _load_nonce2vec_model(args, info, nonce):
     if not args.sum_only:
         model.train_with = args.train_with
         model.alpha = args.alpha
-        model.iter = args.epochs
+        model.epochs = args.epochs
         model.negative = args.neg
         model.lambda_den = args.lambda_den
         model.kappa = args.kappa
@@ -97,9 +94,9 @@ def _load_nonce2vec_model(args, info, nonce):
             # precompute negative labels optimization for pure-python training
             model.neg_labels = np.zeros(model.negative + 1)
             model.neg_labels[0] = 1.
-    model.trainables.info = info
+    model.trainables_info = info
     model.workers = args.num_threads
-    model.vocabulary.nonce = nonce
+    model.current_nonce = nonce
     logger.info('Model loaded')
     return model
 
@@ -118,8 +115,8 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
     for sentences, nonce, probes, responses in samples:
         if num_batch == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
-        model.vocabulary.nonce = nonce
-        vocab_size = len(model.wv.vocab)
+        model.current_nonce = nonce
+        vocab_size = len(model.wv)
         logger.info('-' * 30)
         logger.info('Processing batch {}/{}'.format(num_batch,
                                                     total_num_batches))
@@ -135,14 +132,14 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
             model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
-                        epochs=model.iter)
+                        epochs=model.epochs)
         num_batch += 1
         system_responses = []
         human_responses = []
         probe_count = 0
         for probe in probes:
             try:
-                cos = model.similarity(nonce, probe)
+                cos = model.wv.similarity(nonce, probe)
                 system_responses.append(cos)
                 human_responses.append(responses[probe_count])
             except:  # pylint:disable=W0702
@@ -152,7 +149,7 @@ def _test_on_chimeras(args):  # pylint:disable=R0914
             logger.info('system_responses = {}'.format(system_responses))
             logger.info('human_responses = {}'.format(human_responses))
             logger.info('10 most similar words = {}'.format(
-                model.most_similar(nonce, topn=10)))
+                model.wv.similar_by_word(nonce, topn=10)))
             rho = _spearman(human_responses, system_responses)
             logger.info('RHO = {}'.format(rho))
             if not math.isnan(rho):
@@ -231,18 +228,18 @@ def _test_on_definitions(args):  # pylint:disable=R0914
         if num_sent == 1 or args.reload:
             model = _load_nonce2vec_model(args, info, nonce)
         model.vocabulary.nonce = nonce
-        vocab_size = len(model.wv.vocab)
+        vocab_size = len(model.wv)
         logger.info('vocab size = {}'.format(vocab_size))
         logger.info('nonce: {}'.format(nonce))
         logger.info('sentence: {}'.format(sentences))
-        if nonce not in model.wv.vocab:
+        if nonce not in model.wv:
             logger.error('Nonce \'{}\' not in gensim.word2vec.model '
                          'vocabulary'.format(nonce))
             continue
         model.build_vocab(sentences, update=True)
         if not args.sum_only:
             model.train(sentences, total_examples=model.corpus_count,
-                        epochs=model.iter)
+                        epochs=model.epochs)
         nns = model.most_similar(nonce, topn=vocab_size)
         logger.info('10 most similar words: {}'.format(nns[:10]))
         rank = _get_rank(probe, nns)
@@ -299,7 +296,7 @@ def _check_men(args):
     human_actual = []
     count = 0
     for (first, second), human in Samples(source='men', shuffle=False):
-        if first not in model.wv.vocab or second not in model.wv.vocab:
+        if first not in model.wv or second not in model.wv:
             logger.error('Could not find one of more pair item in model '
                          'vocabulary: {}, {}'.format(first, second))
             continue
@@ -325,8 +322,8 @@ def _train(args):
     logger.info('Saving output w2v model to {}'.format(output_model_filepath))
     model = gensim.models.Word2Vec(
         min_count=args.min_count, alpha=args.alpha, negative=args.neg,
-        window=args.window, sample=args.sample, iter=args.epochs,
-        size=args.size, workers=args.num_threads)
+        window=args.window, sample=args.sample, epochs=args.epochs,
+        vector_size=args.size, workers=args.num_threads)
     if args.train_mode == 'cbow':
         model.sg = 0
     if args.train_mode == 'skipgram':
@@ -463,3 +460,7 @@ def main():
                              help='shuffle the test set')
     args = parser.parse_args()
     args.func(args)
+
+
+if __name__ == '__main__':
+    main()
