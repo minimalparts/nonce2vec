@@ -33,7 +33,7 @@ setup(
         ],
     },
     install_requires=['pyyaml>=4.2b1', 'gensim==3.4.0', 'numpy==1.15.4',
-                      'scipy==1.2.0'],
+                      'scipy==1.10.0'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Environment :: Web Environment',
                  'Intended Audience :: Developers',
